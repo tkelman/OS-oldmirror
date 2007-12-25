@@ -22,7 +22,7 @@ under the Common Public License.])
 
 # List one file in the package so that the configure script can test
 # whether the package is actually there
-AC_CONFIG_SRCDIR(src/OSUtils/ErrorClass.cpp)
+AC_CONFIG_SRCDIR(src/OSUtils/OSErrorClass.cpp)
 
 # Where should everything be installed by default?  Here, we want it
 # to be installed directly in 'bin', 'lib', 'include' subdirectories
@@ -440,6 +440,7 @@ AC_SUBST(oslib)
 ## osil test files
 ##
 AC_COIN_VPATH_LINK(data/osilFiles/parincLinear.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/parincLinearByRow.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincQuadratic.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/HS071_NLP.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/HS071_NLPMod.osil)
@@ -489,10 +490,10 @@ AC_COIN_VPATH_LINK(data/configFiles/testmps.config)
 AC_COIN_VPATH_LINK(data/configFiles/testnl.config)
 AC_COIN_VPATH_LINK(data/configFiles/testRemoteKnock.config)
 AC_COIN_VPATH_LINK(data/configFiles/testRemotegetJobID.config)
-AC_COIN_VPATH_LINK(data/configFiles/testremote.config)
-AC_COIN_VPATH_LINK(data/configFiles/testremoteBIG.config)
-AC_COIN_VPATH_LINK(data/configFiles/testremoteRetrieve.config)
-AC_COIN_VPATH_LINK(data/configFiles/testremoteSend.config)
+AC_COIN_VPATH_LINK(data/configFiles/testRemote.config)
+AC_COIN_VPATH_LINK(data/configFiles/testRemoteBIG.config)
+AC_COIN_VPATH_LINK(data/configFiles/testRemoteRetrieve.config)
+AC_COIN_VPATH_LINK(data/configFiles/testRemoteSend.config)
 
 ##
 ## ampl test files

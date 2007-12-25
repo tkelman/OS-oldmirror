@@ -19,7 +19,7 @@
 #include <string>
 #include "OSMatlab.h"
 #include "OSResult.h"
-#include "CoinSolver.h"
+#include "OSCoinSolver.h"
 #include "OSrLWriter.h"
 #include "config_os.h"
 
@@ -28,17 +28,16 @@
 #include "OSrLReader.h"        
 #include "OSrLWriter.h"      
 #include "OSInstance.h"  
-#include "FileUtil.h"  
+#include "OSFileUtil.h"  
 #include "OSConfig.h" 
-#include "CoinSolver.h"
-#include "DefaultSolver.h"  
-#include "WSUtil.h" 
+#include "OSDefaultSolver.h"  
+#include "OSWSUtil.h" 
 #include "OSSolverAgent.h"   
 #include "OShL.h"     
-#include "ErrorClass.h"
+#include "OSErrorClass.h"
 #include "OSmps2osil.h"   
-#include "Base64.h"
-#include "CommonUtil.h"
+#include "OSBase64.h"
+#include "OSCommonUtil.h"
 
 #ifdef COIN_HAS_GLPK
 #include <OsiGlpkSolverInterface.hpp>
@@ -53,10 +52,10 @@
 #endif
 
 #ifdef COIN_HAS_LINDO    
-#include "LindoSolver.h"
+#include "OSLindoSolver.h"
 #endif  
 #ifdef COIN_HAS_IPOPT    
-#include "IpoptSolver.h"
+#include "OSIpoptSolver.h"
 #endif 
   
 
