@@ -106,15 +106,24 @@ AC_COIN_HAS_PROJECT(SYMPHONY)
 AC_COIN_HAS_PROJECT(DyLP)
 AC_COIN_HAS_PROJECT(Vol)
 AC_COIN_HAS_PROJECT(Ipopt)
+AC_COIN_HAS_PROJECT(Bonmin)
 AC_COIN_HAS_PROJECT(cppad)
 
 
 
   
   case $coin_has_cppad in
-     unavailable|skipping)
+   unavailable|skipping)
          AC_MSG_ERROR([cannot find CppAD which is necessary to build OS]) ;;
   esac
+
+
+
+if test $coin_has_ipopt = skipping &&
+   test $coin_has_bonmin != skipping ; then
+       AC_MSG_ERROR([Bonmin is present, but not the necessary Ipopt])   
+fi
+
 
 if test $coin_has_coinutils != unavailable &&
    test $coin_has_coinutils != skipping; then
@@ -262,7 +271,16 @@ if test $coin_has_ipopt != unavailable &&
 fi
 
 
-
+if test $coin_has_bonmin != unavailable &&
+   test $coin_has_bonmin != skipping; then
+  case $CXX in
+    cl*)
+       bonminlib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libbonmin.lib';;
+     *)
+       bonminlib="-L\$(INSTALLIBDIR) -lbonmin";;
+  esac
+  AC_SUBST(bonminlib)  
+fi
 
 
 
@@ -393,6 +411,7 @@ AC_COIN_CHECK_CXX_CHEADER(time)
 AC_COIN_CHECK_CXX_CHEADER(ieeefp)
 AC_COIN_CHECK_HEADER(stdint.h)
 
+#AC_CHECK_HEADERS([windows.h])
 
 
 ###################
@@ -551,6 +570,18 @@ esac
 AC_SUBST(oslib)
 
 
+#############################################################################
+#  See if we are disabling shared libs###
+#############################################################################
+
+
+     if test $enable_static != yes; then
+         USE_ASL_LIB=$ASLLIB
+     fi
+
+AC_SUBST(USE_ASL_LIB)
+
+
 ##############################################################################
 #                   VPATH links for example input files                      #
 ##############################################################################
@@ -567,6 +598,7 @@ AC_SUBST(oslib)
 ##
 ## osil test files
 ##
+AC_COIN_VPATH_LINK(data/osilFiles/bonminEx1.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincLinear.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincLinearByRow.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincQuadratic.osil)
@@ -609,6 +641,7 @@ AC_COIN_VPATH_LINK(data/osplFiles/knock.ospl)
 AC_COIN_VPATH_LINK(data/osrlFiles/parincLinear.osrl)
 AC_COIN_VPATH_LINK(data/osrlFiles/reducedcost.osrl)
 AC_COIN_VPATH_LINK(data/osrlFiles/rosenbrockmod.osrl)
+AC_COIN_VPATH_LINK(data/osrlFiles/errorExample.osrl)
 ##
 ## configure test files
 ##
@@ -631,8 +664,10 @@ AC_COIN_VPATH_LINK(data/configFiles/testRemoteRetrieve.config)
 AC_COIN_VPATH_LINK(data/configFiles/testRemoteSend.config)
 
 ##
-## ampl tes
+## ampl test files
 AC_COIN_VPATH_LINK(data/amplFiles/testAmpl.run)
+AC_COIN_VPATH_LINK(data/amplFiles/bonminEx1.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/bonminEx1.nl)
 AC_COIN_VPATH_LINK(data/amplFiles/hs71.mod)
 AC_COIN_VPATH_LINK(data/amplFiles/hs71.nl)
 AC_COIN_VPATH_LINK(data/amplFiles/parinc.mod)
@@ -648,6 +683,7 @@ AC_COIN_VPATH_LINK(data/mpsFiles/parinc.mps)
 AC_COIN_VPATH_LINK(data/matlabFiles/markowitz.m)
 AC_COIN_VPATH_LINK(data/matlabFiles/parincLinear.m)
 AC_COIN_VPATH_LINK(data/matlabFiles/template.m)
+AC_COIN_VPATH_LINK(data/matlabFiles/OSCallMatlabSolver.m)
 ##
 ## XSLT FILE
 ##
@@ -686,6 +722,7 @@ AC_CONFIG_FILES([Makefile
           examples/osTestCode/Makefile
           examples/algorithmicDiff/Makefile
           examples/addCuts/Makefile
+          examples/osRemoteTest/Makefile
           applications/Makefile
           applications/amplClient/Makefile
           applications/fileUpload/Makefile
@@ -699,11 +736,5 @@ AC_CONFIG_HEADER([inc/config_os.h])
 AC_COIN_FINALIZE
 
 
-#create a file with the current version 
 
-#cd $srcdir
-#pwd
-#svn info | tail -n  4 > $ac_default_prefix/src/version.txt
-#cd $ac_default_prefix
-#pwd
 

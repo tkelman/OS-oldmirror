@@ -131,7 +131,9 @@
 
 
 
-
+#ifdef COIN_HAS_BONMIN    
+#include "OSBonminSolver.h"
+#endif 
 
 
 #include "OSOptionsStruc.h"  
@@ -154,6 +156,8 @@ int ossslex(void* scanner );
 int ossslex_init(void** ptr);
 int ossslex_destroy (void* scanner );
 
+std::string get_help();
+std::string get_version();
 
 std::string get_help();
 std::string get_version();
@@ -182,7 +186,7 @@ osOptionsStruc *osoptions;
 
 int main(int argC, const char* argV[])
 {  	
-	//WindowsErrorPopupBlocker();
+	WindowsErrorPopupBlocker();
 	void* scanner;
 	FileUtil *fileUtil = NULL;
 	FileUtil *inputFileUtil = NULL; 
@@ -263,25 +267,19 @@ int main(int argC, const char* argV[])
 	} 
 		try{
 			if(osoptions->invokeHelp == true){ 
-				inputFileUtil = new FileUtil();
 				std::string helpTxt = get_help();
 				std::cout << std::endl << std::endl;
 				std::cout << helpTxt << std::endl;
 				delete	osoptions;
 				osoptions = NULL;	
-				delete inputFileUtil;
-				inputFileUtil = NULL;
 				return 0;
 			}
 			if(osoptions->writeVersion == true){ 
-				inputFileUtil = new FileUtil();
 				std::string writeTxt = get_version();
 				std::cout << std::endl << std::endl;
 				std::cout << writeTxt << std::endl;
 				delete	osoptions;
 				osoptions = NULL;	
-				delete inputFileUtil;
-				inputFileUtil = NULL;
 				return 0;
 			}
 		}
@@ -462,18 +460,7 @@ void solve(){
 				bool bIpoptIsPresent = false;
 				#ifdef COIN_HAS_IPOPT
 				bIpoptIsPresent = true;
-				//IpoptSolver *ipoptSolver  = new IpoptSolver();	
-				//ipoptSolver->osol = osoptions->osol;
-				//ipoptSolver->osil = osoptions->osil;
-				//ipoptSolver->osinstance = NULL;
-				//ipoptSolver->solve();
-				//osrl = ipoptSolver->osrl ;
 				solverType = new IpoptSolver();	
-				//solverType->osol = osoptions->osol;
-				//solverType->osil = osoptions->osil;
-				//solverType->osinstance = NULL;
-				//solverType->solve();
-				//osrl = solverType->osrl ;
 				#endif
 				if(bIpoptIsPresent == false) throw ErrorClass( "the Ipopt solver requested is not present");
 			}
@@ -535,9 +522,19 @@ void solve(){
 												solverType = new CoinSolver();
 												solverType->sSolverName = "vol";
 											}
-											else{ //cbc is the default
-												solverType = new CoinSolver();
-												solverType->sSolverName = "cbc";
+											else{
+												if(osoptions->solverName.find( "bonmin") != std::string::npos){
+													// we are requesting the Bonmin solver
+													bool bBonminIsPresent = false;
+													#ifdef COIN_HAS_BONMIN
+													bBonminIsPresent = true;
+													solverType = new BonminSolver();	
+													#endif												
+												}
+												else{ //cbc is the default
+													solverType = new CoinSolver();
+													solverType->sSolverName = "cbc";
+												}
 											}
 										}									
 									}
@@ -995,6 +992,7 @@ string getSolverName( std::string osol){
 std::string get_help(){
 
 	std::ostringstream helpMsg;
+
 	
 	helpMsg << "************************* HELP *************************" << endl << endl;
 	helpMsg << "In this HELP file we assume that the solve service method is used and " << endl; 
@@ -1107,6 +1105,7 @@ std::string get_version(){
 	
 	return versionMsg.str();
 }// get version
+
 
 
 

@@ -752,10 +752,7 @@ InstanceData::~InstanceData(){
 	delete nonlinearExpressions;
 	nonlinearExpressions = NULL;
 	delete timeDomain;
-	if (timeDomain != NULL)
-	{   delete timeDomain;
-		timeDomain = NULL;
-	};
+	timeDomain = NULL;
 } 
 
 string OSInstance::getInstanceName(){
@@ -1549,9 +1546,8 @@ bool OSInstance::addVariable(int index, string name, double lowerBound, double u
 	instanceData->variables->var[index] = new Variable();
 	if(index < 0 || instanceData->variables->numberOfVariables <= 0 || index >= instanceData->variables->numberOfVariables) return false;
 	instanceData->variables->var[index]->name = name;
-	//if(lowerBound != -OSDBL_MAX && lowerBound != -OSDBL_MAX)instanceData->variables->var[index]->lb = lowerBound;
 	instanceData->variables->var[index]->lb = lowerBound;
-	if(upperBound != OSDBL_MAX && upperBound != OSDBL_MAX)instanceData->variables->var[index]->ub = upperBound;
+	instanceData->variables->var[index]->ub = upperBound;
 	instanceData->variables->var[index]->type = type;
 	if(init != OSNAN) instanceData->variables->var[index]->init = init;
 	instanceData->variables->var[index]->initString = initString;
@@ -1579,12 +1575,12 @@ bool OSInstance::setVariables(int number, string *names, double *lowerBounds,
 		}
 		if(lowerBounds != NULL){
 			for(i = 0; i < number; i++){
-				if(lowerBounds[i] != -OSDBL_MAX && lowerBounds[i] != -OSDBL_MAX)instanceData->variables->var[i]->lb = lowerBounds[i];  
+				instanceData->variables->var[i]->lb = lowerBounds[i];  
 			}
 		}
 		if(upperBounds != NULL){
 			for(i = 0; i < number; i++){
-				if(upperBounds[i] != OSDBL_MAX && upperBounds[i] != OSDBL_MAX)instanceData->variables->var[i]->ub = upperBounds[i]; 
+				instanceData->variables->var[i]->ub = upperBounds[i]; 
 			}
 		}
 		if(types != NULL){
