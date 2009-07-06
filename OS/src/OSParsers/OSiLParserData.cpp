@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSiLParserData.cpp
  * 
  * @author  Robert Fourer, Gus Gassmann, Jun Ma, Kipp Martin, 
@@ -24,6 +25,16 @@ using namespace std;
 	productVec.clear();
 	minVec.clear();
 	allDiffVec.clear(); 	
+	if (m_miVarStageInfo != NULL)
+		delete []m_miVarStageInfo;
+	m_miVarStageInfo = NULL;
+	if (m_miConStageInfo != NULL)
+		delete []m_miConStageInfo;
+	m_miConStageInfo = NULL;
+	if (m_miObjStageInfo != NULL)
+		delete []m_miObjStageInfo;
+	m_miObjStageInfo = NULL;
+
  }//~OSiLParserData
  
 
@@ -59,10 +70,15 @@ using namespace std;
 	stagevarcount(0),
 	stageconcount(0),
 	stageobjcount(0),
+	nvarcovered(0),
+	nconcovered(0),
 	intervalhorizonON(false),
 	intervalhorizon(0.0),
 	intervalstartON(false),
 	intervalstart(0.0)
  {
-
+	m_miVarStageInfo = NULL;
+	m_miConStageInfo = NULL;
+	m_miObjStageInfo = NULL;
+	
  }//OSiLParserData

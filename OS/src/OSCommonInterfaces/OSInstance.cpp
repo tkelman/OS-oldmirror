@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSInstance.cpp
  * \brief This file defines the OSInstance class along with its supporting classes..
  *
@@ -5,30 +6,37 @@
  * @version 2.0, 12/21/2007
  * @since   OS1.0
  *initializeNonLinearStructures
+ *
  * \remarks
  * Copyright (C) 2005, Robert Fourer, Gus Gassmann Jun Ma, Kipp Martin,
  * Northwestern University, Dalhousie University, and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Common Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
- * 
- *  
- */ 
-
+ *
+ *
+ */
+ 
 #include "OSInstance.h"
 #include "OSMathUtil.h"
-#include "OSCommonUtil.h"
 #include "OSErrorClass.h"
 #include "OSParameters.h"
+
+#include<stack>
 #include<iostream>  
 #include<sstream>
 
 //#define DEBUG
  
 using namespace std;
-using CppAD::NearEqual;
+using std::ostringstream; 
+
 
 OSInstance::OSInstance(): 
+	bVariablesModified(false),
+	bObjectivesModified(false),
+	bConstraintsModified(false),
+	bAMatrixModified(false),
 	m_sInstanceName(""),
 	m_sInstanceSource(""),	
 	m_sInstanceDescription(""),
@@ -36,6 +44,7 @@ OSInstance::OSInstance():
 	m_iVariableNumber(-1),
 	m_iNumberOfIntegerVariables( 0),
 	m_iNumberOfBinaryVariables( 0),
+	m_iNumberOfStringVariables( 0),
 	m_iNumberOfQuadraticRowIndexes( 0),
 	m_bQuadraticRowIndexesProcessed( false),
 	m_miQuadRowIndexes( NULL),
@@ -46,8 +55,8 @@ OSInstance::OSInstance():
 	m_bNonlinearExpressionTreeModIndexesProcessed( false),
 	m_miNonlinearExpressionTreeModIndexes( NULL),		
 	m_msVariableNames(NULL),
-	m_mdVariableInitialValues(NULL),
-	m_msVariableInitialStringValues(NULL),
+	//m_mdVariableInitialValues(NULL), -- deprecated
+	//m_msVariableInitialStringValues(NULL), -- deprecated
 	m_mcVariableTypes(NULL),
 	m_mdVariableLowerBounds(NULL),
 	m_mdVariableUpperBounds(NULL),
@@ -101,7 +110,7 @@ OSInstance::OSInstance():
 	m_bLagrangianSparseHessianCreated( false),
 	m_miNonLinearVarsReverseMap( NULL),
 	m_bAllNonlinearVariablesIndex( false),
-	m_bCppADFunIsCreated( false),
+	m_bOSADFunIsCreated( false),
 	m_bCppADTapesBuilt( false),
 	m_bCppADMustReTape( false),
 	m_bDuplicateExpressionTreesMap( false),
@@ -114,6 +123,13 @@ OSInstance::OSInstance():
 	m_bProcessTimeInterval( false),
 	m_bFiniteTimeStages( false),
 	m_iNumberOfTimeStages(-1),
+	m_msTimeDomainStageNames(NULL),
+	m_miTimeDomainStageVariableNumber(NULL),
+	m_mmiTimeDomainStageVarList(NULL),
+	m_miTimeDomainStageConstraintNumber(NULL),
+	m_mmiTimeDomainStageConList(NULL),
+	m_miTimeDomainStageObjectiveNumber(NULL),
+	m_mmiTimeDomainStageObjList(NULL),
 	bUseExpTreeForFunEval( false)
 
 {    
@@ -130,28 +146,33 @@ OSInstance::~OSInstance(){
 	#endif
 	std::map<int, OSExpressionTree*>::iterator posMapExpTree;
 	// delete  the temporary arrays
-	delete[] m_msVariableNames;
-	m_msVariableNames = NULL;
-	delete[] m_mdVariableInitialValues;
-	m_mdVariableInitialValues = NULL ;
-	delete[] m_msVariableInitialStringValues;
-	m_msVariableInitialStringValues = NULL;
-	delete[] m_mcVariableTypes;
-	m_mcVariableTypes = NULL;
-	/**
-	delete[] m_msObjectiveNames;
-	m_msObjectiveNames = NULL;
-	delete[] m_msMaxOrMins;
-	m_msMaxOrMins = NULL;
-	delete[] m_miNumberOfObjCoef;
-	m_miNumberOfObjCoef = NULL;
-	delete[] m_mdObjectiveConstants; 
-	m_mdObjectiveConstants = NULL;
-	delete[] m_mdObjectiveWeights;
-	m_mdObjectiveWeights = NULL;
-	*/
-	delete[] m_miNonLinearVarsReverseMap;
-	m_miNonLinearVarsReverseMap = NULL;
+	
+	if(m_bProcessVariables == true){
+		delete[] m_msVariableNames;
+		m_msVariableNames = NULL;
+		delete[] m_mcVariableTypes;
+		m_mcVariableTypes = NULL;
+		delete[] m_mdVariableLowerBounds;
+		m_mdVariableLowerBounds = NULL;
+		delete[] m_mdVariableUpperBounds;
+		m_mdVariableUpperBounds = NULL;
+	}
+	
+	
+	if(m_bProcessConstraints == true){
+		delete[] m_msConstraintNames;
+		m_msConstraintNames = NULL;
+		delete[] m_mcConstraintTypes;
+		m_mcConstraintTypes = NULL;
+		delete[]  m_mdConstraintConstants;
+		m_mdConstraintConstants = NULL;
+		delete[] m_mdConstraintLowerBounds;
+		m_mdConstraintLowerBounds = NULL;
+		delete[] m_mdConstraintUpperBounds;
+		m_mdConstraintUpperBounds = NULL;
+	}
+	
+	
 	int i;
 	//if(instanceData->objectives->numberOfObjectives > 0 && m_mObjectiveCoefficients != NULL){
 	if(m_bProcessObjectives == true ){
@@ -182,7 +203,8 @@ OSInstance::~OSInstance(){
 		delete[] m_mObjectiveCoefficients;
 		m_mObjectiveCoefficients = NULL;
 	}
-	if(instanceData->objectives->numberOfObjectives > 0 && m_mmdDenseObjectiveCoefficients != NULL){
+	
+	if(m_bGetDenseObjectives == true){
 		for(i = 0; i < instanceData->objectives->numberOfObjectives; i++){
 			//delete m_mmdDenseObjectiveCoefficients[i];
 			#ifdef DEBUG
@@ -194,8 +216,19 @@ OSInstance::~OSInstance(){
 		delete[] m_mmdDenseObjectiveCoefficients;
 		m_mmdDenseObjectiveCoefficients = NULL;
 	}
-
+	
+	
+	
+	//if(m_bProcessLinearConstraintCoefficients == true && m_bColumnMajor == true) delete m_linearConstraintCoefficientsInColumnMajor;
+	//if(m_bProcessLinearConstraintCoefficients == true && m_bColumnMajor == false) delete m_linearConstraintCoefficientsInRowMajor;
+	
+	if( m_linearConstraintCoefficientsInColumnMajor != NULL) delete m_linearConstraintCoefficientsInColumnMajor;
+	if (m_linearConstraintCoefficientsInRowMajor != NULL ) delete m_linearConstraintCoefficientsInRowMajor;
+	
+	
 	if( (m_binitForAlgDiff == true)  ){	
+		delete[] m_miNonLinearVarsReverseMap;
+		m_miNonLinearVarsReverseMap = NULL;
 		if(instanceData->objectives->numberOfObjectives > 0 && m_mmdObjGradient != NULL){
 			
 			#ifdef DEBUG
@@ -214,28 +247,10 @@ OSInstance::~OSInstance(){
 		}
 	}
 
-	if(m_bProcessLinearConstraintCoefficients == true && m_bColumnMajor == true) delete m_linearConstraintCoefficientsInColumnMajor;
-	if(m_bProcessLinearConstraintCoefficients == true && m_bColumnMajor == false) delete m_linearConstraintCoefficientsInRowMajor;
-	//if(m_linearConstraintCoefficientsInRowMajor != NULL) delete m_linearConstraintCoefficientsInRowMajor;
-	//if(m_linearConstraintCoefficientsInColumnMajor != NULL) delete m_linearConstraintCoefficientsInColumnMajor;
-	delete[] m_msConstraintNames;
-	m_msConstraintNames = NULL;
-	delete[] m_mcConstraintTypes;
-	m_mcConstraintTypes = NULL;
-	delete[]  m_mdConstraintConstants;
-	 m_mdConstraintConstants = NULL;
-	delete[] m_mdConstraintLowerBounds;
-	m_mdConstraintLowerBounds = NULL;
-	delete[] m_mdConstraintUpperBounds;
-	m_mdConstraintUpperBounds = NULL;
-	delete[] m_mdVariableLowerBounds;
-	m_mdVariableLowerBounds = NULL;
-	delete[] m_mdVariableUpperBounds;
-	m_mdVariableUpperBounds = NULL;
 	//std::cout << "Do garbage collection for the nonlinear API" << std::endl;
 	// garbage collection for the gradient
 	if(m_bNonLinearStructuresInitialized == true ){
-		delete[] m_mdObjectiveFunctionValues;
+		delete[] m_mdObjectiveFunctionValues; 
 		m_mdObjectiveFunctionValues = NULL;	
 		delete[] m_mdConstraintFunctionValues;
 		m_mdConstraintFunctionValues = NULL;
@@ -266,7 +281,7 @@ OSInstance::~OSInstance(){
 		delete m_quadraticTerms;
 		m_quadraticTerms = NULL;
 	}
-	if( (instanceData->quadraticCoefficients->qTerm != NULL)  && (m_bQuadraticRowIndexesProcessed == true) ){
+	if( (instanceData->quadraticCoefficients->qTerm != NULL) && (m_bQuadraticRowIndexesProcessed == true) ){
 		delete[] m_miQuadRowIndexes;
 		m_miQuadRowIndexes = NULL;
 	}
@@ -301,15 +316,65 @@ OSInstance::~OSInstance(){
 		std::cout << "Done Deleting  m_miNonlinearExpressionTreeModIndexes" << std::endl;
 		m_miNonlinearExpressionTreeModIndexes = NULL;
 	}
-	if(m_bCppADFunIsCreated == true){
-		delete Fad;
-		Fad = NULL;
+	if(m_bOSADFunIsCreated == true){
+		try{
+#ifdef COIN_HAS_CPPAD
+			delete Fad;
+			Fad = NULL;
+#else
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+		}
+		catch(const ErrorClass& eclass){
+			throw ErrorClass( eclass.errormsg);
+		}
 	}
 //	if( (instanceData->timeDomain->stages->stage != NULL) && (m_bProcessTimeStages == true) ){
 //		delete m_Stages;
 //		m_Stages = NULL;
 //	}
-	
+
+	if (m_msTimeDomainStageNames != NULL) {
+		delete[] m_msTimeDomainStageNames;
+		m_msTimeDomainStageNames = NULL;
+	}
+
+	if (m_miTimeDomainStageVariableNumber != NULL) {
+		delete[] m_miTimeDomainStageVariableNumber;
+		m_miTimeDomainStageVariableNumber = NULL;
+	}
+
+	if (m_mmiTimeDomainStageVarList != NULL) {
+		for (int i = 0; i < m_iNumberOfTimeStages; i ++) 
+			delete[] m_mmiTimeDomainStageVarList[i];
+		delete[] m_mmiTimeDomainStageVarList;
+		m_mmiTimeDomainStageVarList = NULL;
+	}
+
+	if (m_miTimeDomainStageConstraintNumber != NULL) {
+		delete[] m_miTimeDomainStageConstraintNumber;
+		m_miTimeDomainStageConstraintNumber = NULL;
+	}
+
+	if (m_mmiTimeDomainStageConList != NULL) {
+		for (int i = 0; i < m_iNumberOfTimeStages; i ++) 
+			delete[] m_mmiTimeDomainStageConList[i];
+		delete[] m_mmiTimeDomainStageConList;
+		m_mmiTimeDomainStageConList = NULL;
+	}
+
+	if (m_miTimeDomainStageObjectiveNumber != NULL) {
+		delete[] m_miTimeDomainStageObjectiveNumber;
+		m_miTimeDomainStageObjectiveNumber = NULL;
+	}
+
+	if (m_mmiTimeDomainStageObjList != NULL) {
+		for (int i = 0; i < m_iNumberOfTimeStages; i ++) 
+			delete[] m_mmiTimeDomainStageObjList[i];
+		delete[] m_mmiTimeDomainStageObjList;
+		m_mmiTimeDomainStageObjList = NULL;
+	}
+
 	// delete the two children of OSInstance
 	//delete instanceHeader object
 	delete instanceHeader;
@@ -340,10 +405,10 @@ InstanceHeader::~InstanceHeader(){
 Variable::Variable():
 	lb(0.0),
 	ub(OSDBL_MAX),
-	init(OSNAN), 
+	//init(OSNAN),  deprecated
 	type('C'), 
-	name(""),
-	initString("")
+	name("")
+	//initString("") deprecated
 {  
 	#ifdef DEBUG
 	cout << "Inside the Variable Constructor" << endl;
@@ -588,7 +653,6 @@ Nl::~Nl(){
 		delete osExpressionTree;
 		osExpressionTree = NULL;
 	}
-	
 }//end ~Nl
 
 
@@ -622,11 +686,134 @@ NonlinearExpressions::~NonlinearExpressions(){
 }//end ~NonlinearExpressions()  
 
 
+TimeDomainStageVar::TimeDomainStageVar():
+	idx(0)
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Var Constructor" << endl;
+	#endif
+} // end TimeDomainStageVar
+
+
+TimeDomainStageVar::~TimeDomainStageVar()
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Var Destructor" << endl;
+	#endif
+} // end ~TimeDomainStageVar
+
+
+TimeDomainStageVariables::TimeDomainStageVariables():
+	numberOfVariables(0),
+	startIdx(-1)
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Variables Constructor" << endl;
+	#endif
+	var = NULL;
+} // end TimeDomainStageVariables
+
+TimeDomainStageVariables::~TimeDomainStageVariables()
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Variables Destructor" << endl;
+	#endif
+	if (numberOfVariables > 0 && var != NULL){
+		for (int i = 0; i < numberOfVariables; i++) {
+			delete var[i];
+			var[i] = NULL;
+		}
+	}
+	delete [] var;
+	var = NULL;
+} // end ~TimeDomainStageVariables
+
+TimeDomainStageCon::TimeDomainStageCon():
+	idx(0)
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Con Constructor" << endl;
+	#endif
+} // end TimeDomainStageCon
+
+
+TimeDomainStageCon::~TimeDomainStageCon()
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Con Destructor" << endl;
+	#endif
+} // end ~TimeDomainStageCon
+
+
+TimeDomainStageConstraints::TimeDomainStageConstraints():
+	numberOfConstraints(0),
+	startIdx(-1)
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Constraints Constructor" << endl;
+	#endif
+	con = NULL;
+} // end TimeDomainStageConstraints
+
+TimeDomainStageConstraints::~TimeDomainStageConstraints()
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Constraints Destructor" << endl;
+	#endif
+	if (numberOfConstraints > 0 && con != NULL){
+		for (int i = 0; i < numberOfConstraints; i++) {
+			delete con[i];
+			con[i] = NULL;
+		}
+	}
+	delete [] con;
+	con = NULL;
+} // end ~TimeDomainStageConstraints
+
+TimeDomainStageObj::TimeDomainStageObj():
+	idx(0)
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Obj Constructor" << endl;
+	#endif
+} // end TimeDomainStageObj
+
+
+TimeDomainStageObj::~TimeDomainStageObj()
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Obj Destructor" << endl;
+	#endif
+} // end ~TimeDomainStageObj
+
+
+TimeDomainStageObjectives::TimeDomainStageObjectives():
+	numberOfObjectives(0),
+	startIdx(-1)
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Constructor" << endl;
+	#endif
+	obj = NULL;
+} // end TimeDomainStageObjectives
+
+TimeDomainStageObjectives::~TimeDomainStageObjectives()
+{
+	#ifdef DEBUG 
+	cout << "Inside the Stage Objectives Destructor" << endl;
+	#endif
+	if (numberOfObjectives > 0 && obj != NULL){
+		for (int i = 0; i < numberOfObjectives; i++) {
+			delete obj[i];
+			obj[i] = NULL;
+		}
+	}
+	delete [] obj;
+	obj = NULL;
+} // end ~TimeDomainStageObjectives
+
 TimeDomainStage::TimeDomainStage():
-	name(""),
-	nvar(0),
-	ncon(0),
-	nobj(0)
+	name("")
 { 
 	#ifdef DEBUG 
 	cout << "Inside the Stage Constructor" << endl;
@@ -642,15 +829,15 @@ TimeDomainStage::~TimeDomainStage(){
 	cout << "Inside the Stage Destructor" << endl;
 	#endif
 	if (variables != NULL)
-	{	delete [] variables;
+	{	delete variables;
 		variables = NULL;
 	}
 	if (constraints != NULL)
-	{	delete []  constraints;
+	{	delete constraints;
 		constraints = NULL;
 	}
 	if (objectives != NULL)
-	{	delete [] objectives;
+	{	delete objectives;
 		objectives = NULL;
 	}
 }//end ~TimeDomainStage()  
@@ -682,8 +869,8 @@ TimeDomainStages::~TimeDomainStages(){
 }
 
 TimeDomainInterval::TimeDomainInterval():
-	intervalHorizon(0.0),
-	intervalStart(0.0)
+	start(0.0),
+	horizon(0.0)
 {
 	#ifdef DEBUG  
 	cout << "Inside the Interval Constructor" << endl;
@@ -714,11 +901,11 @@ TimeDomain::~TimeDomain()
 	if (stages != NULL)
 	{	delete stages;
 		stages = NULL;
-	};
+	}
 	if (interval != NULL)
 	{	delete interval;
 		interval = NULL;
-	};
+	}
 } 
 
 
@@ -751,8 +938,10 @@ InstanceData::~InstanceData(){
 	quadraticCoefficients = NULL;
 	delete nonlinearExpressions;
 	nonlinearExpressions = NULL;
-	delete timeDomain;
-	timeDomain = NULL;
+	if (timeDomain != NULL)
+	{   delete timeDomain;
+		timeDomain = NULL;
+	}
 } 
 
 string OSInstance::getInstanceName(){
@@ -794,17 +983,14 @@ int OSInstance::getNumberOfNonlinearExpressions(){
 
 
 bool OSInstance::processVariables() {
-	if(m_bProcessVariables) return true;
-	m_bProcessVariables = true;
+	if(m_bProcessVariables == true && bVariablesModified == false) return true;
+	//m_bProcessVariables = true;
 	string vartype ="CBIS";
 	int i = 0;
 	int n = instanceData->variables->numberOfVariables;
 	try{
 		if(instanceData->variables->var == NULL) throw ErrorClass("no variables defined");
-		if(instanceData->variables->var[0]->name.length() > 0 || instanceData->variables->var[n-1]->name.length() > 0){
-			m_msVariableNames = new string[n];
-			for(i = 0; i < n; i++) m_msVariableNames[i] = instanceData->variables->var[i]->name;
-		} 
+		/*
 			m_mdVariableInitialValues = new double[n];
 			for(i = 0; i < n; i++){
 				if(CommonUtil::ISOSNAN(instanceData->variables->var[ 0]->init) == true ){				
@@ -819,17 +1005,30 @@ bool OSInstance::processVariables() {
 			m_msVariableInitialStringValues = new string[n];
 			for(i = 0; i < n; i++) m_msVariableInitialStringValues[i] = instanceData->variables->var[i]->initString;
 		}
-		m_mcVariableTypes = new char[n];
-		m_mdVariableLowerBounds = new double[n];
-		m_mdVariableUpperBounds = new double[n];
+		*/
+		
+		if(m_bProcessVariables != true ){
+			m_mcVariableTypes = new char[n];
+			m_mdVariableLowerBounds = new double[n];
+			m_mdVariableUpperBounds = new double[n];
+			m_msVariableNames = new string[n];
+			m_bProcessVariables = true;
+		}
+		m_iNumberOfBinaryVariables = 0;
+		m_iNumberOfIntegerVariables = 0;
+		m_iNumberOfStringVariables = 0;
 		for(i = 0; i < n; i++){
 			if(vartype.find(instanceData->variables->var[i]->type) == string::npos) throw ErrorClass("wrong variable type");
 			m_mcVariableTypes[i] = instanceData->variables->var[i]->type;
 			if(m_mcVariableTypes[i] == 'B') m_iNumberOfBinaryVariables++;
 			if(m_mcVariableTypes[i] == 'I') m_iNumberOfIntegerVariables++;
+			if(m_mcVariableTypes[i] == 'S') m_iNumberOfStringVariables++;
 			m_mdVariableLowerBounds[i] = instanceData->variables->var[i]->lb;
 			m_mdVariableUpperBounds[i] = instanceData->variables->var[i]->ub;
 		}
+		if(instanceData->variables->var[0]->name.length() > 0 || instanceData->variables->var[n-1]->name.length() > 0){
+			for(i = 0; i < n; i++) m_msVariableNames[i] = instanceData->variables->var[i]->name;
+		} 
 		return true;
 	} //end try
 	catch(const ErrorClass& eclass){
@@ -842,6 +1041,7 @@ string* OSInstance::getVariableNames() {
 	return m_msVariableNames;
 }//getVariableNames	
 
+/*
 double* OSInstance::getVariableInitialValues() {
 	processVariables();
 	return m_mdVariableInitialValues;
@@ -851,6 +1051,7 @@ string* OSInstance::getVariableInitialStringValues() {
 	processVariables();
 	return m_msVariableInitialStringValues;
 }//getVariableInitialStringValues
+*/
 
 char* OSInstance::getVariableTypes() {
 	processVariables();
@@ -866,6 +1067,11 @@ int OSInstance::getNumberOfBinaryVariables() {
 	processVariables();
 	return m_iNumberOfBinaryVariables;
 }//getNumberOfBinaryVariables
+
+int OSInstance::getNumberOfStringVariables() {
+	processVariables();
+	return m_iNumberOfStringVariables;
+}//getNumberOfStringVariables
 
 double* OSInstance::getVariableLowerBounds() {
 	processVariables();
@@ -886,31 +1092,27 @@ int OSInstance::getObjectiveNumber(){
 
 
 bool OSInstance::processObjectives() {
-	if(m_bProcessObjectives) return true;
-	m_bProcessObjectives = true;
+	if(m_bProcessObjectives == true && bObjectivesModified == false) return true;
+	//m_bProcessObjectives = true;
 	int i = 0;
 	int j = 0;
 	if(instanceData == NULL || instanceData->objectives == NULL || instanceData->objectives->obj == NULL || instanceData->objectives->numberOfObjectives == 0) return true;
 	int n = instanceData->objectives->numberOfObjectives;
 	try{
-		if(instanceData->objectives->obj[0]->name.length() > 0 || instanceData->objectives->obj[n-1]->name.length() > 0){
+		if(m_bProcessObjectives != true){
+			m_msMaxOrMins = new string[n];
+			m_miNumberOfObjCoef = new int[n];
+			m_mdObjectiveConstants = new double[n];
+			m_mdObjectiveWeights = new double[n];
+			m_mObjectiveCoefficients = new SparseVector*[n];
 			m_msObjectiveNames = new string[n];
-			for(i = 0; i < n; i++) m_msObjectiveNames[i] = instanceData->objectives->obj[i]->name;
+			for(i = 0; i < n; i++){
+				m_mObjectiveCoefficients[i] = new SparseVector(instanceData->objectives->obj[ j]->numberOfObjCoef);
+				//m_mObjectiveCoefficients[i]->bDeleteArrays=false;
+			}
+			m_bProcessObjectives = true;
 		}
-		m_msMaxOrMins = new string[n];
-		m_miNumberOfObjCoef = new int[n];
-		m_mdObjectiveConstants = new double[n];
-		m_mdObjectiveWeights = new double[n];
-		m_mObjectiveCoefficients = new SparseVector*[n];
-		for(i = 0; i < n; i++){
-			m_mObjectiveCoefficients[i] = new SparseVector(instanceData->objectives->obj[ j]->numberOfObjCoef);
-			//m_mObjectiveCoefficients[i]->bDeleteArrays=false;
-		}
-		
-		//for(i = 0; i < n; i++){
-		//	m_mObjectiveCoefficients[i] = new SparseVector();
-		//	m_mObjectiveCoefficients[i]->number = instanceData->objectives->obj[ j]->numberOfObjCoef;
-		//}
+
 		for(i = 0; i < n; i++){
 			if((instanceData->objectives->obj[i]->maxOrMin.compare("max") != 0) && (instanceData->objectives->obj[i]->maxOrMin.compare("min") != 0 )) throw ErrorClass("wrong objective maxOrMin");
 			m_msMaxOrMins[i] = instanceData->objectives->obj[i]->maxOrMin;
@@ -926,7 +1128,10 @@ bool OSInstance::processObjectives() {
 					m_mObjectiveCoefficients[i]->values[j] = instanceData->objectives->obj[i]->coef[j]->value;			
 				}
 			}
-		} 		
+		} 	
+		if(instanceData->objectives->obj[0]->name.length() > 0 || instanceData->objectives->obj[n-1]->name.length() > 0){			
+			for(i = 0; i < n; i++) m_msObjectiveNames[i] = instanceData->objectives->obj[i]->name;
+		}	
 		return true;
 	}
 	catch(const ErrorClass& eclass){
@@ -966,17 +1171,23 @@ SparseVector** OSInstance::getObjectiveCoefficients() {
 
 
 double** OSInstance::getDenseObjectiveCoefficients() {
-	if(m_bGetDenseObjectives) return m_mmdDenseObjectiveCoefficients;
-	m_bGetDenseObjectives = true;
+	if(m_bGetDenseObjectives == true && bObjectivesModified == false) return m_mmdDenseObjectiveCoefficients;
+	//m_bGetDenseObjectives = true;
+	int i, j, numobjcoef;
+	SparseVector *sparsevec;
 	if(instanceData->objectives->obj == NULL || instanceData->objectives->numberOfObjectives == 0) return m_mmdDenseObjectiveCoefficients;
 	int m = instanceData->objectives->numberOfObjectives;
 	int n = instanceData->variables->numberOfVariables;
-	m_mmdDenseObjectiveCoefficients = new double*[m];
-	int i, j, numobjcoef;
-	SparseVector *sparsevec;
+	if(m_bGetDenseObjectives != true){
+		m_mmdDenseObjectiveCoefficients = new double*[m];
+		for(i = 0; i < m; i++){
+			m_mmdDenseObjectiveCoefficients[ i] = new double[n];
+		}
+		m_bGetDenseObjectives = true;
+	}
+
 	for(i = 0; i < m; i++){
 		sparsevec = this->getObjectiveCoefficients()[i];
-		m_mmdDenseObjectiveCoefficients[ i] = new double[n];
 		for(j = 0; j < n; j++){
 			m_mmdDenseObjectiveCoefficients[ i][j] = 0.0;
 		}
@@ -998,21 +1209,21 @@ int OSInstance::getConstraintNumber(){
 }//getConstraintNumber
 
 bool OSInstance::processConstraints() {
-	if(m_bProcessConstraints) return true;
-	m_bProcessConstraints = true;
+	if(m_bProcessConstraints == true && bConstraintsModified == false) return true;
+	//m_bProcessConstraints = true;
 	int i = 0;
 	ostringstream outStr;
 	if(instanceData == NULL || instanceData->constraints == NULL || instanceData->constraints->con == NULL || instanceData->constraints->numberOfConstraints == 0) return true;
 	int n = instanceData->constraints->numberOfConstraints;
 	try{
-		if(instanceData->constraints->con[0]->name.length() > 0 || instanceData->constraints->con[n-1]->name.length() > 0){
+		if(m_bProcessConstraints != true){
+			m_mdConstraintLowerBounds = new double[n];
+			m_mdConstraintUpperBounds = new double[n];
+			m_mdConstraintConstants = new double[n];
+			m_mcConstraintTypes = new char[n];
 			m_msConstraintNames = new string[n];
-			for(i = 0; i < n; i++) m_msConstraintNames[i] = instanceData->constraints->con[i]->name;
+			m_bProcessConstraints = true;
 		}
-		m_mdConstraintLowerBounds = new double[n];
-		m_mdConstraintUpperBounds = new double[n];
-		m_mdConstraintConstants = new double[n];
-		m_mcConstraintTypes = new char[n];
 		for(i = 0; i < n; i++){
 			m_mdConstraintLowerBounds[i] = instanceData->constraints->con[i]->lb;
 			m_mdConstraintUpperBounds[i] = instanceData->constraints->con[i]->ub;
@@ -1035,6 +1246,9 @@ bool OSInstance::processConstraints() {
 			else if(m_mdConstraintUpperBounds[i] == OSDBL_MAX)
 				m_mcConstraintTypes[i] = 'G';
 			else m_mcConstraintTypes[i] = 'R';
+		}
+		if(instanceData->constraints->con[0]->name.length() > 0 || instanceData->constraints->con[n-1]->name.length() > 0){
+			for(i = 0; i < n; i++) m_msConstraintNames[i] = instanceData->constraints->con[i]->name;
 		}
 		return true;
 	}
@@ -1073,8 +1287,8 @@ int OSInstance::getLinearConstraintCoefficientNumber(){
 }//getLinearConstraintCoefficientNumber
 
 bool OSInstance::processLinearConstraintCoefficients() {
-	if(m_bProcessLinearConstraintCoefficients) return true;
-	m_bProcessLinearConstraintCoefficients = true;
+	if(m_bProcessLinearConstraintCoefficients == true && bAMatrixModified == false) return true;
+	//m_bProcessLinearConstraintCoefficients = true;
 	try{
 		int n = instanceData->linearConstraintCoefficients->numberOfValues;
 		//value array
@@ -1087,16 +1301,22 @@ bool OSInstance::processLinearConstraintCoefficients() {
 		else{
 			if(instanceData->linearConstraintCoefficients->rowIdx->el != NULL){
 				m_bColumnMajor = true;
-				m_linearConstraintCoefficientsInColumnMajor = new SparseMatrix();
-				m_linearConstraintCoefficientsInColumnMajor->bDeleteArrays = false;
+				if(m_bProcessLinearConstraintCoefficients != true){
+					m_linearConstraintCoefficientsInColumnMajor = new SparseMatrix();
+					m_linearConstraintCoefficientsInColumnMajor->bDeleteArrays = false;
+					m_bProcessLinearConstraintCoefficients = true;
+				}
 				m_linearConstraintCoefficientsInColumnMajor->isColumnMajor = true;
 				m_linearConstraintCoefficientsInColumnMajor->valueSize = n;
 				m_linearConstraintCoefficientsInColumnMajor->startSize = instanceData->variables->numberOfVariables + 1;
 			}
 			else{ 
 				m_bColumnMajor = false;	
-				m_linearConstraintCoefficientsInRowMajor = new SparseMatrix();
-				m_linearConstraintCoefficientsInRowMajor->bDeleteArrays = false;
+				if(m_bProcessLinearConstraintCoefficients != true){
+					m_linearConstraintCoefficientsInRowMajor = new SparseMatrix();
+					m_linearConstraintCoefficientsInRowMajor->bDeleteArrays = false;
+					m_bProcessLinearConstraintCoefficients = true;
+				}
 				m_linearConstraintCoefficientsInRowMajor->isColumnMajor = false;
 				m_linearConstraintCoefficientsInRowMajor->valueSize = n;
 				m_linearConstraintCoefficientsInRowMajor->startSize = instanceData->constraints->numberOfConstraints + 1;
@@ -1311,48 +1531,39 @@ int OSInstance::getNumberOfNonlinearObjectives(){
 OSExpressionTree* OSInstance::getNonlinearExpressionTree(int rowIdx){
 	if( m_bProcessExpressionTrees == false ){
 		getAllNonlinearExpressionTrees();
-		return m_mapExpressionTrees[ rowIdx];
 	} 
-	else{
-		//if( m_mapExpressionTrees.find( rowIdx) != m_mapExpressionTrees.end()) return NULL;
-		//else return m_mapExpressionTrees[ rowIdx];
-		if( m_mapExpressionTrees.find( rowIdx) != m_mapExpressionTrees.end()) return m_mapExpressionTrees[ rowIdx];
-		else return NULL ;
-		// check to make sure rowIdx has a nonlinear term and is in the map
-		/** define an iterator for the expression trees map allExpTrees */
-		//std::map<int, OSExpressionTree*>::iterator pos;
-		///for(pos = m_mapExpressionTrees.begin(); pos != m_mapExpressionTrees.end(); ++pos){
-		//	if(pos->first == rowIdx)return m_mapExpressionTrees[ rowIdx];
-		//}
-		// if we are rowIdx has no nonlinar terms so return a null
-		//return NULL;
-	}     
+	if( m_mapExpressionTrees.find( rowIdx) != m_mapExpressionTrees.end()) return m_mapExpressionTrees[ rowIdx];
+	else return NULL ;
+	// check to make sure rowIdx has a nonlinear term and is in the map
+	/** define an iterator for the expression trees map allExpTrees */
+	//std::map<int, OSExpressionTree*>::iterator pos;
+	///for(pos = m_mapExpressionTrees.begin(); pos != m_mapExpressionTrees.end(); ++pos){
+	//	if(pos->first == rowIdx)return m_mapExpressionTrees[ rowIdx];
+	//}
+	// if we are rowIdx has no nonlinar terms so return a null
+	//return NULL;
 }// getNonlinearExpressionTree for a specific index   
 
 
 OSExpressionTree* OSInstance::getNonlinearExpressionTreeMod(int rowIdx){
 	if( m_bProcessExpressionTreesMod == false ){
 		getAllNonlinearExpressionTreesMod();
-		return m_mapExpressionTreesMod[ rowIdx];
 	} 
-	else{
-		//if( m_mapExpressionTrees.find( rowIdx) != m_mapExpressionTrees.end()) return NULL;
-		//else return m_mapExpressionTrees[ rowIdx];
-		if( m_mapExpressionTreesMod.find( rowIdx) != m_mapExpressionTreesMod.end()) return m_mapExpressionTreesMod[ rowIdx];
-		else return NULL ;
-		// check to make sure rowIdx has a nonlinear term and is in the map
-		/** define an iterator for the expression trees map allExpTrees */
-		//std::map<int, OSExpressionTree*>::iterator pos;
-		///for(pos = m_mapExpressionTrees.begin(); pos != m_mapExpressionTrees.end(); ++pos){
-		//	if(pos->first == rowIdx)return m_mapExpressionTrees[ rowIdx];
-		//}
-		// if we are rowIdx has no nonlinar terms so return a null
-		//return NULL;
-	}     
+	if( m_mapExpressionTreesMod.find( rowIdx) != m_mapExpressionTreesMod.end()) return m_mapExpressionTreesMod[ rowIdx];
+	else return NULL ;
+	// check to make sure rowIdx has a nonlinear term and is in the map
+	/** define an iterator for the expression trees map allExpTrees */
+	//std::map<int, OSExpressionTree*>::iterator pos;
+	///for(pos = m_mapExpressionTrees.begin(); pos != m_mapExpressionTrees.end(); ++pos){
+	//	if(pos->first == rowIdx)return m_mapExpressionTrees[ rowIdx];
+	//}
+	// if we are rowIdx has no nonlinar terms so return a null
+	//return NULL;
 }// getNonlinearExpressionTreeMod for a specific index 
 
 
 std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeInPostfix( int rowIdx){
+	//if( m_binitForAlgDiff == false) this->initForAlgDiff();
 	if( m_bProcessExpressionTrees == false ) getAllNonlinearExpressionTrees();
 	std::vector<OSnLNode*> postfixVec;
 	try{
@@ -1372,7 +1583,471 @@ std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeInPostfix( int rowI
 }//getNonlinearExpressionTreeInPostfix
 
 
+
+
+std::string OSInstance::getNonlinearExpressionTreeInInfix( int rowIdx_){
+	if( m_binitForAlgDiff == false) this->initForAlgDiff();
+	if( m_bProcessExpressionTrees == false ) getAllNonlinearExpressionTrees();
+	std::string resultString;
+	resultString = "";
+	unsigned int i;
+	unsigned int j;
+	unsigned int n;
+	ostringstream outStr;
+	std::vector<OSnLNode*> postfixVec;
+	int rowIdx = rowIdx_;
+	OSnLNode *nlnode = NULL ;
+	OSnLNodeNumber *nlnodeNum = NULL;
+	OSnLNodeVariable *nlnodeVar = NULL;
+	OSnLNodeSum *nlnodeSum = NULL;
+	OSnLNodeProduct *nlnodeProduct = NULL;
+	OSnLNodeMin *nlnodeMin = NULL;
+	OSnLNodeMax *nlnodeMax = NULL;
+	std::string tmp1 = "";
+	std::string tmp2 = "";
+	std::string tmp3 = "";
+	std::stack<OSnLNode*> opStack;
+	std::stack<std::string> tmpStack;
+	std::stack<std::string> sumStack;
+	std::stack<std::string> productStack;
+	std::stack<std::string> minStack;
+	std::stack<std::string> maxStack;
+	
+	
+	try{
+		if( m_mapExpressionTrees.find( rowIdx) != m_mapExpressionTrees.end()){
+			//get the nodes and separate into operators and operands, for now
+			//only the number and variable nodes are operator nodes
+			
+			OSExpressionTree* exptree = this->getNonlinearExpressionTree( rowIdx);
+			if(exptree != NULL) {
+				
+				postfixVec = this->getNonlinearExpressionTreeInPostfix( rowIdx);
+				n  = postfixVec.size();
+				//put vector in reverse order
+				for (i = 0 ; i < n; i++){
+					nlnode =  postfixVec[ n - 1 - i];
+					opStack.push( nlnode);
+					//std::cout << postfixVec[ i]->snodeName << std::endl;
+				}
+				
+				#if 0
+				std::cout << std::endl << std::endl << std::endl << std::endl;
+				n = opStack.size();
+				for(i = 0; i < n; i++){
+					std::cout  << opStack.top()->snodeName  << std::endl;
+				}
+				
+				#endif
+				n = opStack.size();
+				for(i = 0; i < n; i++){
+					//std::cout << "NUMBER OF NODES LEFT =  " << operatorVec.size() << std::endl;
+					nlnode = opStack.top();
+					//std::cout << "EVALUATING NODE: " << nlnode->snodeName << std::endl;
+					switch (nlnode->inodeInt) {
+						case OS_NUMBER:
+							nlnodeNum = (OSnLNodeNumber*)nlnode;
+							tmpStack.push( os_dtoa_format(nlnodeNum->value) );
+							break;
+							
+						case OS_PI:
+							tmpStack.push( "PI" );
+							break;
+							
+						case OS_E:
+							tmpStack.push( "E" );
+							break;
+							
+						case OS_VARIABLE:
+							outStr.str("");
+							// handle a variable
+							nlnodeVar = (OSnLNodeVariable*)nlnode;
+							// see if the coefficient is specified
+							if( (nlnodeVar->coef > 1.0) ||  (nlnodeVar->coef < 1.0) ){
+								outStr << "(";
+								outStr <<  os_dtoa_format(nlnodeVar->coef);
+								outStr << "*x_";
+								outStr << nlnodeVar->idx;
+								outStr << ")";
+								tmpStack.push(outStr.str() );
+								//std::cout << "WE JUST PUSHED " << outStr.str() << std::endl;
+							}else{
+								outStr << "x_";
+								outStr << nlnodeVar->idx;
+								tmpStack.push(outStr.str() );
+								//std::cout << "WE JUST PUSHED " << outStr.str() << std::endl;
+							}
+							break;
+							
+						case OS_PLUS :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing plus operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmp2 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push("(" + tmp2 +  " + "  + tmp1 + ")");
+							break;
+							
+						case OS_SUM :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing sum operater");
+							//std::cout << "INSIDE SUM NODE " << std::endl;
+							nlnodeSum = (OSnLNodeSum*)nlnode;
+							outStr.str("");
+							for(j = 0; j < nlnodeSum->inumberOfChildren; j++){
+								sumStack.push( tmpStack.top() );
+								tmpStack.pop();
+							}
+							outStr << "(";
+							for(j = 0; j < nlnodeSum->inumberOfChildren; j++){
+								outStr << sumStack.top();
+								if (j < nlnodeSum->inumberOfChildren - 1) outStr << " + ";
+								sumStack.pop();
+							}
+							outStr << ")";
+							tmpStack.push( outStr.str() );
+							//std::cout << outStr.str() << std::endl;
+							break;
+							
+						case OS_MINUS :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing minus operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmp2 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push("(" + tmp2 +  " - "  + tmp1 + ")");
+							break;						
+						
+						case OS_NEGATE :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- -- Problem writing negate operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "-"+ tmp1 );
+							break;
+							
+						case OS_TIMES :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing times operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmp2 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push("(" + tmp2 +  "*"  + tmp1 + ")");
+							break;
+						
+						case OS_DIVIDE :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing divide operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmp2 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push("(" + tmp2 +  " / "  + tmp1 + ")");
+							break;
+
+						case OS_POWER :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing power operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmp2 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push("(" + tmp2 +  " ^ "  + tmp1 + ")");
+							break;
+							
+						case OS_ABS :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing abs operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "abs( "+ tmp1  + ")");
+							break;
+							
+						case OS_ERF :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing erf operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "erf( "+ tmp1  + ")");
+							break;
+
+						
+						case OS_SQUARE :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing square operater ");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "("+ tmp1  + ")^2");
+							break;
+													
+						case OS_LN :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing ln operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "ln( "+ tmp1  + ")");
+							break;
+							
+						case OS_EXP :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing exp operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "exp( "+ tmp1  + ")");
+							break;
+							
+						case OS_SIN :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing sin operater");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "sin( "+ tmp1  + ")");
+							break;
+							
+						case OS_COS :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing cos operater ");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "cos( "+ tmp1  + ")");
+							break;
+							
+						case OS_SQRT :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing cos operater ");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "sqrt( "+ tmp1  + ")");
+							break;
+							
+						case OS_MIN :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing min operater");
+							//std::cout << "INSIDE Min NODE " << std::endl;
+							nlnodeMin = (OSnLNodeMin*)nlnode;
+							outStr.str("");
+							for(j = 0; j < nlnodeMin->inumberOfChildren; j++){
+								minStack.push( tmpStack.top() );
+								tmpStack.pop();
+							}
+							outStr << "min(";
+							for(j = 0; j < nlnodeMin->inumberOfChildren; j++){
+								outStr << minStack.top();
+								if (j < nlnodeMin->inumberOfChildren - 1) outStr << " , ";
+								minStack.pop();
+							}
+							outStr << ")";
+							tmpStack.push( outStr.str() );
+							break;
+							
+						case OS_MAX :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing max operater");
+							//std::cout << "INSIDE Max NODE " << std::endl;
+							nlnodeMax = (OSnLNodeMax*)nlnode;
+							outStr.str("");
+							for(j = 0; j < nlnodeMax->inumberOfChildren; j++){
+								maxStack.push( tmpStack.top() );
+								tmpStack.pop();
+							}
+							outStr << "max(";
+							for(j = 0; j < nlnodeMax->inumberOfChildren; j++){
+								outStr << maxStack.top();
+								if (j < nlnodeMax->inumberOfChildren - 1) outStr << " , ";
+								maxStack.pop();
+							}
+							outStr << ")";
+							tmpStack.push( outStr.str() );
+							break;
+							
+						case OS_IF :
+						
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing if operater ");
+							if(nlnode->inumberOfChildren != 3)throw  ErrorClass("The if node must have three children");
+							tmp1 = tmpStack.top();
+							tmpStack.pop();
+							tmp2 = tmpStack.top();
+							tmpStack.pop();
+							tmp3 = tmpStack.top();
+							tmpStack.pop();
+							tmpStack.push( "if(" + tmp3 + "," + tmp2 + "," + tmp1 +")" );
+							break;
+							
+						case OS_PRODUCT :
+							if( tmpStack.size() < nlnode->inumberOfChildren) throw  ErrorClass("There is an error in the OSExpression Tree -- Problem writing product operater");
+							//std::cout << "INSIDE Product NODE " << std::endl;
+							nlnodeProduct = (OSnLNodeProduct*)nlnode;
+							outStr.str("");
+							for(j = 0; j < nlnodeProduct->inumberOfChildren; j++){
+								productStack.push( tmpStack.top() );
+								tmpStack.pop();
+							}
+							outStr << "(";
+							for(j = 0; j < nlnodeProduct->inumberOfChildren; j++){
+								outStr << productStack.top();
+								if (j < nlnodeProduct->inumberOfChildren - 1) outStr << " * ";
+								productStack.pop();
+							}
+							outStr << ")";
+							tmpStack.push( outStr.str() );
+							//std::cout << outStr.str() << std::endl;
+							break;
+							
+						default:
+							 throw  ErrorClass("operator " + nlnode->snodeName + " not supported");
+						break;
+				  }
+					opStack.pop();
+				}
+				postfixVec.clear();
+				if(tmpStack.size() != 1) throw ErrorClass( "There is an error in the OSExpression Tree -- stack size should be 1 at end");
+				resultString = tmpStack.top();
+				//std::cout << resultString << std::endl;
+				tmpStack.pop();
+				
+				return resultString;
+
+			}
+			else{
+				//throw ErrorClass("Error in getNonlinearExpressionTreeInInfix, there is no expression tree for this index");
+				return "";
+			}
+			
+		}  
+		else{
+			throw ErrorClass("Error in getNonlinearExpressionTreeInInfix, rowIdx not valid");
+		}
+		return resultString;	
+	}
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg);
+	} 
+}//getNonlinearExpressionTreeInInfix
+
+std::string OSInstance::printModel( ){
+	std::string resultString = "";
+	ostringstream outStr;
+	outStr << "";
+	int numCon;
+	int numObj;
+	int numVar;
+	int i;
+	numCon = this->getConstraintNumber();
+	numObj = this->getObjectiveNumber();
+	numVar = this->getVariableNumber();
+	this->initForAlgDiff( );
+	outStr << std::endl;
+	outStr << "Objectives:" << std::endl;		
+	for(i = 0; i < numObj; i++){
+		if( this->getObjectiveMaxOrMins()[0] == "min"){
+			outStr << "min ";
+		}
+		else{
+			outStr << "max ";
+		}
+		outStr << this->printModel( i - numObj);
+	}	
+	outStr << std::endl;
+	outStr << "Constraints:" << std::endl;		
+	for(i = 0; i < numCon; i++){
+		outStr << this->printModel( i);
+	}
+	
+	outStr << std::endl;
+	outStr << "Variables:" << std::endl;
+	if(m_bProcessVariables != true ) this->processVariables();
+	for(i = 0; i < numVar; i++){
+		outStr << "x_";
+		outStr << i;
+		outStr << " Type = " ;
+		outStr <<  m_mcVariableTypes[i];
+		outStr << "  Lower Bound =  ";
+		outStr << os_dtoa_format( m_mdVariableLowerBounds[i])  ;
+		outStr << "  Upper Bound =  ";
+		outStr << os_dtoa_format( m_mdVariableUpperBounds[i])  ;
+		outStr << std::endl;
+	}	
+	
+	// if model was originaly in column matrix form we need to delete the new
+	// matrix stored by row
+	
+	//if( this->instanceData->linearConstraintCoefficients != NULL && this->instanceData->linearConstraintCoefficients->numberOfValues > 0){
+	//	if(m_bColumnMajor == true){// we now have a duplication
+	//		delete m_linearConstraintCoefficientsInRowMajor;
+	//	}
+	//}
+	return outStr.str() ;
+}//printModel( )
+
+
+std::string OSInstance::printModel(int rowIdx ){
+	std::string resultString = "";
+	ostringstream outStr;
+	outStr << "";
+	//loop over the consraints first;
+	int j;
+	int row_nonz = 0;
+	int obj_nonz = 0;
+	int varIdx = 0;
+	bool addedLinearTerm = false;
+	
+	// initialize all of the necessary nonlinear stuff
+	this->initForAlgDiff( );	
+	
+	if( rowIdx >= 0){
+		if( m_bProcessConstraints != true ) this->processConstraints() ;
+		if( m_mdConstraintLowerBounds[ rowIdx] >  -OSDBL_MAX){
+			if(m_mdConstraintLowerBounds[ rowIdx] < m_mdConstraintUpperBounds[ rowIdx]){
+				outStr << os_dtoa_format( m_mdConstraintLowerBounds[ rowIdx] );
+				outStr << " <= ";
+			}
+		} 
+		//
+		if(this->instanceData->linearConstraintCoefficients != NULL && this->instanceData->linearConstraintCoefficients->numberOfValues > 0){
+			if(m_linearConstraintCoefficientsInRowMajor == NULL) 
+				m_linearConstraintCoefficientsInRowMajor = this->getLinearConstraintCoefficientsInRowMajor();
+			row_nonz = m_linearConstraintCoefficientsInRowMajor->starts[ rowIdx + 1] - m_linearConstraintCoefficientsInRowMajor->starts[ rowIdx];
+			
+			for(j = 0; j < row_nonz; j++){
+				varIdx =  m_linearConstraintCoefficientsInRowMajor->indexes[ m_linearConstraintCoefficientsInRowMajor->starts[ rowIdx]  + j];
+				
+				if(m_bSparseJacobianCalculated == false  ||  (m_mapExpressionTreesMod.find( rowIdx) == m_mapExpressionTreesMod.end() ) ||
+					( (*m_mapExpressionTreesMod[ rowIdx]->mapVarIdx).find( varIdx) == (*m_mapExpressionTreesMod[ rowIdx]->mapVarIdx).end()) ){					
+					outStr << os_dtoa_format( m_linearConstraintCoefficientsInRowMajor->values[ m_linearConstraintCoefficientsInRowMajor->starts[ rowIdx]  + j] );
+					outStr << "*";
+					outStr << "x_";
+					outStr << varIdx;
+					if( j < row_nonz - 1) outStr << " + ";
+					addedLinearTerm = true;
+				}
+			}
+		}
+	}else{// process an objective function
+		if(m_bProcessObjectives != true ) this->processObjectives() ;
+		int obj_idx =  -rowIdx - 1;
+		obj_nonz = m_miNumberOfObjCoef[ obj_idx];
+		for(j = 0; j < obj_nonz; j++){
+			outStr << os_dtoa_format( m_mObjectiveCoefficients[obj_idx]->values[j] );
+			outStr << "*";
+			outStr << "x_";
+			outStr << m_mObjectiveCoefficients[obj_idx]->indexes[j] ;
+			if( j < obj_nonz - 1) outStr << " + ";		
+		}
+	}
+	if( this->getNonlinearExpressionTree( rowIdx) != NULL){
+		if( (addedLinearTerm == true)  || (obj_nonz > 0) ) outStr << " + " ;
+		outStr << getNonlinearExpressionTreeInInfix( rowIdx);
+		//outStr << ")";
+	}
+	
+	
+	if( rowIdx >= 0){
+		if( m_bProcessConstraints != true ) this->processConstraints() ;
+		if( m_mdConstraintUpperBounds[ rowIdx] <  OSDBL_MAX){
+			if(m_mdConstraintLowerBounds[ rowIdx] < m_mdConstraintUpperBounds[ rowIdx]){
+				outStr << " <= ";
+			 }else{
+				outStr << " = ";
+			 }
+			outStr << os_dtoa_format( m_mdConstraintUpperBounds[ rowIdx] ); 
+			outStr << "  ";
+			outStr << this->getConstraintNames()[ rowIdx] ;
+		}
+	}
+	outStr << std::endl;	
+	resultString = outStr.str();
+	return resultString;
+}//printModel( rowIdx )
+
+
 std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeModInPostfix( int rowIdx){
+	//if( m_binitForAlgDiff == false) this->initForAlgDiff();
 	if( m_bProcessExpressionTreesMod == false ) getAllNonlinearExpressionTreesMod();
 	std::vector<OSnLNode*> postfixVec;
 	try{
@@ -1393,6 +2068,7 @@ std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeModInPostfix( int r
 
 
 std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeInPrefix( int rowIdx){
+	//if( m_binitForAlgDiff == false) this->initForAlgDiff();
 	if( m_bProcessExpressionTrees == false ) getAllNonlinearExpressionTrees();
 	std::vector<OSnLNode*> prefixVec;
 	try{
@@ -1412,6 +2088,7 @@ std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeInPrefix( int rowId
 }//getNonlinearExpressionTreeInPrefix
 
 std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeModInPrefix( int rowIdx){
+	//if( m_binitForAlgDiff == false) this->initForAlgDiff();
 	if( m_bProcessExpressionTreesMod == false ) getAllNonlinearExpressionTreesMod();
 	std::vector<OSnLNode*> prefixVec;
 	try{
@@ -1431,6 +2108,7 @@ std::vector<OSnLNode*> OSInstance::getNonlinearExpressionTreeModInPrefix( int ro
 }//getNonlinearExpressionTreeInPrefix
 
 std::map<int, OSExpressionTree*> OSInstance::getAllNonlinearExpressionTrees(){
+	//if( m_binitForAlgDiff == false) this->initForAlgDiff();
 	if(m_bProcessExpressionTrees == true) return m_mapExpressionTrees;
 	std::map<int, int> foundIdx;
 	std::map<int, int>::iterator pos;
@@ -1499,10 +2177,289 @@ std::map<int, OSExpressionTree*> OSInstance::getAllNonlinearExpressionTreesMod()
 	return m_mapExpressionTreesMod;
 }// getAllNonlinearExpressionTreesMod
 
-//bool OSInstance::processTimeDomain() {
-//	if(m_bProcessTimeDomain) return true;
-//	m_bProcessTimeDomain = true;
-//}// processTimeDomain
+
+/**
+ * Get the format of the time domain ("stages"/"interval")
+ * 
+ * @return the format of the time domain. 
+ */
+std::string OSInstance::getTimeDomainFormat()
+{	if (instanceData->timeDomain == NULL)
+		return "";
+	if (instanceData->timeDomain->interval != NULL)
+		return "interval";
+	if (instanceData->timeDomain->stages != NULL)
+		return "stages";
+	return "";
+} 
+
+/**
+ * Get the number of stages that make up the time domain
+ * 
+ * @return the number of time stages. 
+ */
+int OSInstance::getTimeDomainStageNumber()
+{	if (instanceData->timeDomain == NULL)
+		return 1;
+	if (instanceData->timeDomain->interval != NULL)
+		; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return 1;
+	return instanceData->timeDomain->stages->numberOfStages;
+} 
+	
+/**
+ * Get the names of the stages (NULL or empty string ("") if a stage has not been given a name
+ * 
+ * @return the names of time stages. 
+ */
+std::string* OSInstance::getTimeDomainStageNames()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_msTimeDomainStageNames != NULL)
+		delete [] m_msTimeDomainStageNames;
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_msTimeDomainStageNames = new std::string[instanceData->timeDomain->stages->numberOfStages]; 
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+		m_msTimeDomainStageNames[i] = instanceData->timeDomain->stages->stage[i]->name;
+	return m_msTimeDomainStageNames;
+} 
+	
+/**
+ * Get the number of variables contained in each time stage
+ * 
+ * @return a vector of size numberOfStages. 
+ */
+int* OSInstance::getTimeDomainStageNumberOfVariables()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_miTimeDomainStageVariableNumber != NULL) 
+		delete [] m_miTimeDomainStageVariableNumber;
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_miTimeDomainStageVariableNumber = new int[instanceData->timeDomain->stages->numberOfStages];
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++) 
+		m_miTimeDomainStageVariableNumber[i] = instanceData->timeDomain->stages->stage[i]->variables->numberOfVariables;
+	return m_miTimeDomainStageVariableNumber;
+} 
+	
+/**
+ * Get the number of variables contained in each time stage
+ * 
+ * @return a vector of size numberOfStages. 
+ */
+int* OSInstance::getTimeDomainStageNumberOfConstraints()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_miTimeDomainStageConstraintNumber != NULL){
+	}
+	
+	
+		delete [] m_miTimeDomainStageConstraintNumber;
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_miTimeDomainStageConstraintNumber = new int[instanceData->timeDomain->stages->numberOfStages];
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+		m_miTimeDomainStageConstraintNumber[i] = instanceData->timeDomain->stages->stage[i]->constraints->numberOfConstraints;
+	return m_miTimeDomainStageConstraintNumber;
+} 
+
+/**
+ * Get the number of objectives contained in each time stage
+ * 
+ * @return a vector of size numberOfStages. 
+ */
+int* OSInstance::getTimeDomainStageNumberOfObjectives()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_miTimeDomainStageObjectiveNumber != NULL)
+		delete [] m_miTimeDomainStageObjectiveNumber;
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_miTimeDomainStageObjectiveNumber = new int[instanceData->timeDomain->stages->numberOfStages];
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+		m_miTimeDomainStageObjectiveNumber[i] = instanceData->timeDomain->stages->stage[i]->objectives->numberOfObjectives;
+	return m_miTimeDomainStageObjectiveNumber;
+} 
+	
+/**
+ * Get the list of variables in each stage
+ * 
+ * @return one array of integers for each stage. 
+ */
+int** OSInstance::getTimeDomainStageVarList()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_miTimeDomainStageVariableNumber == NULL)
+		return NULL;
+	if (m_mmiTimeDomainStageVarList != NULL){
+		
+		
+		for (int i = 0; i < m_iNumberOfTimeStages; i ++) 
+			delete[] m_mmiTimeDomainStageVarList[i];
+		delete[] m_mmiTimeDomainStageVarList;
+		m_mmiTimeDomainStageVarList = NULL;
+	}
+	
+	
+		//delete [] m_mmiTimeDomainStageVarList;
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_iNumberOfTimeStages = instanceData->timeDomain->stages->numberOfStages;
+	m_mmiTimeDomainStageVarList = new int*[instanceData->timeDomain->stages->numberOfStages];
+	int timeDomainStageNumberVar;
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+	{	
+		timeDomainStageNumberVar = m_miTimeDomainStageVariableNumber[i];
+		m_mmiTimeDomainStageVarList[i] = new int[ timeDomainStageNumberVar ];
+		if (instanceData->timeDomain->stages->stage[i]->variables->startIdx == -1)
+			for (int j = 0; j < m_miTimeDomainStageVariableNumber[i]; j++)
+				m_mmiTimeDomainStageVarList[i][j] = instanceData->timeDomain->stages->stage[i]->variables->var[j]->idx;
+		else
+			for (int j = 0; j < m_miTimeDomainStageVariableNumber[i]; j++)
+				m_mmiTimeDomainStageVarList[i][j] = instanceData->timeDomain->stages->stage[i]->variables->startIdx + j;
+	}
+	return m_mmiTimeDomainStageVarList;
+} 
+	
+/**
+ * Get the list of constraints in each stage
+ * 
+ * @return one array of integers for each stage. 
+ */
+int** OSInstance::getTimeDomainStageConList()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_miTimeDomainStageConstraintNumber == NULL)
+		return NULL;
+	if (m_mmiTimeDomainStageConList != NULL){
+		
+		for (int i = 0; i < m_iNumberOfTimeStages; i ++) 
+			delete[] m_mmiTimeDomainStageConList[i];
+		delete[] m_mmiTimeDomainStageConList;
+		m_mmiTimeDomainStageConList = NULL;		
+		
+	}
+	
+	
+		
+		
+		
+		
+		
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_iNumberOfTimeStages = instanceData->timeDomain->stages->numberOfStages;
+	m_mmiTimeDomainStageConList = new int*[instanceData->timeDomain->stages->numberOfStages];
+	int numTimeDomainStageCon;
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+	{	
+		numTimeDomainStageCon = m_miTimeDomainStageConstraintNumber[i];
+		m_mmiTimeDomainStageConList[i] = new int[ numTimeDomainStageCon];
+		if (instanceData->timeDomain->stages->stage[i]->constraints->startIdx == -1)
+			for (int j = 0; j < m_miTimeDomainStageConstraintNumber[i]; j++)
+				m_mmiTimeDomainStageConList[i][j] = instanceData->timeDomain->stages->stage[i]->constraints->con[j]->idx;
+		else
+			for (int j = 0; j < m_miTimeDomainStageConstraintNumber[i]; j++)
+				m_mmiTimeDomainStageConList[i][j] = instanceData->timeDomain->stages->stage[i]->constraints->startIdx + j;
+	}
+	return m_mmiTimeDomainStageConList;
+} 
+/**
+ * Get the list of objectives in each stage
+ * 
+ * @return one array of integers for each stage. 
+ */
+int** OSInstance::getTimeDomainStageObjList()
+{	if (instanceData->timeDomain == NULL)
+		return NULL;
+	if (instanceData->timeDomain->interval != NULL)
+		return NULL; //throw an error
+	if (instanceData->timeDomain->stages == NULL)
+		return NULL;
+	if (m_miTimeDomainStageObjectiveNumber == NULL)
+		return NULL;
+	if (m_mmiTimeDomainStageObjList != NULL){
+
+		for (int i = 0; i < m_iNumberOfTimeStages; i ++) 
+			delete[] m_mmiTimeDomainStageObjList[i];
+		delete[] m_mmiTimeDomainStageObjList;
+		m_mmiTimeDomainStageObjList = NULL;
+		
+	}
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+		return NULL;
+	m_iNumberOfTimeStages = instanceData->timeDomain->stages->numberOfStages;
+	m_mmiTimeDomainStageObjList = new int*[instanceData->timeDomain->stages->numberOfStages];
+	int numTimeDomainStageObjNum;
+	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+	{	
+		numTimeDomainStageObjNum = m_miTimeDomainStageObjectiveNumber[i];
+		m_mmiTimeDomainStageObjList[i] = new int[ numTimeDomainStageObjNum];
+		if (instanceData->timeDomain->stages->stage[i]->objectives->startIdx == 0)
+			for (int j = 0; j < m_miTimeDomainStageObjectiveNumber[i]; j++)
+				m_mmiTimeDomainStageObjList[i][j] = instanceData->timeDomain->stages->stage[i]->objectives->obj[j]->idx;
+		else
+			for (int j = 0; j < m_miTimeDomainStageObjectiveNumber[i]; j++)
+				m_mmiTimeDomainStageObjList[i][j] = instanceData->timeDomain->stages->stage[i]->objectives->startIdx - j;
+	}
+	return m_mmiTimeDomainStageObjList;
+} 
+
+/**
+ * Get the start for the time domain interval
+ * 
+ * @return start end of the time interval. 
+ */
+double OSInstance::getTimeDomainIntervalStart()
+{	if (instanceData->timeDomain == NULL)
+		return 0.0;
+	if (instanceData->timeDomain->stages != NULL)
+		return 0.0; //throw an error
+	if (instanceData->timeDomain->interval == NULL)
+		return 0.0;
+	return instanceData->timeDomain->interval->start;
+} 
+
+/**
+ * Get the horizon for the time domain interval
+ * 
+ * @return the end of the time interval. 
+ */
+double OSInstance::getTimeDomainIntervalHorizon()
+{	if (instanceData->timeDomain == NULL)
+		return 0.0;
+	if (instanceData->timeDomain->stages != NULL)
+		return 0.0; //throw an error
+	if (instanceData->timeDomain->interval == NULL)
+		return 0.0;
+	return instanceData->timeDomain->interval->horizon;
+} 
 
 
 
@@ -1542,21 +2499,21 @@ bool OSInstance::setVariableNumber(int number){
 }//setVariableNumber
 
 
-bool OSInstance::addVariable(int index, string name, double lowerBound, double upperBound, char type, double init, string initString){
+bool OSInstance::addVariable(int index, string name, double lowerBound, double upperBound, char type){
 	instanceData->variables->var[index] = new Variable();
 	if(index < 0 || instanceData->variables->numberOfVariables <= 0 || index >= instanceData->variables->numberOfVariables) return false;
 	instanceData->variables->var[index]->name = name;
 	instanceData->variables->var[index]->lb = lowerBound;
 	instanceData->variables->var[index]->ub = upperBound;
 	instanceData->variables->var[index]->type = type;
-	if(init != OSNAN) instanceData->variables->var[index]->init = init;
-	instanceData->variables->var[index]->initString = initString;
+	//if(init != OSNAN) instanceData->variables->var[index]->init = init;
+	//instanceData->variables->var[index]->initString = initString;
 	return true;
 }//addVariable
 
 
 bool OSInstance::setVariables(int number, string *names, double *lowerBounds, 
-	double *upperBounds, char *types, double *inits, string *initsString){
+	double *upperBounds, char *types){
 	if(number <= 0) return false;
 	try{
 		if(instanceData->variables == NULL){
@@ -1589,12 +2546,14 @@ bool OSInstance::setVariables(int number, string *names, double *lowerBounds,
 				if(types[i] != 'C' && types[i] != 'B' && types[i] != 'I' && types[i] != 'S') types[i] = 'C';
 			} 
 		}
+		/*
 		if(inits != NULL){
 			for(i = 0; i < number; i++) instanceData->variables->var[i]->init = inits[i];   			
 		}
 		if(initsString != NULL){
 			for(i = 0; i < number; i++) instanceData->variables->var[i]->initString = initsString[i];   			
 		}
+		*/
 		return true;
 	}
 	catch(const ErrorClass& eclass){
@@ -1639,7 +2598,7 @@ bool OSInstance::addObjective(int index, string name, string maxOrMin, double co
 		for(i = 0; i < n; i++){
 			instanceData->objectives->obj[arrayIndex]->coef[i]->idx = objectiveCoefficients->indexes[i];
 			instanceData->objectives->obj[arrayIndex]->coef[i]->value = objectiveCoefficients->values[i];   
-		}  
+		}   			
 	}
 	return true;
 }//addObjective
@@ -1738,7 +2697,7 @@ bool OSInstance::setConstraints(int number, string* names, double* lowerBounds, 
 			throw ErrorClass("there is no constraints object");		
 		}		
 		if(instanceData->constraints->numberOfConstraints != number){
-			throw ErrorClass("input number of constrasints not equal to number in class");		
+			throw ErrorClass("input number of constraints not equal to number in class");		
 		}
 		int i = 0;
 		for(i = 0; i < number; i++){
@@ -1770,8 +2729,9 @@ bool OSInstance::setConstraints(int number, string* names, double* lowerBounds, 
 bool OSInstance::setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor, 
 		double* values, int valuesBegin, int valuesEnd, 
 		int* indexes, int indexesBegin, int indexesEnd,   			
-		int* starts, int startsBegin, int startsEnd){
-		if(numberOfValues < 0) return false;
+		int* starts, int startsBegin, int startsEnd)
+{
+	if(numberOfValues < 0) return false;
 	if(instanceData->linearConstraintCoefficients == NULL) instanceData->linearConstraintCoefficients = new LinearConstraintCoefficients() ;
 	if(numberOfValues == 0) return true;
 	if((values == 0 ) ||
@@ -1794,7 +2754,7 @@ bool OSInstance::setLinearConstraintCoefficients(int numberOfValues, bool isColu
 			instanceData->linearConstraintCoefficients->start->el[k] = starts[i];
 			k++;
 		}
-	}	
+	}		 
 	//values
 	if(instanceData->linearConstraintCoefficients->value == NULL) instanceData->linearConstraintCoefficients->value = new DoubleVector();
 	if(valuesBegin == 0 ){
@@ -1932,6 +2892,11 @@ bool OSInstance::initializeNonLinearStructures( ){
 	m_mdObjectiveFunctionValues = new double[ this->instanceData->objectives->numberOfObjectives];
 	//m_mdObjGradient = new double[ this->instanceData->variables->numberOfVariables];
 	m_bNonLinearStructuresInitialized = true;
+	m_bProcessVariables = true;
+	m_bProcessObjectives = true;
+	m_bProcessConstraints = true;
+	m_bProcessExpressionTrees = true;
+	m_bDuplicateExpressionTreesMap = true;
 	return true;
 }
 
@@ -1983,10 +2948,10 @@ bool OSInstance::addQTermsToExressionTree(){
 	OSnLNodePlus* nlNodePlus;
 	OSExpressionTree* expTree;
 	getQuadraticTerms();	
-	std::cout << "PROCESSING QUADRATIC TERMS" << std::endl;
+	//std::cout << "PROCESSING QUADRATIC TERMS" << std::endl;
 	for(i = 0; i < numQTerms; i++){
 		idx = m_quadraticTerms->rowIndexes[ i];
-		std::cout << "PROCESSING QTERM  = "  << i <<std::endl;
+		//std::cout << "PROCESSING QTERM  = "  << i <<std::endl;
 		// see if row idx is in the expression tree
 		if( m_mapExpressionTreesMod.find( idx) != m_mapExpressionTreesMod.end() ) {
 			// row idx is in the expression tree
@@ -2002,7 +2967,9 @@ bool OSInstance::addQTermsToExressionTree(){
 				// add to map
 				k = (*expTree->mapVarIdx).size();
 				(*expTree->mapVarIdx)[ nlNodeVariableOne->idx] =  k + 1;
+				#ifdef DEBUG
 				std::cout << "ADDED THE FOLLOWING VAIRABLE TO THE MAP" <<  nlNodeVariableOne->idx << std::endl;
+				#endif
 			}
 			nlNodeVariableOne->coef = m_quadraticTerms->coefficients[ i];
 			nlNodeVariableTwo = new OSnLNodeVariable();
@@ -2013,7 +2980,9 @@ bool OSInstance::addQTermsToExressionTree(){
 				// add to map
 				k = (*expTree->mapVarIdx).size();
 				(*expTree->mapVarIdx)[ nlNodeVariableTwo->idx] =  k + 1;
+				#ifdef DEBUG
 				std::cout << "ADDED THE FOLLOWING VAIRABLE TO THE MAP" <<  nlNodeVariableTwo->idx << std::endl;
+				#endif
 			}
 			nlNodeVariableTwo->coef = 1.;
 			// now multiply the two new variable nodes together
@@ -2036,7 +3005,7 @@ bool OSInstance::addQTermsToExressionTree(){
 			//m_mapExpressionTreesMod[ idx ]  = expTree;	
 			//expTree->mapVarIdx = m_mapExpressionTreesMod[ idx]->mapVarIdx;
 		}
-		else{ 
+		else{
 			// create the quadratic expression to add to the expression tree
 			nlNodeVariableOne = new OSnLNodeVariable();
 			nlNodeVariableOne->idx = m_quadraticTerms->varOneIndexes[ i];
@@ -2061,8 +3030,10 @@ bool OSInstance::addQTermsToExressionTree(){
 				m_iConstraintNumberNonlinear++;
 				m_bProcessExpressionTrees = true;
 			}
+			#ifdef DEBUG
 			std::cout << "NUMBER OF EXPRESSION TREES = "  << m_mapExpressionTreesMod.size() <<std::endl;
 			std::cout << "NUMBER OF NONLINEAR OBJECTIVES = "  << getNumberOfNonlinearObjectives() <<std::endl;
+			#endif
 		} 
 		// if there were no nonlinear terms make this the expression tree
 		if(m_iNonlinearExpressionNumber <= 0) m_mapExpressionTrees = m_mapExpressionTreesMod;
@@ -2213,7 +3184,7 @@ SparseVector *OSInstance::calculateConstraintFunctionGradient(double* x, double 
 		int idx, bool new_x, int highestOrder){
 	try{
 		if(highestOrder < 1 ) throw ErrorClass("When calling calculateConstraintFunctionGradient highestOrder should be 1 or 2");
-		if(idx > instanceData->variables->numberOfVariables ) 
+		if(idx < 0 || idx >= instanceData->constraints->numberOfConstraints ) 
 			throw ErrorClass("invalid index passed to calculateConstraintFunctionGrad");
 		SparseVector *sp;
 		sp = new SparseVector();
@@ -2238,7 +3209,7 @@ SparseVector *OSInstance::calculateConstraintFunctionGradient(double* x, double 
 
 SparseVector *OSInstance::calculateConstraintFunctionGradient(double* x, int idx, bool new_x){
 	try{
-		if(idx > instanceData->variables->numberOfVariables ) 
+		if(idx < 0 || idx >= instanceData->constraints->numberOfConstraints ) 
 			throw ErrorClass("invalid index passed to calculateConstraintFunctionGrad");
 		SparseVector *sp;
 		sp = new SparseVector();
@@ -2259,7 +3230,6 @@ SparseVector *OSInstance::calculateConstraintFunctionGradient(double* x, int idx
 		throw ErrorClass( eclass.errormsg);
 	} 
 }//calculateConstraintFunctionGradient
-
 
 
 double **OSInstance::calculateAllObjectiveFunctionGradients(double* x, double *objLambda, double *conLambda,
@@ -2292,9 +3262,9 @@ double *OSInstance::calculateObjectiveFunctionGradient(double* x, double *objLam
 		if( new_x == true || (highestOrder > m_iHighestOrderEvaluated)  ) {
 			int domainIdx = 0;	
 			std::map<int, OSExpressionTree*>::iterator posMapExpTree;
-			std::map<int, int>::iterator posVarIndexMap;
+			std::map<int, int>::iterator posVarIndexMap;		
+			int iHighestOrderEvaluatedStore;
 			unsigned int i;
-			int iHighestOrderEvaluatedStore;	
 			iHighestOrderEvaluatedStore = m_iHighestOrderEvaluated;
 			for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){
 				//kipp: modify for more than one obj
@@ -2304,8 +3274,8 @@ double *OSInstance::calculateObjectiveFunctionGradient(double* x, double *objLam
 						for(posVarIndexMap = m_mapAllNonlinearVariablesIndex.begin(); posVarIndexMap != m_mapAllNonlinearVariablesIndex.end(); ++posVarIndexMap){
 							m_vdX.push_back( x[ posVarIndexMap->first]) ;
 						}
-						if( (m_bCppADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
-							createCppADFun( m_vdX);
+						if( (m_bOSADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
+							createOSADFun( m_vdX);
 						}						
 					}	
 					
@@ -2339,9 +3309,9 @@ double *OSInstance::calculateObjectiveFunctionGradient(double* x, int objIdx, bo
 	try{
 		int domainIdx = 0;	
 		std::map<int, OSExpressionTree*>::iterator posMapExpTree;
-		std::map<int, int>::iterator posVarIndexMap;
+		std::map<int, int>::iterator posVarIndexMap;	
 		unsigned int i;
-		int iHighestOrderEvaluatedStore;	
+		int  iHighestOrderEvaluatedStore;	
 		iHighestOrderEvaluatedStore = m_iHighestOrderEvaluated;
 		for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){
 			if(posMapExpTree->first == objIdx){
@@ -2350,8 +3320,8 @@ double *OSInstance::calculateObjectiveFunctionGradient(double* x, int objIdx, bo
 					for(posVarIndexMap = m_mapAllNonlinearVariablesIndex.begin(); posVarIndexMap != m_mapAllNonlinearVariablesIndex.end(); ++posVarIndexMap){
 						m_vdX.push_back( x[ posVarIndexMap->first]) ;
 					}
-					if( (m_bCppADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
-						createCppADFun( m_vdX);
+					if( (m_bOSADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
+						createOSADFun( m_vdX);
 					}						
 				}	
 				
@@ -2379,7 +3349,6 @@ double *OSInstance::calculateObjectiveFunctionGradient(double* x, int objIdx, bo
 	return m_mmdObjGradient[abs( objIdx) - 1];
 }//calculateObjectiveFunctionGradient	
 
-
 SparseHessianMatrix *OSInstance::calculateLagrangianHessian( double* x, double *objLambda, double *conLambda,
 	bool new_x, int highestOrder){
 	try{
@@ -2397,7 +3366,7 @@ SparseHessianMatrix *OSInstance::calculateLagrangianHessian( double* x, double *
 
 SparseHessianMatrix *OSInstance::calculateHessian(double* x, int idx, bool new_x){
 	try{
-		if(idx > instanceData->variables->numberOfVariables ) 
+		if(idx < -instanceData->objectives->numberOfObjectives || idx >= instanceData->constraints->numberOfConstraints ) 
 			throw ErrorClass("invalid index passed to calculateHessian");
 		double *objLambda = new double[ getObjectiveNumber() ];
 		double *conLambda = new double[ getConstraintNumber() ];
@@ -2421,7 +3390,7 @@ SparseHessianMatrix *OSInstance::calculateHessian(double* x, int idx, bool new_x
 		}
 		if( new_x == true || (2 > m_iHighestOrderEvaluated)  ) {
 			getIterateResults(x, objLambda, conLambda, new_x,  2);
-			std::cout  << "CALL getIterateResults() FROM calculateHessian" << std::endl;
+//			std::cout  << "CALL getIterateResults() FROM calculateHessian" << std::endl;
 		}
 		delete[] objLambda;
 		delete[] conLambda;
@@ -2479,19 +3448,22 @@ bool OSInstance::getSparseJacobianFromColumnMajor( ){
 					// variable i is appears in the expression tree for row index[ j]
 					// add the coefficient corresponding to variable i in row index[ j] to the expression tree	
 					// define a new OSnLVariable and OSnLnodePlus 
-					expTree = m_mapExpressionTreesMod[ index[j]  ];
-					nlNodeVariable = new OSnLNodeVariable();
-					nlNodeVariable->coef = value[ j];
-					nlNodeVariable->idx = i;
-					nlNodePlus = new OSnLNodePlus();
-					nlNodePlus->m_mChildren[ 0] = m_mapExpressionTreesMod[ index[ j] ]->m_treeRoot;
-					nlNodePlus->m_mChildren[ 1] = nlNodeVariable;
-					//expTree = new OSExpressionTree();
-					expTree->m_treeRoot = nlNodePlus ;	
-					//expTree->mapVarIdx = m_mapExpressionTreesMod[ index[ j]]->mapVarIdx;
-					//m_mapExpressionTreesMod[ index[ j] ]  = expTree;
-					//std::cout << m_mapExpressionTreesMod[ index[ j] ]->m_treeRoot->getNonlinearExpressionInXML() << std::endl;	
-					//std::cout << m_mapExpressionTrees[ index[ j] ]->m_treeRoot->getNonlinearExpressionInXML() << std::endl;
+					// don't add a zero
+					if( value[j] > 0 || value[j] < 0){
+						expTree = m_mapExpressionTreesMod[ index[j]  ];
+						nlNodeVariable = new OSnLNodeVariable();
+						nlNodeVariable->coef = value[ j];
+						nlNodeVariable->idx = i;
+						nlNodePlus = new OSnLNodePlus();
+						nlNodePlus->m_mChildren[ 0] = m_mapExpressionTreesMod[ index[ j] ]->m_treeRoot;
+						nlNodePlus->m_mChildren[ 1] = nlNodeVariable;
+						//expTree = new OSExpressionTree();
+						expTree->m_treeRoot = nlNodePlus ;
+						//expTree->mapVarIdx = m_mapExpressionTreesMod[ index[ j]]->mapVarIdx;
+						//m_mapExpressionTreesMod[ index[ j] ]  = expTree;	
+						//std::cout << m_mapExpressionTreesMod[ index[ j] ]->m_treeRoot->getNonlinearExpressionInXML() << std::endl;	
+						//std::cout << m_mapExpressionTrees[ index[ j] ]->m_treeRoot->getNonlinearExpressionInXML() << std::endl;
+					}
 				}
 				else{ 
 					m_miJacStart[ index[j] + 1] ++;
@@ -2625,17 +3597,19 @@ bool OSInstance::getSparseJacobianFromRowMajor( ){
 					// variable index[ j] appears in the expression tree for row i
 					// add the coefficient corresponding to variable index[j] in row i to the expression tree	
 					// define a new OSnLVariable and OSnLnodePlus 
-					nlNodeVariable = new OSnLNodeVariable();
-					nlNodeVariable->coef = value[ j];
-					nlNodeVariable->idx = index[ j];
-					nlNodePlus = new OSnLNodePlus();
-					nlNodePlus->m_mChildren[ 0] = m_mapExpressionTreesMod[ i ]->m_treeRoot;
-					nlNodePlus->m_mChildren[ 1] = nlNodeVariable;
-					//expTree = new OSExpressionTree();
-					//expTree->m_treeRoot = nlNodePlus ;
-					//expTree->mapVarIdx = m_mapExpressionTreesMod[ i]->mapVarIdx;
-					//m_mapExpressionTreesMod[ i ]  = expTree;	
-					m_mapExpressionTreesMod[ i ]->m_treeRoot = nlNodePlus;
+					if(value[ j] > 0 || value[j] < 0){
+						nlNodeVariable = new OSnLNodeVariable();
+						nlNodeVariable->coef = value[ j];
+						nlNodeVariable->idx = index[ j];
+						nlNodePlus = new OSnLNodePlus();
+						nlNodePlus->m_mChildren[ 0] = m_mapExpressionTreesMod[ i ]->m_treeRoot;
+						nlNodePlus->m_mChildren[ 1] = nlNodeVariable;
+						//expTree = new OSExpressionTree();
+						//expTree->m_treeRoot = nlNodePlus ;
+						//expTree->mapVarIdx = m_mapExpressionTreesMod[ i]->mapVarIdx;
+						//m_mapExpressionTreesMod[ i ]  = expTree;	
+						m_mapExpressionTreesMod[ i ]->m_treeRoot = nlNodePlus;
+					}
 				}
 				else{ 
 					//the partial derivative of variable j in row i is constant
@@ -2808,17 +3782,21 @@ SparseHessianMatrix* OSInstance::getLagrangianHessianSparsityPattern( ){
 	if( m_iNumberOfNonlinearVariables == 0) return NULL;
 	if( m_binitForAlgDiff == false ) initForAlgDiff();
 	unsigned int i = 0;
+	unsigned int j;
 	int numNonz = 0;
 	// Create the CppAD function if necessary
 	//
 	std::vector<double> vx;
 	std::map<int, int>::iterator posMap1, posMap2;	
-	if( (m_bCppADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
+	if( (m_bOSADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
 		for(posMap1 = m_mapAllNonlinearVariablesIndex.begin(); posMap1 != m_mapAllNonlinearVariablesIndex.end(); ++posMap1){
 			vx.push_back( 1.0) ;
 		}
-		createCppADFun( vx);
+		createOSADFun( vx);
 	}
+	
+	
+	/*
 	//
 	// Use CppAD to do a forward sparsity calculation
 	std::vector<bool> r(m_iNumberOfNonlinearVariables * m_iNumberOfNonlinearVariables);
@@ -2827,7 +3805,7 @@ SparseHessianMatrix* OSInstance::getLagrangianHessianSparsityPattern( ){
 		for(j = 0; j < m_iNumberOfNonlinearVariables; j++)
 			r[ i * m_iNumberOfNonlinearVariables + j ] = false;
 			r[ i * m_iNumberOfNonlinearVariables + i] = true;
-	}
+	}	
 	// compute sparsity pattern for J(x) = F^{(1)} (x)
 	(*Fad).ForSparseJac(m_iNumberOfNonlinearVariables, r);
 	//
@@ -2847,12 +3825,18 @@ SparseHessianMatrix* OSInstance::getLagrangianHessianSparsityPattern( ){
 		}
 		//std::cout << std::endl;
 	}
+	
+	*/
+	// note this function call also fills in m_vbLagHessNonz
+	numNonz = getADSparsityHessian();
+	
 	//std::cout << "Lagrangian Hessian Nonzeros = " << numNonz << std::endl;
 	i = 0;
 	// now that we have the dimension create SparseHessianMatrix (upper triangular)
 	m_LagrangianSparseHessian = new SparseHessianMatrix();
 	m_LagrangianSparseHessian->bDeleteArrays = true;
 	m_LagrangianSparseHessian->hessDimension = numNonz;
+	//m_LagrangianSparseHessian->hessDimension = m_vbLagHessNonz.size();
 	m_LagrangianSparseHessian->hessRowIdx = new int[m_LagrangianSparseHessian->hessDimension];
 	m_LagrangianSparseHessian->hessColIdx = new int[m_LagrangianSparseHessian->hessDimension];
 	m_LagrangianSparseHessian->hessValues = new double[m_LagrangianSparseHessian->hessDimension];
@@ -2903,86 +3887,6 @@ void OSInstance::duplicateExpressionTreesMap(){
 }//duplicateExpressionTreesMap
 
 
-bool OSInstance::createCppADFun(std::vector<double> vdX){
-	if(m_bCppADFunIsCreated == true) return true;
-	//if( m_bNonLinearStructuresInitialized == false) initializeNonLinearStructures( );
-	if(m_binitForAlgDiff == false) initForAlgDiff();
-	
-	//if( m_bAllNonlinearVariablesIndex == false) getAllNonlinearVariablesIndexMap( );
-	std::map<int, OSExpressionTree*>::iterator posMapExpTree;
-	unsigned int i;
-	size_t n = vdX.size();
-	// declare a CppAD vector and fill it in
-	CppADvector< AD<double> > vdaX( n );
-	for(i = 0; i < n; i++){
-		vdaX[ i] = vdX[ i];
-		//std::cout << "vdX =  " << vdX[ i] << std::endl;
-	}
-	// declare the independent variables and start recording
-	CppAD::Independent( vdaX);
-	/**
-	 * For expression tree, record the operations for CppAD and put into
-	 *  the range vector m_vFG and it is a vector of CppAD 
-	 * objective and constraint functions.
-	 */
-	CppAD::vector< AD<double> > m_vFG;	
-	int kount = 0;
-	for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){	
-		m_vFG.push_back( (posMapExpTree->second)->m_treeRoot->constructCppADTape(&m_mapAllNonlinearVariablesIndex, &vdaX) );
-		//std::cout << "PUSHING BACK EXPRESSION NUMBER " << posMapExpTree->first << std::endl;
-		if( m_mapCppADFunRangeIndex.find( posMapExpTree->first) == m_mapCppADFunRangeIndex.end() ){
-			// count which nonlinear obj/constraint this is
-			m_mapCppADFunRangeIndex[ posMapExpTree->first] = kount;
-			kount++;
-		}
-	}	
-	//create the function and stop recording
-	std::cout << "create the function and stop recording"  << std::endl;
-	Fad = new CppAD::ADFun<double>(vdaX, m_vFG);
-	std::cout << "range space dimension =  " << m_vFG.size() << std::endl;
-	// no forward sweeps done yet
-	m_iHighestTaylorCoeffOrder = -1;
-	m_bCppADFunIsCreated = true;
-	return true;
-}//end createCppADFun
-
-
-std::vector<double> OSInstance::forwardAD(int p, std::vector<double> vdX){
-	try{
-		// make sure a CppADFun has been created
-		if(m_bCppADFunIsCreated == false) createCppADFun( vdX);
-		if(p > (m_iHighestTaylorCoeffOrder + 1) ) throw 
-			ErrorClass( "trying to calculate a p order forward when p-1 Taylor coefficient not available");
-		// adjust the order of the Taylor coefficient
-		m_iHighestTaylorCoeffOrder = p;	
-		m_iHighestOrderEvaluated = p;
-		//for(int i  = 0; i < vdX.size(); i++){
-			//std::cout << "ForwardAD Primal Variables " << i   << " " << vdX[ i] << std::endl;
-		//}
-		return (*Fad).Forward(p, vdX);
-	}
-	catch(const ErrorClass& eclass){
-		throw ErrorClass( eclass.errormsg);
-	}  
-}//end forwardAD
-
-
-std::vector<double> OSInstance::reverseAD(int p, std::vector<double> vdlambda){
-	try{
-		if(p == 0) throw 
-			ErrorClass( "reverseAD must have p >= 1");
-		if(p > (m_iHighestTaylorCoeffOrder + 1) ) throw 
-			ErrorClass( "trying to calculate a p order reverse when p-1 Taylor coefficient not available");
-		//for(int i  = 0; i < vdlambda.size(); i++){
-		//	std::cout << "ReverseAD Multiplier " << i   << " " << vdlambda[ i] << std::endl;
-		//}
-		m_iHighestOrderEvaluated = p;
-		return (*Fad).Reverse(p, vdlambda);
-	}
-	catch(const ErrorClass& eclass){
-		throw ErrorClass( eclass.errormsg);
-	}  
-}//end forwardAD
 
 bool OSInstance::getIterateResults( double *x, double *objLambda, double* conMultipliers, 
 		bool new_x, int highestOrder){
@@ -2995,8 +3899,8 @@ bool OSInstance::getIterateResults( double *x, double *objLambda, double* conMul
 			for(posVarIndexMap = m_mapAllNonlinearVariablesIndex.begin(); posVarIndexMap != m_mapAllNonlinearVariablesIndex.end(); ++posVarIndexMap){
 				m_vdX.push_back( x[ posVarIndexMap->first]) ;
 			}
-			if( (m_bCppADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
-				createCppADFun( m_vdX);
+			if( (m_bOSADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
+				createOSADFun( m_vdX);
 			}	
 		}
 		else{ // make sure vector not empty -- this could happen if we have linear obj and nonlinear constraints
@@ -3004,11 +3908,11 @@ bool OSInstance::getIterateResults( double *x, double *objLambda, double* conMul
 				for(posVarIndexMap = m_mapAllNonlinearVariablesIndex.begin(); posVarIndexMap != m_mapAllNonlinearVariablesIndex.end(); ++posVarIndexMap){
 					m_vdX.push_back( x[ posVarIndexMap->first]) ;
 				}
-				if( (m_bCppADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
-					createCppADFun( m_vdX);
+				if( (m_bOSADFunIsCreated == false || m_bCppADMustReTape == true )  && (m_mapExpressionTreesMod.size() > 0) ) {
+					createOSADFun( m_vdX);
 				}	
 			}
-		}	
+		}
 		switch( highestOrder){		
 			case 0:	
 				if(new_x == true || m_iHighestOrderEvaluated < 0){	
@@ -3056,7 +3960,7 @@ bool OSInstance::getZeroOrderResults(double *x, double *objLambda, double *conMu
 		for(rowNum = 0; rowNum < m_iConstraintNumber; rowNum++){
 			m_mdConstraintFunctionValues[ rowNum] = 0.0;
 			if( m_mapExpressionTreesMod.find( rowNum) != m_mapExpressionTreesMod.end() ){
-				m_mdConstraintFunctionValues[ rowNum] = m_vdYval[  m_mapCppADFunRangeIndex[ rowNum]];
+				m_mdConstraintFunctionValues[ rowNum] = m_vdYval[  m_mapOSADFunRangeIndex[ rowNum]];
 			}
 			// now the linear part
 			// be careful, loop over only the constant terms in sparseJacMatrix
@@ -3105,7 +4009,7 @@ bool OSInstance::getFirstOrderResults(double *x, double *objLambda, double *conM
 		int domainIdx = 0;	
 		std::map<int, OSExpressionTree*>::iterator posMapExpTree;
 		std::map<int, int>::iterator posVarIdx;
-			
+		
 		/** if the number of columns exceeds the number of rows we will get the 
 		 * Jacobian by row, however, if the number of rows exceeds the number of 
 		 * columns we get the Jacobian by column
@@ -3147,6 +4051,7 @@ bool OSInstance::getFirstOrderResults(double *x, double *objLambda, double *conM
 					domainIdx++;
 				}
 				else{    // we have an objective function
+					
 
 					domainIdx++;
 				}
@@ -3179,7 +4084,6 @@ bool OSInstance::getFirstOrderResults(double *x, double *objLambda, double *conM
 						}
 						rowNum++;
 					}//end Jacobian calculation
-
 			}			
 			//
 			m_vdDomainUnitVec[i] = 0.;
@@ -3194,7 +4098,6 @@ bool OSInstance::getFirstOrderResults(double *x, double *objLambda, double *conM
 				<< " value = " << *(m_sparseJacMatrix->values + k) << std::endl;
 			}
 		}
-
 		#endif
 		return true;
 	}//end try
@@ -3212,9 +4115,11 @@ bool OSInstance::getSecondOrderResults(double *x, double *objLambda, double *con
 		int jstart,  idx;
 		OSExpressionTree *expTree = NULL;
 		int hessValuesIdx = 0;	
+		if( m_bLagrangianSparseHessianCreated == false) getLagrangianHessianSparsityPattern( );
 		std::map<int, OSExpressionTree*>::iterator posMapExpTree;
 		std::map<int, int>::iterator posVarIndexMap;
-		if( conMultipliers == NULL) throw ErrorClass("cannot have a null vector of lagrange multipliers when calculating Hessian of Lagrangian");
+		if( objLambda == NULL) throw ErrorClass("must have a multiplier for the objective function even if zero when calling getSecondOrderResults");
+		if( conMultipliers == NULL) throw ErrorClass("cannot have a null vector of lagrange multipliers when calling getSecondOrderResults -- okay if  zero");
 		if( m_vdLambda.size() > 0) m_vdLambda.clear();
 		for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){	
 			if( posMapExpTree->first >= 0){
@@ -3225,7 +4130,7 @@ bool OSInstance::getSecondOrderResults(double *x, double *objLambda, double *con
 				m_vdLambda.push_back( objLambda[ abs(posMapExpTree->first) - 1] );
 			}
 		}
-		for(i = 0; i < m_iNumberOfNonlinearVariables; i++){
+		for(i = 0; i < m_iNumberOfNonlinearVariables; i++){ 
 			m_vdDomainUnitVec[i] = 1.;     
 			rowNum = 0;
 			if( m_mapExpressionTreesMod.size() > 0){          
@@ -3258,7 +4163,7 @@ bool OSInstance::getSecondOrderResults(double *x, double *objLambda, double *con
 		}			
 		// now calculate the Hessian
 		if( m_mapExpressionTreesMod.size() > 0){   
-			m_vdw = reverseAD(2, m_vdLambda);   // derivtative of partial
+			m_vdw = reverseAD(2, m_vdLambda);   // derivative of partial
 		}
 		for(j = i; j < m_iNumberOfNonlinearVariables; j++){
 			if( m_vbLagHessNonz[i*m_iNumberOfNonlinearVariables + j] == true){
@@ -3273,7 +4178,6 @@ bool OSInstance::getSecondOrderResults(double *x, double *objLambda, double *con
 		//
 		m_vdDomainUnitVec[i] = 0.;
 	}
-
 	#ifdef DEBUG
 	int k;
 	std::cout  << "JACOBIAN DATA " << std::endl;
@@ -3296,12 +4200,12 @@ bool OSInstance::initForAlgDiff(){
 	initializeNonLinearStructures( );
 	initObjGradients();
 	getAllNonlinearVariablesIndexMap( );
-	if(m_bSparseJacobianCalculated  == false) getJacobianSparsityPattern();
+	//if(m_bSparseJacobianCalculated  == false) getJacobianSparsityPattern();
 	//see if we need to retape 
 	//loop over expression tree and see if one requires it
 	std::map<int, OSExpressionTree*>::iterator posMapExpTree;
 	for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){
-		if(posMapExpTree->second->bCppADMustReTape == true) m_bCppADMustReTape = true;
+		if(posMapExpTree->second->bADMustReTape == true) m_bCppADMustReTape = true;
 	}				
 
 	#ifdef DEBUG
@@ -3315,6 +4219,8 @@ bool OSInstance::initForAlgDiff(){
 		m_vdRangeUnitVec.push_back( 0.0 );
 	}
 	m_binitForAlgDiff = true;
+	//m_bSparseJacobianCalculated = true;
+	//m_bProcessExpressionTrees = true;
 	return true;
 }//end initForAlgDiff
 
@@ -3339,5 +4245,568 @@ bool OSInstance::initObjGradients(){
 /**
  * end revised AD test code
  */
+
+
+/**
+ * set methods for timeDomain object
+ */
+bool OSInstance::setTimeDomain(std::string format)
+{   if ((format != "stages") && (format != "interval") && (format != "none")) 
+		return false;
+	if (instanceData->timeDomain == NULL)
+	{	instanceData->timeDomain = new TimeDomain();
+	}
+	if (format == "stages")
+	{	if (instanceData->timeDomain->interval != NULL)
+		{	delete instanceData->timeDomain->interval;
+			instanceData->timeDomain->interval = NULL;
+		}
+		if (instanceData->timeDomain->stages == NULL)
+			instanceData->timeDomain->stages = new TimeDomainStages();
+		m_sTimeDomainFormat = format;
+	}
+	if (format == "interval")
+	{	if (instanceData->timeDomain->stages != NULL)
+		{	delete instanceData->timeDomain->stages;
+			instanceData->timeDomain->stages = NULL;
+		}
+		if (instanceData->timeDomain->interval == NULL)
+			instanceData->timeDomain->interval = new TimeDomainInterval();
+		m_sTimeDomainFormat = format;
+	}
+	if (format == "none")
+	{	if (instanceData->timeDomain->stages != NULL)
+		{	delete instanceData->timeDomain->stages;
+			instanceData->timeDomain->stages = NULL;
+		}
+		if (instanceData->timeDomain->interval != NULL)
+		{	delete instanceData->timeDomain->interval;
+			instanceData->timeDomain->interval = NULL;
+		}
+		m_sTimeDomainFormat = "";
+	}
+	return true;
+} //end setTimeDomain
+
+/**
+ * set time domain stages
+ */
+bool OSInstance::setTimeDomainStages(int number, std::string *names)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+	{	instanceData->timeDomain->stages = new TimeDomainStages;
+	}
+	else
+	{	if (instanceData->timeDomain->stages->numberOfStages != number)
+		{	for (int i = 0; i < instanceData->timeDomain->stages->numberOfStages; i++)
+			{	if (instanceData->timeDomain->stages->stage[i]->variables != NULL)
+				{	delete instanceData->timeDomain->stages->stage[i]->variables;
+					instanceData->timeDomain->stages->stage[i]->variables = NULL;
+				}
+				if (instanceData->timeDomain->stages->stage[i]->constraints != NULL)
+				{	delete instanceData->timeDomain->stages->stage[i]->constraints;
+					instanceData->timeDomain->stages->stage[i]->constraints = NULL;
+				}
+				if (instanceData->timeDomain->stages->stage[i]->objectives != NULL)
+				{	delete instanceData->timeDomain->stages->stage[i]->objectives;
+					instanceData->timeDomain->stages->stage[i]->objectives = NULL;
+				}
+				delete instanceData->timeDomain->stages->stage[i];
+				instanceData->timeDomain->stages->stage[i] = NULL;
+			}
+			delete []instanceData->timeDomain->stages->stage;
+			instanceData->timeDomain->stages->stage = NULL;
+		}
+	}
+	if (number != 0 )
+	{	if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[number];
+		for (int i = 0; i < number; i++)
+		{	instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+		}
+		instanceData->timeDomain->stages->numberOfStages = number;
+	}
+	for (int i = 0; i < number; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->variables != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->variables;
+			instanceData->timeDomain->stages->stage[i]->variables = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->variables = new TimeDomainStageVariables();
+		if (instanceData->timeDomain->stages->stage[i]->constraints != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->constraints;
+			instanceData->timeDomain->stages->stage[i]->constraints = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->constraints = new TimeDomainStageConstraints();
+		if (instanceData->timeDomain->stages->stage[i]->objectives != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->objectives;
+			instanceData->timeDomain->stages->stage[i]->objectives = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->objectives = new TimeDomainStageObjectives();
+		instanceData->timeDomain->stages->stage[i]->objectives->numberOfObjectives = instanceData->objectives->numberOfObjectives;
+		instanceData->timeDomain->stages->stage[i]->objectives->obj = new TimeDomainStageObj*[instanceData->objectives->numberOfObjectives];
+		for (int j = 0; j < instanceData->objectives->numberOfObjectives; j++)
+		{	instanceData->timeDomain->stages->stage[i]->objectives->obj[j] = new TimeDomainStageObj();
+			instanceData->timeDomain->stages->stage[i]->objectives->obj[j]->idx = -(j+1);
+		}
+		if (names != NULL)
+			instanceData->timeDomain->stages->stage[i]->name = names[i];
+	}
+	return true;
+} //end setTimeDomainStages
+
+/**
+ * set time domain stage variables in temporal order
+ */
+bool OSInstance::setTimeDomainStageVariablesOrdered(int numberOfStages, int *numberOfVariables, int *startIdx)
+{  	if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+		instanceData->timeDomain->stages = new TimeDomainStages();	
+	if (instanceData->timeDomain->stages != NULL)
+	{	if ((instanceData->timeDomain->stages->numberOfStages != numberOfStages) &&
+			(instanceData->timeDomain->stages->numberOfStages != 0))
+			 return false;
+	}
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+	{	instanceData->timeDomain->stages->numberOfStages = numberOfStages;
+		if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[numberOfStages];
+		for (int i = 0; i < numberOfStages; i++)
+			instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+	}
+	int checksum = 0;
+	for (int i = 0; i < numberOfStages; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->variables != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->variables;
+			instanceData->timeDomain->stages->stage[i]->variables = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->variables = new TimeDomainStageVariables();
+		instanceData->timeDomain->stages->stage[i]->variables->startIdx = startIdx[i];
+		instanceData->timeDomain->stages->stage[i]->variables->numberOfVariables = numberOfVariables[i];
+		checksum += numberOfVariables[i];
+	}
+	return (checksum == instanceData->variables->numberOfVariables);
+} //end setTimeDomainVariablesOrdered
+
+/**
+ * set time domain stage variables in arbitrary order
+ */
+bool OSInstance::setTimeDomainStageVariablesUnordered(int numberOfStages, int *numberOfVariables, int **varIndex)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+		instanceData->timeDomain->stages = new TimeDomainStages();	
+	if (instanceData->timeDomain->stages != NULL)
+	{	if ((instanceData->timeDomain->stages->numberOfStages != numberOfStages) &&
+			(instanceData->timeDomain->stages->numberOfStages != 0))
+			 return false;
+	}
+	if (instanceData->timeDomain->stages->numberOfStages == 0 )
+	{	instanceData->timeDomain->stages->numberOfStages = numberOfStages;
+		if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[numberOfStages];
+		for (int i = 0; i < numberOfStages; i++)
+			instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+	}
+	int checksum = 0;
+	for (int i = 0; i < numberOfStages; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->variables != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->variables;
+			instanceData->timeDomain->stages->stage[i]->variables = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->variables = new TimeDomainStageVariables();
+		instanceData->timeDomain->stages->stage[i]->variables->numberOfVariables = numberOfVariables[i];
+		instanceData->timeDomain->stages->stage[i]->variables->var = new TimeDomainStageVar*[numberOfVariables[i]];
+		for (int j = 0; j < numberOfVariables[i]; j++)
+		{	instanceData->timeDomain->stages->stage[i]->variables->var[j] = new TimeDomainStageVar();
+			instanceData->timeDomain->stages->stage[i]->variables->var[j]->idx = varIndex[i][j];
+		}
+		checksum += numberOfVariables[i];
+	}
+	if (checksum != instanceData->variables->numberOfVariables) return false;
+	int *checkvar = new int[instanceData->variables->numberOfVariables];
+	for (int j = 0; j < instanceData->variables->numberOfVariables; j++)
+		checkvar[j] = -1;
+	int k;
+	for (int i = 0; i < numberOfStages; i++)
+		for (int j = 0; j < instanceData->timeDomain->stages->stage[i]->variables->numberOfVariables; j++)
+		{	k = instanceData->timeDomain->stages->stage[i]->variables->var[j]->idx;
+			if (checkvar[k] != -1) 
+			{	delete [] checkvar;
+				checkvar = NULL;
+				return false;
+			}
+			checkvar[k] = instanceData->timeDomain->stages->stage[i]->variables->var[j]->idx;
+		}
+	delete [] checkvar;
+	checkvar = NULL;			
+	return true;
+} //end setTimeDomainVariablesUnordered
+
+/**
+ * set time domain stage constraints in temporal order
+ */
+bool OSInstance::setTimeDomainStageConstraintsOrdered(int numberOfStages, int *numberOfConstraints, int *startIdx)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+		instanceData->timeDomain->stages = new TimeDomainStages();	
+	if (instanceData->timeDomain->stages != NULL)
+	{	if ((instanceData->timeDomain->stages->numberOfStages != numberOfStages) &&
+			(instanceData->timeDomain->stages->numberOfStages != 0))
+			 return false;
+	}
+	if (instanceData->timeDomain->stages->numberOfStages == 0 )
+	{	instanceData->timeDomain->stages->numberOfStages = numberOfStages;
+		if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[numberOfStages];
+		for (int i = 0; i < numberOfStages; i++)
+			instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+	}
+	int checksum = 0;
+	for (int i = 0; i < numberOfStages; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->constraints != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->constraints;
+			instanceData->timeDomain->stages->stage[i]->constraints = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->constraints = new TimeDomainStageConstraints();
+		instanceData->timeDomain->stages->stage[i]->constraints->startIdx = startIdx[i];
+		instanceData->timeDomain->stages->stage[i]->constraints->numberOfConstraints = numberOfConstraints[i];
+		checksum += numberOfConstraints[i];
+	}
+	return (checksum == instanceData->constraints->numberOfConstraints);
+} // end of setTimeStageConstraintsOrdered
+
+/**
+ * set time domain stage constraints in arbitrary order
+ */
+bool OSInstance::setTimeDomainStageConstraintsUnordered(int numberOfStages, int *numberOfConstraints, int **conIndex)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+		instanceData->timeDomain->stages = new TimeDomainStages();	
+	if (instanceData->timeDomain->stages != NULL)
+	{	if ((instanceData->timeDomain->stages->numberOfStages != numberOfStages) &&
+			(instanceData->timeDomain->stages->numberOfStages != 0))
+			 return false;
+	}
+	if ( instanceData->timeDomain->stages->numberOfStages == 0 )
+	{	instanceData->timeDomain->stages->numberOfStages = numberOfStages;
+		if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[numberOfStages];
+		for (int i = 0; i < numberOfStages; i++)
+			instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+	}
+	int checksum = 0;
+	for (int i = 0; i < numberOfStages; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->constraints != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->constraints;
+			instanceData->timeDomain->stages->stage[i]->constraints = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->constraints = new TimeDomainStageConstraints();
+		instanceData->timeDomain->stages->stage[i]->constraints->numberOfConstraints = numberOfConstraints[i];
+		instanceData->timeDomain->stages->stage[i]->constraints->con = new TimeDomainStageCon*[numberOfConstraints[i]];
+		for (int j = 0; j < numberOfConstraints[i]; j++)
+		{	instanceData->timeDomain->stages->stage[i]->constraints->con[j] = new TimeDomainStageCon();
+			instanceData->timeDomain->stages->stage[i]->constraints->con[j]->idx = conIndex[i][j];
+		}
+		checksum += numberOfConstraints[i];
+	}
+	if (checksum != instanceData->constraints->numberOfConstraints) return false;
+	int *checkvar = new int[instanceData->constraints->numberOfConstraints];
+	for (int j = 0; j < instanceData->constraints->numberOfConstraints; j++)
+		checkvar[j] = -1;
+	int k;
+	for (int i = 0; i < numberOfStages; i++)
+		for (int j = 0; j < instanceData->timeDomain->stages->stage[i]->constraints->numberOfConstraints; j++)
+		{	k = instanceData->timeDomain->stages->stage[i]->constraints->con[j]->idx;
+			if (checkvar[k] != -1) 
+			{	delete [] checkvar;
+				checkvar = NULL;
+				return false;
+			}
+			checkvar[k] = instanceData->timeDomain->stages->stage[i]->constraints->con[j]->idx;
+		}
+	delete [] checkvar;
+	checkvar = NULL;			
+	return true;
+}// end setTimeDomainStageConstraintsUnordered()
+
+/**
+ * set time domain stage objectives in temporal order
+ */
+bool OSInstance::setTimeDomainStageObjectivesOrdered(int numberOfStages, int *numberOfObjectives, int *startIdx)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+		instanceData->timeDomain->stages = new TimeDomainStages();	
+	if (instanceData->timeDomain->stages != NULL)
+	{	if ((instanceData->timeDomain->stages->numberOfStages != numberOfStages) &&
+			(instanceData->timeDomain->stages->numberOfStages != 0))
+			 return false;
+	}
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+	{	instanceData->timeDomain->stages->numberOfStages = numberOfStages;
+		if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[numberOfStages];
+		for (int i = 0; i < numberOfStages; i++)
+			instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+	}
+	for (int i = 0; i < numberOfStages; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->objectives != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->objectives;
+			instanceData->timeDomain->stages->stage[i]->objectives = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->objectives = new TimeDomainStageObjectives();
+		instanceData->timeDomain->stages->stage[i]->objectives->startIdx = startIdx[i];
+		instanceData->timeDomain->stages->stage[i]->objectives->numberOfObjectives = numberOfObjectives[i];
+	}
+	return true;
+}
+
+/**
+ * set time domain stage objectives in arbitrary order
+ */
+bool OSInstance::setTimeDomainStageObjectivesUnordered(int numberOfStages, int *numberOfObjectives, int **objIndex)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->interval != NULL)
+		return false;
+	if (instanceData->timeDomain->stages == NULL)
+		instanceData->timeDomain->stages = new TimeDomainStages();	
+	if (instanceData->timeDomain->stages != NULL)
+	{	if ((instanceData->timeDomain->stages->numberOfStages != numberOfStages) &&
+			(instanceData->timeDomain->stages->numberOfStages != 0))
+			 return false;
+	}
+	if (instanceData->timeDomain->stages->numberOfStages == 0)
+	{	instanceData->timeDomain->stages->numberOfStages = numberOfStages;
+		if (instanceData->timeDomain->stages->stage == NULL)
+			instanceData->timeDomain->stages->stage = new TimeDomainStage*[numberOfStages];
+		for (int i = 0; i < numberOfStages; i++)
+			instanceData->timeDomain->stages->stage[i] = new TimeDomainStage();
+	}
+	for (int i = 0; i < numberOfStages; i++)
+	//initial or empty vars, cons, objectives and set default to all objectives
+	{	if (instanceData->timeDomain->stages->stage[i]->objectives != NULL)
+		{	delete instanceData->timeDomain->stages->stage[i]->objectives;
+			instanceData->timeDomain->stages->stage[i]->objectives = NULL;
+		}
+		instanceData->timeDomain->stages->stage[i]->objectives = new TimeDomainStageObjectives();
+		instanceData->timeDomain->stages->stage[i]->objectives->numberOfObjectives = numberOfObjectives[i];
+		instanceData->timeDomain->stages->stage[i]->objectives->obj = new TimeDomainStageObj*[numberOfObjectives[i]];
+		for (int j = 0; j < numberOfObjectives[i]; j++)
+		{	instanceData->timeDomain->stages->stage[i]->objectives->obj[j] = new TimeDomainStageObj();
+			instanceData->timeDomain->stages->stage[i]->objectives->obj[j]->idx = objIndex[i][j];
+		}
+	}
+	int *checkvar = new int[instanceData->objectives->numberOfObjectives];
+	for (int j = 0; j < instanceData->objectives->numberOfObjectives; j++)
+		checkvar[j] = 0;
+	int k;
+	for (int i = 0; i < numberOfStages; i++)
+		for (int j = 0; j < instanceData->timeDomain->stages->stage[i]->objectives->numberOfObjectives; j++)
+		{	k = -instanceData->timeDomain->stages->stage[i]->objectives->obj[j]->idx-1;
+			checkvar[k] = instanceData->timeDomain->stages->stage[i]->objectives->obj[j]->idx;
+		}
+	for (int i = 0; i < instanceData->objectives->numberOfObjectives; i++)
+		if (checkvar[i] == 0)
+		{	delete [] checkvar;
+			checkvar = NULL;
+			return false;
+		}
+	delete [] checkvar;
+	checkvar = NULL;			
+	return true;
+}
+
+/**
+ * set time domain interval
+ */
+bool OSInstance::setTimeDomainInterval(double start, double horizon)
+{   if (instanceData->timeDomain == NULL)
+		instanceData->timeDomain = new TimeDomain();
+	if (instanceData->timeDomain->stages != NULL)
+		return false;
+	if (instanceData->timeDomain->interval == NULL)
+		instanceData->timeDomain->interval = new TimeDomainInterval();	
+	instanceData->timeDomain->interval->start = start;
+	instanceData->timeDomain->interval->horizon = horizon;
+	return true;
+} //end setTimeDomainInterval
+
+
+bool OSInstance::createOSADFun(std::vector<double> vdX){
+	try{
+		if(m_bOSADFunIsCreated == true) return true;
+		//if( m_bNonLinearStructuresInitialized == false) initializeNonLinearStructures( );
+		if(m_binitForAlgDiff == false) initForAlgDiff();
+		
+		//if( m_bAllNonlinearVariablesIndex == false) getAllNonlinearVariablesIndexMap( );
+		std::map<int, OSExpressionTree*>::iterator posMapExpTree;
+		unsigned int i;
+		size_t n = vdX.size();
+#ifdef COIN_HAS_CPPAD
+		// declare a CppAD vector and fill it in
+		CppAD::vector< AD<double> > vdaX( n );
+		for(i = 0; i < n; i++){
+			vdaX[ i] = vdX[ i];
+			//std::cout << "vdX =  " << vdX[ i] << std::endl;
+		}
+		// declare the independent variables and start recording
+		CppAD::Independent( vdaX);
+		/**
+		 * For expression tree, record the operations for CppAD and put into
+		 *  the range vector m_vFG and it is a vector of CppAD 
+		 * objective and constraint functions.
+		 */
+		CppAD::vector< AD<double> > m_vFG;	  
+		int kount = 0;
+		for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){	
+			m_vFG.push_back( (posMapExpTree->second)->m_treeRoot->constructADTape(&m_mapAllNonlinearVariablesIndex, &vdaX) );
+			//std::cout << "PUSHING BACK EXPRESSION NUMBER " << posMapExpTree->first << std::endl;
+			if( m_mapOSADFunRangeIndex.find( posMapExpTree->first) == m_mapOSADFunRangeIndex.end() ){
+				// count which nonlinear obj/constraint this is
+				m_mapOSADFunRangeIndex[ posMapExpTree->first] = kount;
+				kount++;
+			}
+		}	
+		//create the function and stop recording
+//		std::cout << "create the function and stop recording"  << std::endl;
+		Fad = new CppAD::ADFun<double>(vdaX, m_vFG);
+//		std::cout << "range space dimension =  " << m_vFG.size() << std::endl;
+		// no forward sweeps done yet
+		m_iHighestTaylorCoeffOrder = -1;
+		m_bOSADFunIsCreated = true;
+#else
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+			
+		return true;
+	}
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg);
+	} 
+}//end createOSADFun
+
+
+std::vector<double> OSInstance::forwardAD(int p, std::vector<double> vdX){
+	try{
+		// make sure a OSADFun has been created
+		if(m_bOSADFunIsCreated == false) createOSADFun( vdX);
+		if(p > (m_iHighestTaylorCoeffOrder + 1) ) throw 
+			ErrorClass( "trying to calculate a p order forward when p-1 Taylor coefficient not available");
+		// adjust the order of the Taylor coefficient
+		m_iHighestTaylorCoeffOrder = p;	
+		m_iHighestOrderEvaluated = p;
+		//for(int i  = 0; i < vdX.size(); i++){
+			//std::cout << "ForwardAD Primal Variables " << i   << " " << vdX[ i] << std::endl;
+		//}
+#ifdef COIN_HAS_CPPAD
+		return (*Fad).Forward(p, vdX);
+#else
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+		
+	}
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg);
+	}  
+}//end forwardAD
+
+
+std::vector<double> OSInstance::reverseAD(int p, std::vector<double> vdlambda){
+	try{
+#ifndef COIN_HAS_CPPAD
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+		if(p == 0) throw 
+			ErrorClass( "reverseAD must have p >= 1");
+		if(p > (m_iHighestTaylorCoeffOrder + 1) ) throw 
+			ErrorClass( "trying to calculate a p order reverse when p-1 Taylor coefficient not available");
+		//for(int i  = 0; i < vdlambda.size(); i++){
+		//	std::cout << "ReverseAD Multiplier " << i   << " " << vdlambda[ i] << std::endl;
+		//}
+		m_iHighestOrderEvaluated = p;
+#ifdef COIN_HAS_CPPAD
+		return (*Fad).Reverse(p, vdlambda);
+#else
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+		
+	}
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg);
+	}  
+}//end forwardAD
+
+
+int  OSInstance::getADSparsityHessian(){
+	
+	unsigned int i;
+	int numNonz;
+	numNonz = 0;
+	try{	
+		std::vector<bool> r(m_iNumberOfNonlinearVariables * m_iNumberOfNonlinearVariables);
+		unsigned int j;
+		for(i = 0; i < m_iNumberOfNonlinearVariables; i++) { 
+			for(j = 0; j < m_iNumberOfNonlinearVariables; j++)
+				r[ i * m_iNumberOfNonlinearVariables + j ] = false;
+				r[ i * m_iNumberOfNonlinearVariables + i] = true;
+		}	
+		// compute sparsity pattern for J(x) = F^{(1)} (x)
+		//should only be here if we have CppAD
+#ifdef COIN_HAS_CPPAD
+		(*Fad).ForSparseJac(m_iNumberOfNonlinearVariables, r);
+#else
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+		//
+		//now the second derivative
+		unsigned int m = m_mapExpressionTreesMod.size();
+		std::vector<bool> e( m);
+		//Vector s(m);
+		for(i = 0; i < m; i++) e[i] = true;
+//		std::cout << "Computing Sparse Hessian" << std::endl;
+		//m_vbLagHessNonz holds the sparsity pattern Lagrangian of the Hessian
+#ifdef COIN_HAS_CPPAD
+		m_vbLagHessNonz = (*Fad).RevSparseHes(m_iNumberOfNonlinearVariables, e);
+#else
+		throw ErrorClass( "Error: An Algorithmic Differentiation Package Not Available");
+#endif
+		
+		for(i = 0; i < m_iNumberOfNonlinearVariables; i++){
+			//std::cout << "Row " << i << "  of Hessian " << std::endl;
+			for(j = i; j < m_iNumberOfNonlinearVariables; j++){
+				if(m_vbLagHessNonz[ i*m_iNumberOfNonlinearVariables + j]  == true) numNonz++;
+				//std::cout << m_vbLagHessNonz[ i*m_iNumberOfNonlinearVariables + j] <<  "  " ;
+			}
+			//std::cout << std::endl;
+		}	
+		return numNonz;
+	}
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg);
+	}
+}//end getADSparsityHessian()
 
 

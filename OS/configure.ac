@@ -12,7 +12,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT([OS],[1.1stable],[coin-os@list.coin-or.org])
+AC_INIT([OS],[0.1],[coin-os@list.coin-or.org])
 
 AC_COPYRIGHT([
 Copyright 2006 International Business Machines and others.
@@ -97,6 +97,7 @@ AC_CHECK_SIZEOF( long)
 #############################################################################
 
 AC_COIN_HAS_PROJECT(OS)
+AC_COIN_HAS_PROJECT(Bcp)
 AC_COIN_HAS_PROJECT(CoinUtils)
 AC_COIN_HAS_PROJECT(Osi)
 AC_COIN_HAS_PROJECT(Clp)
@@ -106,11 +107,23 @@ AC_COIN_HAS_PROJECT(SYMPHONY)
 AC_COIN_HAS_PROJECT(DyLP)
 AC_COIN_HAS_PROJECT(Vol)
 AC_COIN_HAS_PROJECT(Ipopt)
+AC_COIN_HAS_PROJECT(Couenne)
 AC_COIN_HAS_PROJECT(Bonmin)
 AC_COIN_HAS_PROJECT(cppad)
 
 
 
+AC_ARG_WITH([boncouenne],
+            AC_HELP_STRING([--with-boncouenne],
+                           [Compile Bonmin with Couenne parallel version]),
+            [use_couenne="$withval"], [use_couenne=no])
+if test "$use_couenne" = yes; then
+  if test $m4_tolower(coin_has_$1) = unavailable ||
+     test $m4_tolower(coin_has_$1) = skipping; then
+     AC_MSG_ERROR([You specified --with-boncouenne, but Couenne is not available])
+  fi
+fi
+AM_CONDITIONAL(COMPILE_BONCOUENNE, test "$use_couenne" = yes)
   
   case $coin_has_cppad in
    unavailable|skipping)
@@ -158,10 +171,10 @@ if test $coin_has_cbc != unavailable &&
    test $coin_has_cbc != skipping; then
   case $CXX in
     cl*)
-       cbclib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libCbc.lib'
+       cbclib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libCbcSolver.lib    `$(CYGPATH_W) $(INSTALLIBDIR)`\\libCbc.lib'
        osicbclib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libOsiCbc.lib';;
      *)
-       cbclib="-L\$(INSTALLIBDIR) -lCbc"
+       cbclib="-L\$(INSTALLIBDIR) -lCbcSolver -lCbc"
        osicbclib="-L\$(INSTALLIBDIR) -lOsiCbc";;
   esac
   AC_SUBST(cbclib) 
@@ -211,6 +224,9 @@ if test $coin_has_dylp != unavailable &&
 fi
 
 
+
+
+
 if test $coin_has_dylp != unavailable &&
    test $coin_has_dylp != skipping; then
   case $CXX in
@@ -236,8 +252,20 @@ if test $coin_has_vol != unavailable &&
        vollib="-L\$(INSTALLIBDIR) -lVol"
        osivollib="-L\$(INSTALLIBDIR) -lOsiVol";;
   esac
-  AC_SUBST(vollib)
-  AC_SUBST(osivollib)  
+  AC_SUBST(vollib) 
+  AC_SUBST(osivollib) 
+fi
+
+
+if test $coin_has_bcp != unavailable &&
+   test $coin_has_bcp != skipping; then
+  case $CXX in
+    cl*)
+       bcplib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libbcp.lib';;
+     *)
+       bcplib="-L\$(INSTALLIBDIR) -lBcp";;
+  esac
+  AC_SUBST(bcplib)
 fi
 
 
@@ -271,16 +299,30 @@ if test $coin_has_ipopt != unavailable &&
 fi
 
 
+if test $coin_has_couenne != unavailable &&
+   test $coin_has_couenne != skipping; then
+  case $CXX in
+    cl*)
+       couennelib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libcouenne.lib';;
+     *)
+       couennelib="-L\$(INSTALLIBDIR) -lBonCouenne -lCouenneReadnl -lCouenne ";;
+  esac
+  AC_SUBST(couennelib)  
+fi
+
+
 if test $coin_has_bonmin != unavailable &&
    test $coin_has_bonmin != skipping; then
   case $CXX in
     cl*)
        bonminlib='`$(CYGPATH_W) $(INSTALLIBDIR)`\\libbonmin.lib';;
      *)
-       bonminlib="-L\$(INSTALLIBDIR) -lbonmin";;
+       bonminlib="-L\$(INSTALLIBDIR) -lbonminampl -lbonmin";;
   esac
   AC_SUBST(bonminlib)  
 fi
+
+
 
 
 
@@ -295,6 +337,8 @@ AC_COIN_HAS_USER_LIBRARY([Knitro],[KNITRO],[knitro.h],[])
 
 AC_COIN_HAS_GLPK(Glpk)
 AC_COIN_HAS_ASL
+
+
 
 #############################################################################
 #                         OS-specific configuration                         #
@@ -569,7 +613,6 @@ case $CXX in
 esac
 AC_SUBST(oslib)
 
-
 #############################################################################
 #  See if we are disabling shared libs###
 #############################################################################
@@ -598,28 +641,44 @@ AC_SUBST(USE_ASL_LIB)
 ##
 ## osil test files
 ##
+AC_COIN_VPATH_LINK(data/osilFiles/avion2.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/bonminEx1.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/bonminEx1_Nonlinear.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/callBackTest.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/callBackTestRowMajor.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/CppADTestLag.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/finplan1.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/gamstrnsport.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/HS071_NLP.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/HS071_feas.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/HS071_NLPMod.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/IP_infeasible.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/IP_noconstraint.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/IP_unbounded.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/lindoapiaddins.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/LP_nobasis.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/LP_noconstraint.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/LP_infeasible.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/LP_unbounded.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/muer.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/nonconvex.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/parincInteger.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincLinear.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincLinearByRow.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/parincQuadratic.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/HS071_NLP.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/HS071_NLPMod.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/rosenbrockmod.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/avion2.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/gamstrnsport.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/lindoapiaddins.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/volumeTest.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/p0033.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/p0201.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/CppADTestLag.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/rosenbrockmod.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/rosenbrockorig.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/rosenbrockorigInt.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/testOperators.osil)
+AC_COIN_VPATH_LINK(data/osilFiles/volumeTest.osil)
 AC_COIN_VPATH_LINK(data/osilFiles/wayneQuadratic.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/callBackTest.osil)
-AC_COIN_VPATH_LINK(data/osilFiles/callBackTestRowMajor.osil)
 ##
 ## osol test files
 ##
 AC_COIN_VPATH_LINK(data/osolFiles/demo.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/demo1.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/knock.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/remotegsbkip.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/remoteosil.osol)
@@ -630,7 +689,40 @@ AC_COIN_VPATH_LINK(data/osolFiles/kill.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/remoteSolve1.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/remoteSolve2.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/demopassword.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parsertest.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parsertest2.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parsertest3.osol)
 AC_COIN_VPATH_LINK(data/osolFiles/demopasswordjobID.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/avion2_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/bonminEx1_Bonmin.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/bonminEx1_Couenne.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/callBackTestRowMajor_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/callBackTest_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/callBackTest_knitro.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/HS071_NLPMod_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/HS071_NLP_knitro.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/lindoapiaddins_lindo.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincInteger_cbc.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/p0033_cbc.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/p0033_cpx.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/p0033_glpk.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/p0033_sym.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/p0201_cbc.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincLinearByRow_clp.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincLinear_dylp.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincLinear_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincQuadratic_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincQuadratic_knitro.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/parincQuadratic_lindo.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/rosenbrockmod_ipopt.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/rosenbrockmod_knitro.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/rosenbrockmod_lindo.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/volumeTest_vol.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/wayneQuadratic_Bonmin1.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/wayneQuadratic_Bonmin2.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/wayneQuadratic_Couenne.osol)
+AC_COIN_VPATH_LINK(data/osolFiles/wayneQuadratic_lindo.osol)
+
 ##
 ## ospl test files
 ##
@@ -638,6 +730,8 @@ AC_COIN_VPATH_LINK(data/osplFiles/knock.ospl)
 ##
 ## osrl test files
 ##
+AC_COIN_VPATH_LINK(data/osrlFiles/ipoptResult.osrl)
+AC_COIN_VPATH_LINK(data/osrlFiles/parserTest.osrl)
 AC_COIN_VPATH_LINK(data/osrlFiles/parincLinear.osrl)
 AC_COIN_VPATH_LINK(data/osrlFiles/reducedcost.osrl)
 AC_COIN_VPATH_LINK(data/osrlFiles/rosenbrockmod.osrl)
@@ -670,13 +764,39 @@ AC_COIN_VPATH_LINK(data/amplFiles/bonminEx1.mod)
 AC_COIN_VPATH_LINK(data/amplFiles/bonminEx1.nl)
 AC_COIN_VPATH_LINK(data/amplFiles/hs71.mod)
 AC_COIN_VPATH_LINK(data/amplFiles/hs71.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/muer.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/muerdata10.dat)
+AC_COIN_VPATH_LINK(data/amplFiles/muer.nl)
 AC_COIN_VPATH_LINK(data/amplFiles/parinc.mod)
 AC_COIN_VPATH_LINK(data/amplFiles/parinc.dat)
 AC_COIN_VPATH_LINK(data/amplFiles/parinc.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/volumeTest.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/volumeTest.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/LP_infeasible.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/LP_infeasible.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/IP_infeasible.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/IP_infeasible.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/LP_unbounded.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/LP_unbounded.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/IP_unbounded.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/IP_unbounded.nl)
+AC_COIN_VPATH_LINK(data/amplFiles/volumeTest.mod)
+AC_COIN_VPATH_LINK(data/amplFiles/volumeTest.nl)
+##
+##
+## GAMS test files
+AC_COIN_VPATH_LINK(data/gamsFiles/parincLinear.gms)
+AC_COIN_VPATH_LINK(data/gamsFiles/rbrockmod.gms)
+AC_COIN_VPATH_LINK(data/gamsFiles/rbrockorig.gms)
+AC_COIN_VPATH_LINK(data/gamsFiles/trnsport.gms)
+AC_COIN_VPATH_LINK(data/gamsFiles/IP_infeasible.gms)
+AC_COIN_VPATH_LINK(data/gamsFiles/IP_unbounded.gms)
+AC_COIN_VPATH_LINK(data/gamsFiles/LP_unbounded.gms)
 ##
 ## mps test files
 ##
 AC_COIN_VPATH_LINK(data/mpsFiles/parinc.mps)
+AC_COIN_VPATH_LINK(data/mpsFiles/IP_unbounded.mps)
 ##
 ## MATLAB test files
 ##
@@ -695,14 +815,6 @@ AC_COIN_VPATH_LINK(stylesheets/OSrL.css)
 ##
 
 
-
-
-
-
-
-
-
-
 ##############################################################################
 #                   Finishing up by writing all the output                   #
 ##############################################################################
@@ -719,10 +831,13 @@ AC_CONFIG_FILES([Makefile
           src/OSParsers/Makefile
           test/Makefile
           examples/instanceGenerator/Makefile
-          examples/osTestCode/Makefile
-          examples/algorithmicDiff/Makefile
-          examples/addCuts/Makefile
+          examples/cglCuts/Makefile
+          examples/osModificationDemo/Makefile
           examples/osRemoteTest/Makefile
+		 examples/osSolverDemo/Makefile
+		 examples/osResultDemo/Makefile
+          examples/template/Makefile
+          examples/branchCutPrice/Makefile
           applications/Makefile
           applications/amplClient/Makefile
           applications/fileUpload/Makefile
@@ -734,7 +849,6 @@ AC_CONFIG_HEADER([inc/config_os.h])
 
 # Finally, we let configure write all the output...
 AC_COIN_FINALIZE
-
 
 
 

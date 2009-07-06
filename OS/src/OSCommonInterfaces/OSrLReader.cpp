@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSrLReader.cpp
  * 
  * 
@@ -13,6 +14,7 @@
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  */ 
+//#define OSRLREADER_DEBUG
 
 #include "OSrLReader.h"
 
@@ -26,23 +28,49 @@ void osrlset_extra (OSrLParserData* parserData , void* yyscanner );
 
 
 OSrLReader::OSrLReader( )  {	
+#ifdef OSRLREADER_DEBUG
+	std::cout << "new OSrLParserData()" << std::endl;
+#endif
 	m_parserData = new OSrLParserData();
+#ifdef OSRLREADER_DEBUG
+	std::cout << "new OSResult()" << std::endl;
+#endif
 	m_osresult = new OSResult(); 
 	// initialize the lexer and set yyextra
+#ifdef OSRLREADER_DEBUG
+	std::cout << "initialize the lexer" << std::endl;
+#endif
 	osrllex_init( &(m_parserData->scanner) );
 	osrlset_extra (m_parserData ,   m_parserData->scanner);						
+#ifdef OSRLREADER_DEBUG
+	std::cout << "done" << std::endl;
+#endif
 }
 
 OSrLReader::~OSrLReader(){
 	// delete the osresult object
+#ifdef OSRLREADER_DEBUG
+	std::cout << "delete m_osresult" << std::endl;
+#endif
 	if(m_osresult != NULL) delete m_osresult;
 	m_osresult = NULL;
+
 	// now delete the scanner that was initialized
+#ifdef OSRLREADER_DEBUG
+	std::cout << "delete scanner" << std::endl;
+#endif
 	osrllex_destroy(m_parserData->scanner );
+
 	// findally delete parser data
+#ifdef OSRLREADER_DEBUG
+	std::cout << "delete parser data" << std::endl;
+#endif
 	if( m_parserData != NULL) delete m_parserData;
 	m_parserData = NULL;
 	
+#ifdef OSRLREADER_DEBUG
+	std::cout << "success!" << std::endl;
+#endif
 } 
 
 OSResult* OSrLReader::readOSrL(const std::string& posrl) throw(ErrorClass){  	

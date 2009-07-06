@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file osRemoteTest.cpp
  * 
  * @author  Gus Gassmann, Jun Ma, Kipp Martin, 
@@ -13,7 +14,6 @@
  * 
  */ 
  
-
 
 #include <cppad/cppad.hpp> 
 #include "OSConfig.h"
@@ -42,7 +42,7 @@
 #include "OSErrorClass.h"
 #include "OSmps2osil.h"   
 #include "OSBase64.h"
-#include "OSCommonUtil.h"
+//#include "OSCommonUtil.h"
 #include "OSErrorClass.h"
 #include "OSMathUtil.h"
 
@@ -55,8 +55,6 @@ int main( ){
 		std::string osil;
 
 // test OS code samples here
-	FileUtil *fileUtil = NULL; 
-	fileUtil = new FileUtil();
 	cout << "Start Building the Model" << endl;
 	try{
 		OSInstance *osinstance = new OSInstance();
@@ -71,8 +69,8 @@ int main( ){
 		osinstance->setVariableNumber( 2);   
 		//addVariable(int index, string name, double lowerBound, double upperBound, char type, double init, string initString);
 		// we could use setVariables() and add all the variable with one method call -- below is easier
-		osinstance->addVariable(0, "x0", 0, OSDBL_MAX, 'C', OSNAN, "");
-		osinstance->addVariable(1, "x1", 0, OSDBL_MAX, 'C', OSNAN, "");
+		osinstance->addVariable(0, "x0", 0, OSDBL_MAX, 'C');
+		osinstance->addVariable(1, "x1", 0, OSDBL_MAX, 'C');
 		//
 		// now add the objective function
 		osinstance->setObjectiveNumber( 1);
@@ -131,16 +129,20 @@ int main( ){
 		OSiLWriter *osilwriter; 
 		osilwriter = new OSiLWriter();
 		osil = osilwriter->writeOSiL( osinstance);
+		
+
 
 		// now solve the model synchronously
 		OSSolverAgent* osagent = NULL;
 		osagent = new OSSolverAgent("gsbkip.chicagogsb.edu/os/OSSolverService.jws");
 		
+
 		std::string osol = "<osol></osol>";
 		cout << "Solve the model synchronously" << endl;
 		cout << "osil input:" << endl << endl;
 		cout << osil  << endl << endl;
-		std::string osrl = osagent->solve(osil, osol);
+		std::string osrl ="" ;
+		osrl = osagent->solve(osil, osol);
 		cout << "osrl result from osagent:" << endl << endl;
 		cout << osrl  << endl << endl;
 
@@ -150,6 +152,7 @@ int main( ){
 		cout << "get the jobID" << endl;
 		std::string jobID = osagent->getJobID("");
 		cout << jobID << endl << endl;
+
 
 		// build the osol 
 		osol = "<osol><general><jobID>" + jobID + "</jobID></general></osol>";
@@ -212,15 +215,15 @@ int main( ){
 		osinstance = NULL;
 		delete osilwriter;
 		osilwriter = NULL;
-		delete fileUtil;
-		fileUtil = NULL;
+		delete osagent;
+		osagent = NULL;
 
 		cout << "Done with garbage collection" << endl;
 		return 0;
 		//
 	}
 	catch(const ErrorClass& eclass){
-		delete fileUtil;
+
 		std::cout << eclass.errormsg <<  std::endl;
 		return 0;
 	} 

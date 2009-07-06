@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSInstance.h
  * \brief This file defines the OSInstance class along with its supporting classes.
  *
@@ -7,7 +8,7 @@
  *
  * \remarks
  * Copyright (C) 2005-2007, Robert Fourer, Gus Gassmann, Jun Ma, Kipp Martin,
- * Northwestern University, Dalhsouie University, and the University of Chicago.
+ * Northwestern University, Dalhousie University, and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Common Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
@@ -38,8 +39,6 @@
 #include "OSExpressionTree.h"
 #include <string>
 #include <map>
-#include<cppad/cppad.hpp>
-
 
 
 /*! \class InstanceHeader
@@ -89,9 +88,9 @@ public:
 	double ub;
 	
 	/** init corresponds to the optional attribute that holds the variable initial value,
-	 * the default value is OSNAN 
+	 * the default value is OSNAN  -- now deprecated
 	 */
-	double init;
+	//double init;
 	
 	/** type corresponds to the attribute that holds the variable type: C (Continuous),
 	 * B (binary), I (general integer), or S (string). The default is C
@@ -103,8 +102,10 @@ public:
 	 */ 
 	std::string name;
 	
-	/** initString corresponds to the optional attribute that holds the name std::string */
-	std::string initString;
+	/** initString corresponds to the optional attribute that holds the name std::string 
+	 * -- now deprecated
+	 */
+	//std::string initString;
 }; // class Variable
 
 
@@ -326,7 +327,7 @@ public:
  * quadratic term, and the row in which it appears
  */
 class QuadraticTerm{
-    public:
+public:
     
 	/** The QuadraticTerm class constructor */
 	QuadraticTerm();
@@ -362,7 +363,7 @@ class QuadraticTerm{
  * 
  */
 class QuadraticCoefficients {
-    public:
+public:
     
     /** The QuadraticCoefficients class constructor */
 	QuadraticCoefficients();
@@ -416,7 +417,7 @@ public:
  * <b><nonlinearExpressions></b> element.
  */
 class NonlinearExpressions {
-    public:
+public:
     
     /** The NonlinearExpressions class constructor */
 	NonlinearExpressions();
@@ -434,18 +435,143 @@ class NonlinearExpressions {
 	 * object pointers */	
     Nl **nl;
 }; // NonlinearExpression
- 
+
+
+
+/*! \class TimeDomainStageVar
+ * \brief The in-memory representation of the 
+ * <b><var></b> element.
+ */
+class TimeDomainStageVar {
+public:
+    
+    /** The TimeDomainStageVar class constructor */
+	TimeDomainStageVar();
+	
+	/** The TimeDomainStageVar class destructor */
+	~TimeDomainStageVar();
+	
+	/** idx gives the index of this variable */
+	int idx;
+}; // TimeDomainStageVar
+
+/*! \class TimeDomainStageVariables
+ * \brief The in-memory representation of the 
+ * <b><variables></b> child of the <stage> element.
+ */
+class TimeDomainStageVariables {
+public:
+    
+    /** The TimeDomainStageVariables class constructor */
+	TimeDomainStageVariables();
+	
+	/** The TimeDomainStageVariables class destructor */
+	~TimeDomainStageVariables();
+	
+	/** numberOfVariables gives the number of variables contained in this stage */
+	int numberOfVariables;
+
+	/** startdIdx gives the number of the first variable contained in this stage */
+	int startIdx;
+
+	/** var is a pointer to an array of TimeDomainStageVar object pointers */
+	TimeDomainStageVar** var;
+}; // TimeDomainStageVariables
+
+
+/*! \class TimeDomainStageCon
+ * \brief The in-memory representation of the 
+ * <b><con></b> element.
+ */
+class TimeDomainStageCon {
+public:
+    
+    /** The TimeDomainStageCon class constructor */
+	TimeDomainStageCon();
+	
+	/** The TimeDomainStageCon class destructor */
+	~TimeDomainStageCon();
+	
+	/** idx gives the index of this constraint */
+	int idx;
+}; // TimeDomainStageCon
+
+/*! \class TimeDomainStageConstraints
+ * \brief The in-memory representation of the 
+ * <b><constraints></b> child of the <stage> element.
+ */
+class TimeDomainStageConstraints {
+public:
+    
+    /** The TimeDomainStageConstraints class constructor */
+	TimeDomainStageConstraints();
+	
+	/** The TimeDomainStageConstraints class destructor */
+	~TimeDomainStageConstraints();
+	
+	/** numberOfConstraints gives the number of constraints contained in this stage */
+	int numberOfConstraints;
+
+	/** startdIdx gives the number of the first constraint contained in this stage */
+	int startIdx;
+
+	/** con is a pointer to an array of TimeDomainStageCon object pointers */
+	TimeDomainStageCon** con;
+}; // TimeDomainStageConstraints
+
+
+/*! \class TimeDomainStageObj
+ * \brief The in-memory representation of the 
+ * <b><obj></b> element.
+ */
+class TimeDomainStageObj {
+public:
+    
+    /** The TimeDomainStageObj class constructor */
+	TimeDomainStageObj();
+	
+	/** The TimeDomainStageObj class destructor */
+	~TimeDomainStageObj();
+	
+	/** idx gives the index of this variable */
+	int idx;
+}; // TimeDomainStageObj
+
+/*! \class TimeDomainStageObjectives
+ * \brief The in-memory representation of the 
+ * <b><objectives></b> child of the <stage> element.
+ */
+class TimeDomainStageObjectives {
+public:
+    
+    /** The TimeDomainStageObjectives class constructor */
+	TimeDomainStageObjectives();
+	
+	/** The TimeDomainStageObjectives class destructor */
+	~TimeDomainStageObjectives();
+	
+	/** numberOfObjectives gives the number of objectives contained in this stage */
+	int numberOfObjectives;
+
+	/** startdIdx gives the number of the first objective contained in this stage */
+	int startIdx;
+
+	/** obj is a pointer to an array of TimeDomainStageObj object pointers */
+	TimeDomainStageObj** obj;
+}; // TimeDomainStageObjectives
+
+
 /*! \class TimeDomainStage
  * \brief The in-memory representation of the 
  * <b><stage></b> element.
  */
 class TimeDomainStage {
-    public:
+public:
     
-    /** The Stage class constructor */
+    /** The TimeDomainStage class constructor */
 	TimeDomainStage();
 	
-	/** The Stage class destructor */
+	/** The TimeDomainStage class destructor */
 	~TimeDomainStage();
 	
 	/** name corresponds to the optional attribute that holds
@@ -453,40 +579,22 @@ class TimeDomainStage {
 	 */
 	std::string name;
 	
-	/** nvar gives the number of variables associated with this stage
-	 */
-	int nvar;
-	
-	/** ncon gives the number of constraints associated with this stage
-	 */
-	int ncon;
-	
-	/** nobj gives the number of objectives associated with this stage
-	 */
-	int nobj;
+	/** variables is a pointer to a TimeDomainVariables object */
+	TimeDomainStageVariables *variables;
 
-	/** variables is a pointer to an array of variables
-	 *  associated with this stage
-	 */
-	int *variables;
+	/** constraints is a pointer to a TimeDomainConstraints object */
+	TimeDomainStageConstraints *constraints;
 
-	/** constraints is a pointer to an array of constraints
-	 *  associated with this stage
-	 */
-	int *constraints;
-
-	/** objectives is a pointer to an array of objectives
-	 *  associated with this stage
-	 */
-	int *objectives;
-}; // Stage
+	/** objectives is a pointer to a TimeDomainObjectives object */
+	TimeDomainStageObjectives *objectives;
+}; // TimeDomainStage
  
 /*! \class TimeDomainStages
  * \brief The in-memory representation of the 
  * <b><stages></b> element.
  */
 class TimeDomainStages {
-    public:
+public:
     
     /** The Stages class constructor */
 	TimeDomainStages();
@@ -508,7 +616,7 @@ class TimeDomainStages {
  * <b><interval></b> element.
  */
 class TimeDomainInterval {
-    public:
+public:
     
     /** The Interval class constructor */
 	TimeDomainInterval();
@@ -516,15 +624,15 @@ class TimeDomainInterval {
 	/** The Interval class destructor */
 	~TimeDomainInterval();
 	
-	/** intervalHorizon is the end of the planning period
+	/** start is the start of the planning period
 	 * in the <b><interval></b> element.
 	 */
-	double intervalHorizon;
+	double start;
 	
-	/** intervalStart is the start of the planning period
+	/** horizon is the end of the planning period
 	 * in the <b><interval></b> element.
 	 */
-	double intervalStart;
+	double horizon;
 }; // Interval
  
 /*! \class TimeDomain
@@ -532,7 +640,7 @@ class TimeDomainInterval {
  * <b><timeDomain></b> element.
  */
 class TimeDomain {
-    public:
+public:
     
     /** The TimeDomain class constructor */
 	TimeDomain();
@@ -645,6 +753,28 @@ public:
 	
 	/** A pointer to an InstanceData object */
 	InstanceData *instanceData;
+	
+	/**
+	 * bVariablesModified is true if the variables data has been modified. 
+	 */
+	bool bVariablesModified ;
+	
+	/**
+	 * bObjectivesModified is true if the objective function data has been modified. 
+	 */
+	bool bObjectivesModified ;
+	
+	/**
+	 * bConstraintsModified is true if the constraints data has been modified. 
+	 */
+	bool bConstraintsModified ;
+	
+	/**
+	 * bAMatrixModified is true if the A matrix data has been modified. 
+	 */
+	bool bAMatrixModified ;
+	
+
 
 private:
 	/**
@@ -679,6 +809,11 @@ private:
 	 * m_iNumberOfBinaryVariables holds the number of binary variables. 
 	 */
 	int m_iNumberOfBinaryVariables;
+	
+	/**
+	 * m_iNumberOfStringVariables holds the number of integer variables. 
+	 */
+	int m_iNumberOfStringVariables;
 	
 	/**
 	 * m_iNumberOfQuadraticRowIndexes holds the number of distinct rows and objectives with quadratic terms. 
@@ -734,14 +869,16 @@ private:
 	std::string* m_msVariableNames;
 	
 	/**
-	 * m_mdVariableInitialValues holds a double array of the initial variable values. 
+	 * m_mdVariableInitialValues holds a double array of the initial variable values.
+	 * -- now deprecated 
 	 */
-	double* m_mdVariableInitialValues ;
+	//double* m_mdVariableInitialValues ;
 
 	/**
-	 * m_msVariableInitialStringValues holds a std::string array of the initial variable values. 
+	 * m_msVariableInitialStringValues holds a std::string array of the initial variable values.
+	 * -- now deprecated 
 	 */
-	std::string* m_msVariableInitialStringValues;
+	//std::string* m_msVariableInitialStringValues;
 
 	/**
 	 * m_mcVariableTypes holds a char array of variable types (default = 'C').
@@ -1002,7 +1139,7 @@ private:
 	
 	
 	
-	std::map<int, int> m_mapCppADFunRangeIndex ;
+	std::map<int, int> m_mapOSADFunRangeIndex ;
 	
 	/**
 	 * m_LagrangianExpTree is an OSExpressionTree object that is the expression tree
@@ -1051,10 +1188,10 @@ private:
 	std::map<int, OSExpressionTree*> m_mapExpressionTreesMod ;
 	
 	/**
-	 * m_bCppADFunIsCreated is true if we have created the OSInstanc
-	 * CppAD Function
+	 * m_bOSADFunIsCreated is true if we have created the OSInstanc
+	 * OSAD Function
 	 */	  
-	 bool m_bCppADFunIsCreated;
+	 bool m_bOSADFunIsCreated;
 	
 	/**
 	 * is true if a CppAD Expresion Tree has been built for each row and objective 
@@ -1102,12 +1239,7 @@ private:
 	 */
 	double **m_mmdObjGradient;
 	
-	//define the vectors
-		
-	/**
-	 *  m_vX is a vector of CppAD indpendent variables.
-	 */
-	CppAD::vector< AD<double> > m_vX;	
+	//define the vectors	
 
 	/**
 	 * m_vdX is a vector of primal variables at each iteration
@@ -1186,6 +1318,54 @@ private:
 	int m_iNumberOfTimeStages;
 
 	/**
+	 * m_sTimeDomainFormat holds the format ("stages"/"interval") of the time domain.
+	 */
+	std::string m_sTimeDomainFormat;
+
+	/**
+	 * m_msTimeDomainStageNames holds the names of the time stages.
+	 *
+	 */
+	std::string* m_msTimeDomainStageNames;
+
+	/**
+	 * m_miTimeDomainStageVariableNumber holds the number of variables in each stage.
+	 *
+	 */
+	int* m_miTimeDomainStageVariableNumber;
+
+	/**
+	 * m_mmiTimeDomainStageVarList holds the list of variables in each stage.
+	 *
+	 */
+	int** m_mmiTimeDomainStageVarList;
+
+	/**
+	 * m_miTimeDomainStageConstraintNumber holds the number of constraints in each stage.
+	 *
+	 */
+	int* m_miTimeDomainStageConstraintNumber;
+
+	/**
+	 * m_mmiTimeDomainStageConList holds the list of constraints in each stage.
+	 *
+	 */
+	int** m_mmiTimeDomainStageConList;
+
+	/**
+	 * m_miTimeDomainStageObjectiveNumber holds the number of objectives in each stage.
+	 *
+	 */
+	int* m_miTimeDomainStageObjectiveNumber;
+
+	/**
+	 * m_mmiTimeDomainStageObjList holds the list of objectives in each stage.
+	 *
+	 */
+	int** m_mmiTimeDomainStageObjList;
+
+
+	/**
 	 * process variables. 
 	 * 
 	 * @return true if the variables are processed. 
@@ -1222,7 +1402,6 @@ private:
 	
 public:
 
-	
 	/**
 	 * Get instance name. 
 	 * @return instance name. Null or empty std::string ("") if there is no instance name. 
@@ -1264,16 +1443,18 @@ public:
 	 * 
 	 * @return a double array of variable initial values, null if no initial variable values.
 	 * @throws Exception if the elements in variables are logically inconsistent. 
+	 * -- now deprecated
 	 */
-	double* getVariableInitialValues();
+	//double* getVariableInitialValues();
 	
 	/**
 	 * Get variable initial std::string values. 
 	 * 
 	 * @return a std::string array of variable initial values, null if no initial variable std::string values.
 	 * @throws Exception if the elements in variables are logically inconsistent. 
+	 * -- now deprecated
 	 */
-	std::string* getVariableInitialStringValues();
+	//std::string* getVariableInitialStringValues();
 	
 	/**
 	 * Get variable types. 
@@ -1299,6 +1480,12 @@ public:
 	 * @return an integer which is the number of B variables. 
 	 */
 	int getNumberOfBinaryVariables();
+	
+	/**
+	 * getNumberOfStringVariables
+	 * @return an integer which is the number of S variables. 
+	 */
+	int getNumberOfStringVariables();
 	
 	/**
 	 * Get variable lower bounds. 
@@ -1543,7 +1730,33 @@ public:
 	 * @return a vector of pointers to OSnLNodes in prefix, if rowIdx
 	 * does not index a row with a nonlinear term throw an exception
 	 */
-	std::vector<OSnLNode*> getNonlinearExpressionTreeInPrefix( int rowIdx);  
+	std::vector<OSnLNode*> getNonlinearExpressionTreeInPrefix( int rowIdx); 
+	
+	/**
+	 * Get the infix representation for a given row (or objective function) index.  
+	 
+	 * @param rowIdx is the index of the row we want to express in infix.
+	 * @return a string representation of the tree, if rowIdx
+	 * does not index a row with a nonlinear term throw an exception
+	 */
+	std::string getNonlinearExpressionTreeInInfix( int rowIdx);  
+	
+	
+	/**
+	 * Print the infix representation of the problem.  
+	 * @return a string with the infix representation
+	 */
+	std::string printModel( ); 
+	
+	
+	/**
+	 * Print the infix representation of the row (which could be an
+	 * an objective function row) indexed by rowIdx.  
+	 *
+	 * @param rowIdx is the index of the row we want to express in infix.
+	 * @return a string with the infix representation
+	 */
+	std::string printModel( int rowIdx); 
 	
 	/**
 	 * Get the prefix tokens for a given row index for the modified
@@ -1585,7 +1798,7 @@ public:
 	
 	
 	 /**
-   	 * Get the number of unique Nonlinear exrpession tree indexes. 
+   	 * Get the number of unique Nonlinear expression tree indexes. 
    	 * 
    	 * @return the number of unique nonlinear expression tree indexes. 
    	 */
@@ -1602,12 +1815,91 @@ public:
 	
 	
 	 /**
-   	 * Get the number of unique Nonlinear exrpession tree indexes after
+   	 * Get the number of unique Nonlinear expression tree indexes after
    	 * modifying the expression tree to contain quadratic terms. 
    	 * 
    	 * @return the number of unique nonlinear expression tree indexes (including quadratic terms). 
    	 */
 	int getNumberOfNonlinearExpressionTreeModIndexes(); 
+	
+	
+	 /**
+   	 * Get the format of the time domain ("stages"/"interval")
+   	 * 
+   	 * @return the format of the time domain. 
+   	 */
+	std::string getTimeDomainFormat(); 
+	
+	 /**
+   	 * Get the number of stages that make up the time domain
+   	 * 
+   	 * @return the number of time stages. 
+   	 */
+	int getTimeDomainStageNumber(); 
+	
+	 /**
+   	 * Get the names of the stages (NULL or empty string ("") if a stage has not been given a name
+   	 * 
+   	 * @return the names of time stages. 
+   	 */
+	std::string* getTimeDomainStageNames(); 
+	
+	 /**
+   	 * Get the number of variables contained in each time stage
+   	 * 
+   	 * @return a vector of size numberOfStages. 
+   	 */
+	int* getTimeDomainStageNumberOfVariables(); 
+	
+	 /**
+   	 * Get the number of constraints contained in each time stage
+   	 * 
+   	 * @return a vector of size numberOfStages. 
+   	 */
+	int* getTimeDomainStageNumberOfConstraints(); 
+	
+	 /**
+   	 * Get the number of objectives contained in each time stage
+   	 * 
+   	 * @return a vector of size numberOfStages. 
+   	 */
+	int* getTimeDomainStageNumberOfObjectives(); 
+	
+	 /**
+   	 * Get the list of variables in each stage
+   	 * 
+   	 * @return one array of integers for each stage. 
+   	 */
+	int** getTimeDomainStageVarList(); 
+	
+	 /**
+   	 * Get the list of constraints in each stage
+   	 * 
+   	 * @return one array of integers for each stage. 
+   	 */
+	int** getTimeDomainStageConList(); 
+	
+	 /**
+   	 * Get the list of objectives in each stage
+   	 * 
+   	 * @return one array of integers for each stage. 
+   	 */
+	int** getTimeDomainStageObjList(); 
+
+	 /**
+   	 * Get the start for the time domain interval
+   	 * 
+   	 * @return start end of the time interval. 
+   	 */
+	double getTimeDomainIntervalStart(); 
+
+	 /**
+   	 * Get the horizon for the time domain interval
+   	 * 
+   	 * @return the end of the time interval. 
+   	 */
+	double getTimeDomainIntervalHorizon(); 
+	
 	
 	
 	// the set() methods
@@ -1658,11 +1950,12 @@ public:
    	 * @param lowerBound holds the variable lower bound; use Double.NEGATIVE_INFINITY if no lower bound. 
    	 * @param upperBound holds the variable upper bound; use Double.POSITIVE_INFINITY if no upper bound. 
    	 * @param type holds the variable type character, B for Binary, I for Integer, S for String, C or any other char for Continuous)
-   	 * @param init holds the double variable initial value; use Double.NaN if no initial value. 
-   	 * @param initString holds the std::string variable initial value; use null or empty std::string ("") if no initial std::string value.  
+   	 * @param init holds the double variable initial value; use Double.NaN if no initial value -- deprecated
+   	 * @param initString holds the std::string variable initial value; use null or empty std::string ("") 
+   	 * if no initial std::string value -- deprecated
    	 * @return whether the variable is added successfully. 
    	 */
-   	bool addVariable(int index, std::string name, double lowerBound, double upperBound, char type, double init, std::string initString);
+   	bool addVariable(int index, std::string name, double lowerBound, double upperBound, char type);
 	
    	/**
    	 * set all the variable related elements. All the previous variable-related elements will be deleted. 
@@ -1677,12 +1970,13 @@ public:
 	 *  use Double.POSITIVE_INFINITY if no upper bound for a specific variable in the array. 
    	 * @param types holds a char array of variable types; use null if all variables are continuous; 
    	 * for a specfic variable in the array use B for Binary, I for Integer, S for String, C or any other char for Continuous,)  
-   	 * @param inits holds a double array of varible initial values; use null if no initial values. 
-   	 * @param initsString holds a std::string array of varible initial values; use null if no initial std::string values.  
+   	 * @param inits holds a double array of varible initial values; use null if no initial values. -- deprecated
+   	 * @param initsString holds a std::string array of varible initial values; use null
+   	 *  if no initial std::string values.  -- deprecated
    	 * @return whether the variables are set successfully. 
    	 */
    	bool setVariables(int number, std::string* names, double* lowerBounds, 
-		double* upperBounds, char* types, double* inits, std::string* initsString);
+		double* upperBounds, char* types);
 
    	/**
    	 * set the objective number. 
@@ -1958,9 +2252,10 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 * <p>
 	 * 
 	 * @param x is a pointer (double array) to the current variable values
-	 * @param idx is the index of the constraint function gradient
+	 * @parma idx is the index of the constraint function gradient
 	 * @param new_x is false if any evaluation method was previously called
 	 * for the current iterate
+	 * @param highestOrder is the highest order of the derivative being calculated
 	 * @return a pointer to a sparse vector of doubles.  
 	 */
 	SparseVector *calculateConstraintFunctionGradient(double* x, int idx, bool new_x );
@@ -2007,10 +2302,9 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 * <p>
 	 * 
 	 * @param x is a pointer (double array) to the current variable values
-	 * @parma objIdx is the index of the objective function being optimized
+	 * @param objIdx is the index of the objective function being optimized
 	 * @param new_x is false if any evaluation method was previously called
 	 * for the current iterate
-	 * @param highestOrder is the highest order of the derivative being calculated
 	 * @return a pointer to a dense vector of doubles.  
 	 */
 	double *calculateObjectiveFunctionGradient(double* x, int objIdx, bool new_x );
@@ -2098,13 +2392,13 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 */	 
 	void duplicateExpressionTreesMap();
 	
-	 
+#ifdef COIN_HAS_CPPAD  	 
 	 /**
 	  * F is a CppAD function the range space is the objective +
 	  * constraints functions, x is the domeain space
 	  */
 	CppAD::ADFun<double> *Fad;
-
+#endif
 	/**
 	 * Create the a CppAD Function object: this is a function where the domain is
 	 * the set of variables for the problem and the range is the objective function 
@@ -2116,7 +2410,7 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 * the size of x should equal instanceData->variables->numberOfVariables
 	 * @return if successfully created
 	 */	
-	bool createCppADFun(std::vector<double> vdX );
+	bool createOSADFun(std::vector<double> vdX );
 	
 	/**
 	 * Perform an AD forward sweep  
@@ -2141,6 +2435,20 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 * @return a double vector equal to the n*p 
 	 */	
 	std::vector<double> reverseAD(int p, std::vector<double> vdlambda);
+	 
+	 /**
+	  * end revised AD code
+	  */
+	
+	
+	/**
+	 * Call the AD routine to fill in m_vbLagHessNonz and determine the nonzeros.
+	 * 
+	 * <p>
+	 * 
+	 * @return the number of nonzeros in the Hessian 
+	 */	
+	int  getADSparsityHessian();
 	 
 	 /**
 	  * end revised AD code
@@ -2230,15 +2538,73 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 * @return true if successful 
 	 */		 
 	bool initObjGradients();
-	
-	
+
+
 	/**
 	 * bUseExpTreeForFunEval is set to true if you wish to use the OS Expression Tree for
 	 * function evaluations instead of AD -- false by default. 
 	 */
 	bool bUseExpTreeForFunEval;
 	
-																																																			
+	
+	/**
+	 * This sets the format of the time domain ("stages"/"interval"/"none")
+	 */
+	bool setTimeDomain(std::string format);
+	
+	/**
+	 * This sets the number (and optionally names) of the time stages
+	 */
+	bool setTimeDomainStages(int number, std::string *names);
+
+	/**
+	* This sets the variables associated with each time domain stage in temporal order.
+	* (I.e., for each stage numberOfVariables gives the number of variables accociated 
+	* with this stage and startIdx gives the first variable in this stage.)
+	*/
+	bool setTimeDomainStageVariablesOrdered(int numberOfStages, int *numberOfVariables, int *startIdx);
+
+	/**
+	* This sets the variables associated with each time domain stage in srbitrary order.
+	* (I.e., for each stage numberOfVariables gives the number of variables accociated 
+	* with this stage and varIndex[i] gives the index of each variable in stage[i].)
+	*/
+	bool setTimeDomainStageVariablesUnordered(int numberOfStages, int *numberOfVariables, int **varIndex);
+
+	/**
+	* This sets the constraints associated with each time domain stage in temporal order.
+	* (I.e., for each stage numberOfConstraints gives the number of constraints accociated 
+	* with this stage and startIdx gives the first constraint in this stage.)
+	*/
+	bool setTimeDomainStageConstraintsOrdered(int numberOfStages, int *numberOfConstraints, int *startIdx);
+
+	/**
+	* This sets the constraints associated with each time domain stage in srbitrary order.
+	* (I.e., for each stage numberOfConstraints gives the number of constraints accociated 
+	* with this stage and conIndex[i] gives the index of each constraint in stage[i].)
+	*/
+	bool setTimeDomainStageConstraintsUnordered(int numberOfStages, int *numberOfConstraints, int **conIndex);
+
+	/**
+	* This sets the objectives associated with each time domain stage in temporal order.
+	* (I.e., for each stage numberOfObjectives gives the number of objectives accociated 
+	* with this stage and startIdx gives the first objective in this stage.)
+	*/
+	bool setTimeDomainStageObjectivesOrdered(int numberOfStages, int *numberOfObjectives, int *startIdx);
+
+	/**
+	* This sets the objectives associated with each time domain stage in arbitrary order.
+	* (I.e., for each stage numberOfObjectives gives the number of objectives accociated 
+	* with this stage and objIndex[i] gives the index of each objective in stage[i].)
+	*/
+	bool setTimeDomainStageObjectivesUnordered(int numberOfStages, int *numberOfObjectives, int **varIndex);
+
+	/**
+	 * This sets the start and end of the time interval
+	 */
+	bool setTimeDomainInterval(double start, double horizon);
+
+
 }; //class OSInstance
 
 #endif

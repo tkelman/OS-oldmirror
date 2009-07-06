@@ -1,7 +1,8 @@
+/* $Id$ */
 /** @file parseosil.l
  * 
  * @author  Robert Fourer, Gus Gassmann, Jun Ma, Kipp Martin, 
- * @version 2.0, 12/21/2007
+ * @version 1.1, 12/21/2007
  * @since   OS1.0
  *
  * \remarks
@@ -63,7 +64,7 @@
 #include "OSInstance.h"
 
 
-
+//#define PARSERDEBUG
 
 #ifdef PARSERDEBUG
 	#define YY_PRINT  printf("%s", yytext);
@@ -144,12 +145,13 @@ return(DOUBLE);}
 ({xmlwhitespace}*\/>) {YY_PRINT;  return(ENDOFELEMENT);}
 
 
-({xmlwhitespace}+numberOfNonlinearExpressions{equality}) {YY_PRINT; return(NUMBEROFNONLINEAREXPRESSIONS);}
-({xmlwhitespace}+numberOfQuadraticTerms{equality}) {YY_PRINT; return(NUMBEROFQTERMSATT);}
-({xmlwhitespace}+numberOfStages{equality}) {YY_PRINT; return(NUMBEROFSTAGESATT);}
 ({xmlwhitespace}+numberOfVariables{equality}) {YY_PRINT; return(NUMBEROFVARIABLESATT);}
 ({xmlwhitespace}+numberOfConstraints{equality}) {YY_PRINT; return(NUMBEROFCONSTRAINTSATT);}
 ({xmlwhitespace}+numberOfObjectives{equality}) {YY_PRINT; return(NUMBEROFOBJECTIVESATT);}
+({xmlwhitespace}+numberOfQuadraticTerms{equality}) {YY_PRINT; return(NUMBEROFQTERMSATT);}
+({xmlwhitespace}+numberOfNonlinearExpressions{equality}) {YY_PRINT; return(NUMBEROFNONLINEAREXPRESSIONS);}
+({xmlwhitespace}+numberOfStages{equality}) {YY_PRINT; return(NUMBEROFSTAGESATT);}
+
 
 ({xmlwhitespace}+idx{equality}) {YY_PRINT;   return(IDXATT);}
 ({xmlwhitespace}+idxOne{equality}) {YY_PRINT;   return(IDXONEATT);}
@@ -194,8 +196,8 @@ return(DOUBLE);}
 {xmlwhitespace}*\<\/power{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(POWEREND);}
 {xmlwhitespace}*\<ln{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(LNSTART);}
 {xmlwhitespace}*\<\/ln{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(LNEND);}
-{xmlwhitespace}*\<sqrt{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SQRTSTART);}
-{xmlwhitespace}*\<\/sqrt{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SQRTEND);}
+{xmlwhitespace}*\<squareRoot{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SQRTSTART);}
+{xmlwhitespace}*\<\/squareRoot{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SQRTEND);}
 {xmlwhitespace}*\<square{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SQUARESTART);}
 {xmlwhitespace}*\<\/square{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SQUAREEND);}
 {xmlwhitespace}*\<sin{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(SINSTART);}
@@ -206,6 +208,8 @@ return(DOUBLE);}
 {xmlwhitespace}*\<\/exp{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(EXPEND);}
 {xmlwhitespace}*\<abs{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(ABSSTART);}
 {xmlwhitespace}*\<\/abs{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(ABSEND);}
+{xmlwhitespace}*\<erf{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(ERFSTART);}
+{xmlwhitespace}*\<\/erf{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(ERFEND);}
 {xmlwhitespace}*\<if{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(IFSTART);}
 {xmlwhitespace}*\<\/if{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(IFEND);}
 {xmlwhitespace}*\<max{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(MAXSTART);}
@@ -250,6 +254,13 @@ return(DOUBLE);}
 {xmlwhitespace}*\<interval {YY_PRINT; return(INTERVALSTART);}
 {xmlwhitespace}*\<\/interval{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(INTERVALEND);}
 
+
+ /* patterns for <parametersAndStochasticElements> 
+{xmlwhitespace}*\<parametersAndStochasticElements {YY_PRINT; return(PARAMETERSSTART);}
+{xmlwhitespace}*\<\/parametersAndStochasticElements{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(PARAMETERSEND);}
+{xmlwhitespace}*\<param {YY_PRINT; return(PARAMSTART);}
+{xmlwhitespace}*\<\/param{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(PARAMEND);}
+*/
 
  "<!--" BEGIN comment;
  <comment>. |

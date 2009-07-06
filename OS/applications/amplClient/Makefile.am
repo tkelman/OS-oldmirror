@@ -31,14 +31,32 @@ OSAmplClient_LDADD =  \
 	$(OSOBJDIR)/src/libOS.la 
 	
 	
+	  
+if COIN_HAS_COUENNE
+   OSAmplClient_LDADD += $(COUENNEOBJDIR)/src/main/libBonCouenne.la $(COUENNEOBJDIR)/src/readnl/libCouenneReadnl.la $(COUENNEOBJDIR)/src/libCouenne.la
+if COIN_HAS_ASL
+   OSAmplClient_LDADD += $(BONMINOBJDIR)/src/CbcBonmin/libbonminampl.la
+endif
+endif
+
 if COIN_HAS_BONMIN
-   OSAmplClient_LDADD += $(BONMINOBJDIR)/src/CbcBonmin/libbonmin.la
-endif	 
+   OSAmplClient_LDADD += $(BONMINOBJDIR)/src/CbcBonmin/libbonmin.la 
+#    	$(BONMINOBJDIR)/src/Interfaces/libbonmininterfaces.la 
+endif
+
+
 
 if COIN_HAS_IPOPT
-  OSAmplClient_LDADD += $(IPOPTOBJDIR)/src/Interfaces/libipopt.la
+if COIN_HAS_ASL
+
+endif
+  OSAmplClient_LDADD += $(IPOPTOBJDIR)/src/Interfaces/libipopt.la \
+        $(IPOPTOBJDIR)/src/LinAlg/liblinalg.la
   LIBS += `cat $(IPOPTOBJDIR)/src/Interfaces/ipopt_addlibs_cpp.txt`
 endif
+	
+	
+	
 	
 OSAmplClient_LDADD += $(OSIOBJDIR)/src/OsiCbc/libOsiCbc.la
 
@@ -61,6 +79,7 @@ if COIN_HAS_CPX
  OSAmplClient_LDADD += $(OSIOBJDIR)/src/OsiCpx/libOsiCpx.la
 endif
 
+ OSAmplClient_LDADD += $(CBCOBJDIR)/src/libCbcSolver.la 
  OSAmplClient_LDADD += $(CBCOBJDIR)/src/libCbc.la 
 
 if COIN_HAS_SYMPHONY
@@ -102,6 +121,8 @@ AM_CPPFLAGS =\
 	-I`$(CYGPATH_W) $(CBCSRCDIR)/src` \
 	-I`$(CYGPATH_W) $(CBCSRCDIR)/inc` \
 	-I`$(CYGPATH_W) $(CBCOBJDIR)/inc` \
+	-I`$(CYGPATH_W) $(CGLSRCDIR)/src` \
+	-I`$(CYGPATH_W) $(CGLOBJDIR)/inc` \
 	-I`$(CYGPATH_W) $(CLPSRCDIR)/src` \
 	-I`$(CYGPATH_W) $(CLPSRCDIR)/inc` \
 	-I`$(CYGPATH_W) $(CLPOBJDIR)/inc` \
@@ -207,7 +228,23 @@ if COIN_HAS_ASL
 endif
 
 
-
+if COIN_HAS_COUENNE
+  AM_CPPFLAGS += \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/bound_tightening` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/branch` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/convex` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/disjunctive` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/expression` \
+        -I`$(CYGPATH_W) $(COUENNESRCDIR)/src/expression/operators` \
+        -I`$(CYGPATH_W) $(COUENNESRCDIR)/src/expression/simplify` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/main` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/problem` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/readnl` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/standardize` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/util` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src` \
+	-I`$(CYGPATH_W) $(COUENNEOBJDIR)/inc`
+endif
 
 
 # This line is necessary to allow VPATH compilation with MS compilers

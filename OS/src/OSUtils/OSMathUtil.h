@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file MathUtil.h
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -24,6 +25,7 @@
 #include "OSParameters.h"
 #include "OSdtoa.h"
 #include "OSErrorClass.h"
+#include "OSDataStructures.h"
 
 
 #include <sstream>  

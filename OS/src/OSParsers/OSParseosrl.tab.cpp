@@ -79,67 +79,93 @@
      INTEGER = 260,
      DOUBLE = 261,
      QUOTE = 262,
-     GREATERTHAN = 263,
-     ENDOFELEMENT = 264,
-     OSRLSTART = 265,
-     OSRLATTRIBUTETEXT = 266,
-     OSRLEND = 267,
-     RESULTHEADERSTART = 268,
-     RESULTHEADEREND = 269,
-     SERVICEURISTARTANDEND = 270,
-     SERVICEURISTART = 271,
-     SERVICEURIEND = 272,
-     SERVICENAMESTARTANDEND = 273,
-     SERVICENAMESTART = 274,
-     SERVICENAMEEND = 275,
-     INSTANCENAMESTARTANDEND = 276,
-     INSTANCENAMESTART = 277,
-     INSTANCENAMEEND = 278,
-     JOBIDSTARTANDEND = 279,
-     JOBIDSTART = 280,
-     JOBIDEND = 281,
-     RESULTDATASTART = 282,
-     RESULTDATAEND = 283,
-     RESULTDATASTARTANDEND = 284,
-     OPTIMIZATIONSTART = 285,
-     OPTIMIZATIONEND = 286,
-     SOLUTIONSTART = 287,
-     SOLUTIONEND = 288,
-     VALUESSTART = 289,
-     VALUESEND = 290,
-     DUALVALUESSTART = 291,
-     DUALVALUESEND = 292,
-     VARIABLESSTART = 293,
-     VARIABLESEND = 294,
-     VARSTART = 295,
-     VAREND = 296,
-     OBJECTIVESSTART = 297,
-     OBJECTIVESEND = 298,
-     OBJSTART = 299,
-     OBJEND = 300,
-     CONSTRAINTSSTART = 301,
-     CONSTRAINTSEND = 302,
-     CONSTART = 303,
-     CONEND = 304,
-     STATUSSTART = 305,
-     STATUSEND = 306,
-     GENERALSTATUSSTART = 307,
-     GENERALSTATUSEND = 308,
-     MESSAGESTART = 309,
-     MESSAGEEND = 310,
-     MESSAGESTARTANDEND = 311,
-     OTHERSTART = 312,
-     OTHEREND = 313,
-     NUMBEROFSOLUTIONSATT = 314,
-     NUMBEROFVARIABLESATT = 315,
-     NUMBEROFCONSTRAINTSATT = 316,
-     NUMBEROFOBJECTIVESATT = 317,
-     OBJECTIVEIDXATT = 318,
-     IDXATT = 319,
-     TYPEATT = 320,
-     DESCRIPTIONATT = 321,
-     NAMEATT = 322,
-     DUMMY = 323
+     TWOQUOTES = 263,
+     GREATERTHAN = 264,
+     ENDOFELEMENT = 265,
+     OSRLSTART = 266,
+     OSRLSTARTEMPTY = 267,
+     OSRLATTRIBUTETEXT = 268,
+     OSRLEND = 269,
+     GENERALSTART = 270,
+     GENERALEND = 271,
+     SYSTEMSTART = 272,
+     SYSTEMEND = 273,
+     SERVICESTART = 274,
+     SERVICEEND = 275,
+     JOBSTART = 276,
+     JOBEND = 277,
+     SERVICEURISTARTANDEND = 278,
+     SERVICEURISTART = 279,
+     SERVICEURIEND = 280,
+     SERVICENAMESTARTANDEND = 281,
+     SERVICENAMESTART = 282,
+     SERVICENAMEEND = 283,
+     INSTANCENAMESTARTANDEND = 284,
+     INSTANCENAMESTART = 285,
+     INSTANCENAMEEND = 286,
+     JOBIDSTARTANDEND = 287,
+     JOBIDSTART = 288,
+     JOBIDEND = 289,
+     TIMINGINFORMATIONSTART = 290,
+     TIMINGINFORMATIONEND = 291,
+     TIMESTARTANDEND = 292,
+     TIMESTART = 293,
+     TIMEEND = 294,
+     OPTIMIZATIONSTART = 295,
+     OPTIMIZATIONEND = 296,
+     SOLUTIONSTART = 297,
+     SOLUTIONEND = 298,
+     VALUESSTART = 299,
+     VALUESEND = 300,
+     DUALVALUESSTART = 301,
+     DUALVALUESEND = 302,
+     VARIABLESSTART = 303,
+     VARIABLESEND = 304,
+     VARSTART = 305,
+     VAREND = 306,
+     OBJECTIVESSTART = 307,
+     OBJECTIVESEND = 308,
+     OBJSTART = 309,
+     OBJEND = 310,
+     CONSTRAINTSSTART = 311,
+     CONSTRAINTSEND = 312,
+     CONSTART = 313,
+     CONEND = 314,
+     STATUSSTART = 315,
+     STATUSEND = 316,
+     GENERALSTATUSSTART = 317,
+     GENERALSTATUSEND = 318,
+     MESSAGESTART = 319,
+     MESSAGEEND = 320,
+     MESSAGESTARTANDEND = 321,
+     OTHERSTART = 322,
+     OTHEREND = 323,
+     NUMBEROFTIMESATT = 324,
+     NUMBEROFSOLUTIONSATT = 325,
+     NUMBEROFVARIABLESATT = 326,
+     NUMBEROFCONSTRAINTSATT = 327,
+     NUMBEROFOBJECTIVESATT = 328,
+     NUMBEROFOTHERVARIABLERESULTSATT = 329,
+     NUMBEROFOTHEROBJECTIVERESULTSATT = 330,
+     NUMBEROFOTHERCONSTRAINTRESULTSATT = 331,
+     NUMBEROFVARATT = 332,
+     NUMBEROFOBJATT = 333,
+     NUMBEROFCONATT = 334,
+     TARGETOBJECTIVEIDXATT = 335,
+     IDXATT = 336,
+     TYPEATT = 337,
+     EMPTYTYPEATT = 338,
+     DESCRIPTIONATT = 339,
+     EMPTYDESCRIPTIONATT = 340,
+     NAMEATT = 341,
+     EMPTYNAMEATT = 342,
+     CATEGORYATT = 343,
+     EMPTYCATEGORYATT = 344,
+     UNITATT = 345,
+     EMPTYUNITATT = 346,
+     VALUEATT = 347,
+     EMPTYVALUEATT = 348,
+     DUMMY = 349
    };
 #endif
 /* Tokens.  */
@@ -148,67 +174,93 @@
 #define INTEGER 260
 #define DOUBLE 261
 #define QUOTE 262
-#define GREATERTHAN 263
-#define ENDOFELEMENT 264
-#define OSRLSTART 265
-#define OSRLATTRIBUTETEXT 266
-#define OSRLEND 267
-#define RESULTHEADERSTART 268
-#define RESULTHEADEREND 269
-#define SERVICEURISTARTANDEND 270
-#define SERVICEURISTART 271
-#define SERVICEURIEND 272
-#define SERVICENAMESTARTANDEND 273
-#define SERVICENAMESTART 274
-#define SERVICENAMEEND 275
-#define INSTANCENAMESTARTANDEND 276
-#define INSTANCENAMESTART 277
-#define INSTANCENAMEEND 278
-#define JOBIDSTARTANDEND 279
-#define JOBIDSTART 280
-#define JOBIDEND 281
-#define RESULTDATASTART 282
-#define RESULTDATAEND 283
-#define RESULTDATASTARTANDEND 284
-#define OPTIMIZATIONSTART 285
-#define OPTIMIZATIONEND 286
-#define SOLUTIONSTART 287
-#define SOLUTIONEND 288
-#define VALUESSTART 289
-#define VALUESEND 290
-#define DUALVALUESSTART 291
-#define DUALVALUESEND 292
-#define VARIABLESSTART 293
-#define VARIABLESEND 294
-#define VARSTART 295
-#define VAREND 296
-#define OBJECTIVESSTART 297
-#define OBJECTIVESEND 298
-#define OBJSTART 299
-#define OBJEND 300
-#define CONSTRAINTSSTART 301
-#define CONSTRAINTSEND 302
-#define CONSTART 303
-#define CONEND 304
-#define STATUSSTART 305
-#define STATUSEND 306
-#define GENERALSTATUSSTART 307
-#define GENERALSTATUSEND 308
-#define MESSAGESTART 309
-#define MESSAGEEND 310
-#define MESSAGESTARTANDEND 311
-#define OTHERSTART 312
-#define OTHEREND 313
-#define NUMBEROFSOLUTIONSATT 314
-#define NUMBEROFVARIABLESATT 315
-#define NUMBEROFCONSTRAINTSATT 316
-#define NUMBEROFOBJECTIVESATT 317
-#define OBJECTIVEIDXATT 318
-#define IDXATT 319
-#define TYPEATT 320
-#define DESCRIPTIONATT 321
-#define NAMEATT 322
-#define DUMMY 323
+#define TWOQUOTES 263
+#define GREATERTHAN 264
+#define ENDOFELEMENT 265
+#define OSRLSTART 266
+#define OSRLSTARTEMPTY 267
+#define OSRLATTRIBUTETEXT 268
+#define OSRLEND 269
+#define GENERALSTART 270
+#define GENERALEND 271
+#define SYSTEMSTART 272
+#define SYSTEMEND 273
+#define SERVICESTART 274
+#define SERVICEEND 275
+#define JOBSTART 276
+#define JOBEND 277
+#define SERVICEURISTARTANDEND 278
+#define SERVICEURISTART 279
+#define SERVICEURIEND 280
+#define SERVICENAMESTARTANDEND 281
+#define SERVICENAMESTART 282
+#define SERVICENAMEEND 283
+#define INSTANCENAMESTARTANDEND 284
+#define INSTANCENAMESTART 285
+#define INSTANCENAMEEND 286
+#define JOBIDSTARTANDEND 287
+#define JOBIDSTART 288
+#define JOBIDEND 289
+#define TIMINGINFORMATIONSTART 290
+#define TIMINGINFORMATIONEND 291
+#define TIMESTARTANDEND 292
+#define TIMESTART 293
+#define TIMEEND 294
+#define OPTIMIZATIONSTART 295
+#define OPTIMIZATIONEND 296
+#define SOLUTIONSTART 297
+#define SOLUTIONEND 298
+#define VALUESSTART 299
+#define VALUESEND 300
+#define DUALVALUESSTART 301
+#define DUALVALUESEND 302
+#define VARIABLESSTART 303
+#define VARIABLESEND 304
+#define VARSTART 305
+#define VAREND 306
+#define OBJECTIVESSTART 307
+#define OBJECTIVESEND 308
+#define OBJSTART 309
+#define OBJEND 310
+#define CONSTRAINTSSTART 311
+#define CONSTRAINTSEND 312
+#define CONSTART 313
+#define CONEND 314
+#define STATUSSTART 315
+#define STATUSEND 316
+#define GENERALSTATUSSTART 317
+#define GENERALSTATUSEND 318
+#define MESSAGESTART 319
+#define MESSAGEEND 320
+#define MESSAGESTARTANDEND 321
+#define OTHERSTART 322
+#define OTHEREND 323
+#define NUMBEROFTIMESATT 324
+#define NUMBEROFSOLUTIONSATT 325
+#define NUMBEROFVARIABLESATT 326
+#define NUMBEROFCONSTRAINTSATT 327
+#define NUMBEROFOBJECTIVESATT 328
+#define NUMBEROFOTHERVARIABLERESULTSATT 329
+#define NUMBEROFOTHEROBJECTIVERESULTSATT 330
+#define NUMBEROFOTHERCONSTRAINTRESULTSATT 331
+#define NUMBEROFVARATT 332
+#define NUMBEROFOBJATT 333
+#define NUMBEROFCONATT 334
+#define TARGETOBJECTIVEIDXATT 335
+#define IDXATT 336
+#define TYPEATT 337
+#define EMPTYTYPEATT 338
+#define DESCRIPTIONATT 339
+#define EMPTYDESCRIPTIONATT 340
+#define NAMEATT 341
+#define EMPTYNAMEATT 342
+#define CATEGORYATT 343
+#define EMPTYCATEGORYATT 344
+#define UNITATT 345
+#define EMPTYUNITATT 346
+#define VALUEATT 347
+#define EMPTYVALUEATT 348
+#define DUMMY 349
 
 
 
@@ -218,13 +270,16 @@
 
 
  
-  
-
+#include "OSDataStructures.h"
+#include "OSMathUtil.h"
+#include "OSParameters.h"
+#include "OSConfig.h"
 #include "OSErrorClass.h"
 #include "OSResult.h"
 #include "OSrLParserData.h"
 #include <iostream>
 #include <sstream> 
+#include <stdio.h>
 
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
@@ -236,6 +291,7 @@ char *osrlget_text (void* yyscanner );
 void osrlset_lineno (int line_number , void* yyscanner );
 void osrlset_extra (OSrLParserData* parserData , void* yyscanner );
 void  yygetOSResult(const char *ch, OSResult* m_osresult, OSrLParserData *m_parserData ) throw(ErrorClass);
+void osrl_empty_vectors( OSrLParserData* parserData);
 
 
 
@@ -264,7 +320,7 @@ typedef union YYSTYPE
 {
 	double dval;
 	int ival;
-	char* charval;
+	char* sval;
 }
 /* Line 193 of yacc.c.  */
 
@@ -516,20 +572,20 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   173
+#define YYLAST   273
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  73
+#define YYNTOKENS  99
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  57
+#define YYNNTS  83
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  115
+#define YYNRULES  163
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  219
+#define YYNSTATES  308
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   323
+#define YYMAXUTOK   349
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -537,10 +593,10 @@ union yyalloc
 /* YYTRANSLATE[YYLEX] -- Bison symbol number corresponding to YYLEX.  */
 static const yytype_uint8 yytranslate[] =
 {
-       0,     2,     2,     2,     2,     2,     2,     2,     2,    70,
-      72,     2,     2,    71,     2,     2,     2,     2,     2,     2,
+       0,     2,     2,     2,     2,     2,     2,     2,     2,    96,
+      98,     2,     2,    97,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,    69,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,    95,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -569,7 +625,9 @@ static const yytype_uint8 yytranslate[] =
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
-      65,    66,    67,    68
+      65,    66,    67,    68,    69,    70,    71,    72,    73,    74,
+      75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
+      85,    86,    87,    88,    89,    90,    91,    92,    93,    94
 };
 
 #if YYDEBUG
@@ -577,78 +635,100 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint16 yyprhs[] =
 {
-       0,     0,     3,     4,    10,    13,    17,    26,    31,    35,
-      37,    40,    44,    48,    49,    51,    55,    58,    59,    61,
-      65,    68,    69,    71,    75,    78,    79,    81,    85,    88,
-      89,    91,    95,    98,   100,   106,   109,   110,   112,   113,
-     115,   116,   121,   123,   126,   127,   130,   133,   136,   139,
-     142,   145,   148,   151,   154,   156,   159,   163,   173,   174,
-     178,   183,   187,   189,   192,   196,   200,   201,   205,   208,
-     209,   218,   220,   223,   229,   235,   236,   239,   240,   241,
-     249,   251,   254,   260,   266,   272,   274,   277,   281,   285,
-     286,   295,   297,   300,   306,   312,   313,   314,   324,   326,
-     329,   335,   341,   345,   346,   348,   349,   351,   353,   356,
-     359,   361,   363,   365,   367,   368
+       0,     0,     3,    11,    14,    18,    19,    28,    33,    37,
+      39,    42,    46,    48,    52,    54,    55,    57,    61,    64,
+      65,    67,    71,    74,    75,    77,    81,    84,    85,    87,
+      91,    94,    95,    97,   101,   104,   105,   108,   109,   112,
+     113,   117,   118,   122,   127,   129,   133,   134,   137,   139,
+     145,   146,   149,   151,   153,   155,   157,   161,   163,   167,
+     169,   173,   175,   179,   181,   183,   185,   186,   190,   193,
+     195,   198,   199,   202,   205,   208,   211,   214,   218,   222,
+     226,   230,   231,   234,   235,   246,   247,   252,   257,   261,
+     263,   266,   270,   272,   276,   278,   279,   283,   286,   287,
+     298,   299,   304,   309,   311,   314,   320,   322,   324,   328,
+     329,   332,   338,   340,   341,   344,   346,   348,   350,   352,
+     357,   359,   363,   365,   369,   373,   374,   377,   383,   385,
+     387,   389,   391,   392,   402,   407,   408,   411,   417,   423,
+     427,   428,   429,   440,   445,   447,   450,   456,   462,   466,
+     470,   471,   473,   474,   476,   478,   481,   483,   486,   488,
+     490,   492,   494,   495
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int16 yyrhs[] =
 {
-      74,     0,    -1,    -1,    76,    77,    86,    75,    12,    -1,
-      10,     8,    -1,    10,    11,     8,    -1,    13,    78,    81,
-      82,    83,    84,    85,    14,    -1,    52,    79,     8,    53,
-      -1,    52,    79,     9,    -1,    80,    -1,    79,    80,    -1,
-      65,     3,   127,    -1,    66,     3,   127,    -1,    -1,    15,
-      -1,    16,     4,    17,    -1,    16,    17,    -1,    -1,    18,
-      -1,    19,     4,    20,    -1,    19,    20,    -1,    -1,    21,
-      -1,    22,     4,    23,    -1,    22,    23,    -1,    -1,    24,
-      -1,    25,     4,    26,    -1,    25,    26,    -1,    -1,    56,
-      -1,    54,     4,    55,    -1,    54,    55,    -1,    29,    -1,
-      27,    88,    89,    87,    28,    -1,    27,    28,    -1,    -1,
-      68,    -1,    -1,    68,    -1,    -1,    30,    92,    90,    91,
-      -1,     9,    -1,     8,    98,    -1,    -1,    92,    93,    -1,
-      94,   127,    -1,    95,   127,    -1,    96,   127,    -1,    97,
-     127,    -1,    59,     5,    -1,    60,     5,    -1,    61,     5,
-      -1,    62,     5,    -1,    31,    -1,    99,    31,    -1,    98,
-      99,    31,    -1,    32,   100,     8,   101,   104,   105,   116,
-     119,   126,    -1,    -1,    63,     5,   127,    -1,    50,   102,
-       8,    51,    -1,    50,   102,     9,    -1,   103,    -1,   102,
-     103,    -1,    65,     3,   127,    -1,    66,     3,   127,    -1,
-      -1,    54,     4,    55,    -1,    54,    55,    -1,    -1,    38,
-       8,    34,     8,   106,    35,   108,    39,    -1,   107,    -1,
-     106,   107,    -1,    40,   123,     8,     6,    41,    -1,    40,
-     123,     8,     5,    41,    -1,    -1,   108,   109,    -1,    -1,
-      -1,    57,   110,   114,     8,   111,   112,    58,    -1,   113,
-      -1,   112,   113,    -1,    40,   123,     8,     4,    41,    -1,
-      40,   123,     8,     6,    41,    -1,    40,   123,     8,     5,
-      41,    -1,   115,    -1,   114,   115,    -1,    67,     3,   127,
-      -1,    66,     3,   127,    -1,    -1,    42,     8,    34,     8,
-     117,    35,   124,    43,    -1,   118,    -1,   117,   118,    -1,
-      44,   123,     8,     6,    45,    -1,    44,   123,     8,     5,
-      45,    -1,    -1,    -1,    46,     8,    36,   120,     8,   121,
-      37,   125,    47,    -1,   122,    -1,   121,   122,    -1,    48,
-     123,     8,     6,    49,    -1,    48,   123,     8,     5,    49,
-      -1,    64,     5,   127,    -1,    -1,    68,    -1,    -1,    68,
-      -1,    33,    -1,    68,    33,    -1,   129,     7,    -1,    69,
-      -1,    70,    -1,    71,    -1,    72,    -1,    -1,   129,   128,
-      -1
+     100,     0,    -1,   101,   102,   111,   112,   113,   126,    14,
+      -1,    11,     9,    -1,    11,    13,     9,    -1,    -1,    15,
+     103,   106,   107,   108,   109,   110,    16,    -1,    62,   104,
+       9,    63,    -1,    62,   104,    10,    -1,   105,    -1,   104,
+     105,    -1,    82,     3,   179,    -1,    83,    -1,    84,     3,
+     179,    -1,    85,    -1,    -1,    23,    -1,    24,     4,    25,
+      -1,    24,    25,    -1,    -1,    26,    -1,    27,     4,    28,
+      -1,    27,    28,    -1,    -1,    29,    -1,    30,     4,    31,
+      -1,    30,    31,    -1,    -1,    32,    -1,    33,     4,    34,
+      -1,    33,    34,    -1,    -1,    66,    -1,    64,     4,    65,
+      -1,    64,    65,    -1,    -1,    17,    18,    -1,    -1,    19,
+      20,    -1,    -1,    21,   114,    22,    -1,    -1,    35,   115,
+     116,    -1,    69,     7,     5,     7,    -1,    10,    -1,     9,
+     117,    36,    -1,    -1,   117,   118,    -1,    37,    -1,    38,
+     119,     9,   125,    39,    -1,    -1,   119,   120,    -1,   121,
+      -1,   122,    -1,   123,    -1,   124,    -1,    82,     3,     7,
+      -1,    83,    -1,    88,     3,     7,    -1,    89,    -1,    90,
+       3,     7,    -1,    91,    -1,    84,     3,     7,    -1,    85,
+      -1,     6,    -1,     5,    -1,    -1,    40,   127,    41,    -1,
+     129,   128,    -1,    10,    -1,     9,   135,    -1,    -1,   129,
+     130,    -1,   131,   179,    -1,   132,   179,    -1,   133,   179,
+      -1,   134,   179,    -1,    70,   179,     5,    -1,    71,   179,
+       5,    -1,    72,   179,     5,    -1,    73,   179,     5,    -1,
+      -1,   135,   136,    -1,    -1,    42,   137,   138,     9,   139,
+     142,   143,   163,   168,   177,    -1,    -1,    80,   179,     5,
+     179,    -1,    60,   140,     9,    61,    -1,    60,   140,    10,
+      -1,   141,    -1,   140,   141,    -1,    82,     3,   179,    -1,
+      83,    -1,    84,     3,   179,    -1,    85,    -1,    -1,    64,
+       4,    65,    -1,    64,    65,    -1,    -1,    48,   144,     9,
+      44,   145,     9,   146,    45,   150,    49,    -1,    -1,    74,
+     179,     5,   179,    -1,    77,   179,     5,   179,    -1,   147,
+      -1,   146,   147,    -1,    50,   149,     9,   148,    51,    -1,
+       5,    -1,     6,    -1,    81,     5,   179,    -1,    -1,   150,
+     151,    -1,   152,   153,     9,   159,    68,    -1,    67,    -1,
+      -1,   154,   153,    -1,   155,    -1,   156,    -1,   157,    -1,
+     158,    -1,    77,   179,     5,   179,    -1,    93,    -1,    92,
+       3,   179,    -1,    87,    -1,    86,     3,   179,    -1,    84,
+       3,   179,    -1,    -1,   160,   159,    -1,   162,   174,     9,
+     161,    51,    -1,     4,    -1,     5,    -1,     6,    -1,    50,
+      -1,    -1,    52,     9,    44,   164,     9,   165,    45,   175,
+      53,    -1,    78,   179,     5,   179,    -1,    -1,   165,   166,
+      -1,    54,   167,     9,     6,    55,    -1,    54,   167,     9,
+       5,    55,    -1,    81,     5,   179,    -1,    -1,    -1,    56,
+       9,    46,   170,   169,     9,   171,    47,   176,    57,    -1,
+      79,   179,     5,   179,    -1,   172,    -1,   171,   172,    -1,
+      58,   173,     9,     6,    59,    -1,    58,   173,     9,     5,
+      59,    -1,    81,     5,   179,    -1,    81,     5,   179,    -1,
+      -1,    94,    -1,    -1,    94,    -1,   178,    -1,    94,   178,
+      -1,    43,    -1,   181,     7,    -1,    95,    -1,    96,    -1,
+      97,    -1,    98,    -1,    -1,   181,   180,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   106,   106,   105,   123,   124,   128,   130,   131,   133,
-     134,   136,   137,   140,   141,   142,   143,   146,   147,   148,
-     149,   151,   152,   153,   154,   156,   157,   158,   159,   161,
-     162,   163,   164,   166,   167,   168,   170,   171,   173,   174,
-     177,   176,   204,   205,   207,   208,   210,   211,   212,   213,
-     217,   219,   221,   223,   227,   228,   229,   232,   238,   239,
-     242,   243,   246,   247,   249,   250,   252,   253,   254,   256,
-     257,   260,   261,   263,   267,   274,   275,   277,   280,   277,
-     284,   285,   287,   295,   301,   309,   310,   312,   313,   316,
-     317,   319,   320,   322,   324,   327,   329,   328,   339,   340,
-     342,   345,   352,   358,   359,   361,   362,   364,   365,   371,
-     373,   374,   375,   376,   378,   379
+       0,   118,   118,   121,   122,   126,   126,   128,   129,   131,
+     132,   134,   135,   136,   137,   140,   141,   142,   143,   146,
+     147,   148,   149,   151,   152,   153,   154,   156,   157,   158,
+     159,   161,   162,   163,   164,   166,   166,   168,   168,   170,
+     170,   172,   173,   175,   181,   181,   183,   183,   185,   186,
+     198,   198,   200,   200,   200,   200,   202,   203,   205,   206,
+     208,   209,   211,   212,   215,   216,   218,   218,   220,   223,
+     224,   226,   227,   229,   230,   231,   232,   236,   237,   238,
+     239,   242,   243,   246,   246,   256,   257,   263,   264,   267,
+     268,   270,   271,   272,   273,   275,   276,   280,   286,   287,
+     298,   299,   309,   316,   317,   319,   322,   327,   333,   337,
+     338,   340,   359,   368,   371,   373,   373,   373,   373,   375,
+     384,   387,   393,   399,   405,   414,   415,   417,   434,   435,
+     436,   438,   443,   444,   453,   457,   458,   460,   466,   474,
+     477,   479,   478,   496,   502,   503,   505,   512,   520,   522,
+     526,   527,   529,   530,   532,   533,   535,   543,   545,   546,
+     547,   548,   550,   551
 };
 #endif
 
@@ -658,35 +738,50 @@ static const yytype_uint16 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "ATTRIBUTETEXT", "ELEMENTTEXT",
-  "INTEGER", "DOUBLE", "QUOTE", "GREATERTHAN", "ENDOFELEMENT", "OSRLSTART",
-  "OSRLATTRIBUTETEXT", "OSRLEND", "RESULTHEADERSTART", "RESULTHEADEREND",
-  "SERVICEURISTARTANDEND", "SERVICEURISTART", "SERVICEURIEND",
-  "SERVICENAMESTARTANDEND", "SERVICENAMESTART", "SERVICENAMEEND",
-  "INSTANCENAMESTARTANDEND", "INSTANCENAMESTART", "INSTANCENAMEEND",
-  "JOBIDSTARTANDEND", "JOBIDSTART", "JOBIDEND", "RESULTDATASTART",
-  "RESULTDATAEND", "RESULTDATASTARTANDEND", "OPTIMIZATIONSTART",
+  "INTEGER", "DOUBLE", "QUOTE", "TWOQUOTES", "GREATERTHAN", "ENDOFELEMENT",
+  "OSRLSTART", "OSRLSTARTEMPTY", "OSRLATTRIBUTETEXT", "OSRLEND",
+  "GENERALSTART", "GENERALEND", "SYSTEMSTART", "SYSTEMEND", "SERVICESTART",
+  "SERVICEEND", "JOBSTART", "JOBEND", "SERVICEURISTARTANDEND",
+  "SERVICEURISTART", "SERVICEURIEND", "SERVICENAMESTARTANDEND",
+  "SERVICENAMESTART", "SERVICENAMEEND", "INSTANCENAMESTARTANDEND",
+  "INSTANCENAMESTART", "INSTANCENAMEEND", "JOBIDSTARTANDEND", "JOBIDSTART",
+  "JOBIDEND", "TIMINGINFORMATIONSTART", "TIMINGINFORMATIONEND",
+  "TIMESTARTANDEND", "TIMESTART", "TIMEEND", "OPTIMIZATIONSTART",
   "OPTIMIZATIONEND", "SOLUTIONSTART", "SOLUTIONEND", "VALUESSTART",
   "VALUESEND", "DUALVALUESSTART", "DUALVALUESEND", "VARIABLESSTART",
   "VARIABLESEND", "VARSTART", "VAREND", "OBJECTIVESSTART", "OBJECTIVESEND",
   "OBJSTART", "OBJEND", "CONSTRAINTSSTART", "CONSTRAINTSEND", "CONSTART",
   "CONEND", "STATUSSTART", "STATUSEND", "GENERALSTATUSSTART",
   "GENERALSTATUSEND", "MESSAGESTART", "MESSAGEEND", "MESSAGESTARTANDEND",
-  "OTHERSTART", "OTHEREND", "NUMBEROFSOLUTIONSATT", "NUMBEROFVARIABLESATT",
-  "NUMBEROFCONSTRAINTSATT", "NUMBEROFOBJECTIVESATT", "OBJECTIVEIDXATT",
-  "IDXATT", "TYPEATT", "DESCRIPTIONATT", "NAMEATT", "DUMMY", "' '",
-  "'\\t'", "'\\r'", "'\\n'", "$accept", "osrldoc", "@1", "osrlstart",
-  "resultHeader", "generalStatus", "anotherGeneralStatusATT",
-  "generalstatusatt", "serviceURI", "serviceName", "instanceName", "jobID",
-  "headerMessage", "resultData", "otherResultData", "statistics",
-  "optimization", "@2", "optend", "anotherOptATT", "optatt",
-  "optnumsolatt", "optnumvaratt", "optnumconatt", "optnumobjatt",
-  "solution", "anothersolution", "objectiveIDXATT", "status",
-  "anotherStatusATT", "statusatt", "message", "variables", "var",
-  "anothervar", "otherVariables", "otherVariableResult", "@3", "@4",
-  "othervar", "anotherothervar", "anotherotherVarATT", "otheratt",
-  "objectives", "obj", "anotherobj", "constraints", "@5", "con",
-  "anothercon", "anIDXATT", "otherObjectives", "otherConstraints",
-  "otherSolution", "quote", "xmlWhiteSpaceChar", "xmlWhiteSpace", 0
+  "OTHERSTART", "OTHEREND", "NUMBEROFTIMESATT", "NUMBEROFSOLUTIONSATT",
+  "NUMBEROFVARIABLESATT", "NUMBEROFCONSTRAINTSATT",
+  "NUMBEROFOBJECTIVESATT", "NUMBEROFOTHERVARIABLERESULTSATT",
+  "NUMBEROFOTHEROBJECTIVERESULTSATT", "NUMBEROFOTHERCONSTRAINTRESULTSATT",
+  "NUMBEROFVARATT", "NUMBEROFOBJATT", "NUMBEROFCONATT",
+  "TARGETOBJECTIVEIDXATT", "IDXATT", "TYPEATT", "EMPTYTYPEATT",
+  "DESCRIPTIONATT", "EMPTYDESCRIPTIONATT", "NAMEATT", "EMPTYNAMEATT",
+  "CATEGORYATT", "EMPTYCATEGORYATT", "UNITATT", "EMPTYUNITATT", "VALUEATT",
+  "EMPTYVALUEATT", "DUMMY", "' '", "'\\t'", "'\\r'", "'\\n'", "$accept",
+  "osrldoc", "osrlstart", "generalElement", "generalStatus",
+  "anotherGeneralStatusATT", "generalstatusatt", "serviceURI",
+  "serviceName", "instanceName", "jobID", "headerMessage", "systemElement",
+  "serviceElement", "jobElement", "timingInformation", "numberoftimes",
+  "timingContent", "listOfTimes", "time", "timeAttList", "timeAtt",
+  "timeType", "timeCategory", "timeUnit", "timeDescription", "timeValue",
+  "optimizationElement", "optimizationContent", "optend", "anotherOptATT",
+  "optatt", "optnumsolatt", "optnumvaratt", "optnumconatt", "optnumobjatt",
+  "solution", "anothersolution", "@1", "targetObjectiveIDXATT", "status",
+  "anotherStatusATT", "statusatt", "message", "variables",
+  "numberOfOtherVariableResults", "numberOfVarATT", "var", "anothervar",
+  "DoubleOrInt", "aVARIDXATT", "otherVariables", "otherVariableResult",
+  "otherVariableStart", "otherVariableATTlist", "othervariableATT",
+  "numberOfOtherVarATT", "otherVarValueATT", "otherVarNameATT",
+  "otherVarDescriptionATT", "othervarlist", "othervar", "ElementValue",
+  "othervarstart", "objectives", "numberOfObjATT", "obj", "anotherobj",
+  "anOBJIDXATT", "constraints", "@2", "numberOfConATT", "con",
+  "anothercon", "aCONIDXATT", "anIDXATT", "otherObjectives",
+  "otherConstraints", "otherSolution", "solutionEnd", "quote",
+  "xmlWhiteSpaceChar", "xmlWhiteSpace", 0
 };
 #endif
 
@@ -701,43 +796,55 @@ static const yytype_uint16 yytoknum[] =
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
      295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
      305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
-     315,   316,   317,   318,   319,   320,   321,   322,   323,    32,
-       9,    13,    10
+     315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
+     325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
+     335,   336,   337,   338,   339,   340,   341,   342,   343,   344,
+     345,   346,   347,   348,   349,    32,     9,    13,    10
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    73,    75,    74,    76,    76,    77,    78,    78,    79,
-      79,    80,    80,    81,    81,    81,    81,    82,    82,    82,
-      82,    83,    83,    83,    83,    84,    84,    84,    84,    85,
-      85,    85,    85,    86,    86,    86,    87,    87,    88,    88,
-      90,    89,    91,    91,    92,    92,    93,    93,    93,    93,
-      94,    95,    96,    97,    98,    98,    98,    99,   100,   100,
-     101,   101,   102,   102,   103,   103,   104,   104,   104,   105,
-     105,   106,   106,   107,   107,   108,   108,   110,   111,   109,
-     112,   112,   113,   113,   113,   114,   114,   115,   115,   116,
-     116,   117,   117,   118,   118,   119,   120,   119,   121,   121,
-     122,   122,   123,   124,   124,   125,   125,   126,   126,   127,
-     128,   128,   128,   128,   129,   129
+       0,    99,   100,   101,   101,   102,   102,   103,   103,   104,
+     104,   105,   105,   105,   105,   106,   106,   106,   106,   107,
+     107,   107,   107,   108,   108,   108,   108,   109,   109,   109,
+     109,   110,   110,   110,   110,   111,   111,   112,   112,   113,
+     113,   114,   114,   115,   116,   116,   117,   117,   118,   118,
+     119,   119,   120,   120,   120,   120,   121,   121,   122,   122,
+     123,   123,   124,   124,   125,   125,   126,   126,   127,   128,
+     128,   129,   129,   130,   130,   130,   130,   131,   132,   133,
+     134,   135,   135,   137,   136,   138,   138,   139,   139,   140,
+     140,   141,   141,   141,   141,   142,   142,   142,   143,   143,
+     144,   144,   145,   146,   146,   147,   148,   148,   149,   150,
+     150,   151,   152,   153,   153,   154,   154,   154,   154,   155,
+     156,   156,   157,   157,   158,   159,   159,   160,   161,   161,
+     161,   162,   163,   163,   164,   165,   165,   166,   166,   167,
+     168,   169,   168,   170,   171,   171,   172,   172,   173,   174,
+     175,   175,   176,   176,   177,   177,   178,   179,   180,   180,
+     180,   180,   181,   181
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     5,     2,     3,     8,     4,     3,     1,
-       2,     3,     3,     0,     1,     3,     2,     0,     1,     3,
-       2,     0,     1,     3,     2,     0,     1,     3,     2,     0,
-       1,     3,     2,     1,     5,     2,     0,     1,     0,     1,
-       0,     4,     1,     2,     0,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     1,     2,     3,     9,     0,     3,
-       4,     3,     1,     2,     3,     3,     0,     3,     2,     0,
-       8,     1,     2,     5,     5,     0,     2,     0,     0,     7,
-       1,     2,     5,     5,     5,     1,     2,     3,     3,     0,
-       8,     1,     2,     5,     5,     0,     0,     9,     1,     2,
-       5,     5,     3,     0,     1,     0,     1,     1,     2,     2,
-       1,     1,     1,     1,     0,     2
+       0,     2,     7,     2,     3,     0,     8,     4,     3,     1,
+       2,     3,     1,     3,     1,     0,     1,     3,     2,     0,
+       1,     3,     2,     0,     1,     3,     2,     0,     1,     3,
+       2,     0,     1,     3,     2,     0,     2,     0,     2,     0,
+       3,     0,     3,     4,     1,     3,     0,     2,     1,     5,
+       0,     2,     1,     1,     1,     1,     3,     1,     3,     1,
+       3,     1,     3,     1,     1,     1,     0,     3,     2,     1,
+       2,     0,     2,     2,     2,     2,     2,     3,     3,     3,
+       3,     0,     2,     0,    10,     0,     4,     4,     3,     1,
+       2,     3,     1,     3,     1,     0,     3,     2,     0,    10,
+       0,     4,     4,     1,     2,     5,     1,     1,     3,     0,
+       2,     5,     1,     0,     2,     1,     1,     1,     1,     4,
+       1,     3,     1,     3,     3,     0,     2,     5,     1,     1,
+       1,     1,     0,     9,     4,     0,     2,     5,     5,     3,
+       0,     0,    10,     4,     1,     2,     5,     5,     3,     3,
+       0,     1,     0,     1,     1,     2,     1,     2,     1,     1,
+       1,     1,     0,     2
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -745,79 +852,103 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     4,     0,     1,     0,     0,     5,
-       0,    13,    38,    33,     2,     0,     0,     0,     9,    14,
-       0,    17,    35,    39,     0,     0,   114,   114,     0,     8,
-      10,     0,    16,    18,     0,    21,    44,    36,     3,    11,
-       0,    12,     7,    15,     0,    20,    22,     0,    25,    40,
-      37,     0,   109,   110,   111,   112,   113,   115,    19,     0,
-      24,    26,     0,    29,     0,     0,     0,     0,     0,    45,
-     114,   114,   114,   114,    34,    23,     0,    28,     0,    30,
-       0,    50,    51,    52,    53,     0,    42,    41,    46,    47,
-      48,    49,    27,     0,    32,     6,    54,    58,    43,     0,
-      31,     0,     0,     0,    55,   114,     0,    56,    59,     0,
-      66,     0,     0,     0,    62,     0,    69,   114,   114,     0,
-      61,    63,     0,    68,     0,    89,    64,    65,    60,    67,
-       0,     0,    95,     0,     0,     0,     0,     0,     0,     0,
-     107,     0,    57,     0,     0,    71,     0,    96,   108,     0,
-       0,    75,    72,     0,     0,    91,     0,   114,     0,     0,
-       0,   103,    92,     0,   102,     0,     0,    70,    77,    76,
-       0,   104,     0,     0,     0,    98,    74,    73,     0,     0,
-       0,    90,     0,   105,    99,     0,     0,     0,    85,    94,
-      93,     0,   106,     0,   114,   114,    78,    86,     0,     0,
-      97,    88,    87,     0,   101,   100,     0,     0,    80,     0,
-      79,    81,     0,     0,     0,     0,    82,    84,    83
+       0,     0,     0,     5,     3,     0,     1,     0,    35,     4,
+       0,    15,     0,    37,     0,    12,     0,    14,     0,     9,
+      16,     0,    19,    36,     0,    39,   162,   162,     0,     8,
+      10,     0,    18,    20,     0,    23,    38,    41,    66,    11,
+       0,    13,     7,    17,     0,    22,    24,     0,    27,     0,
+       0,    71,     0,   157,   158,   159,   160,   161,   163,    21,
+       0,    26,    28,     0,    31,     0,     0,    40,     0,     0,
+       2,    25,     0,    30,     0,    32,     0,     0,    46,    44,
+      42,    67,    81,    69,   162,   162,   162,   162,    68,    72,
+     162,   162,   162,   162,    29,     0,    34,     6,     0,     0,
+      70,     0,     0,     0,     0,    73,    74,    75,    76,    33,
+      43,    45,    48,    50,    47,    83,    82,    77,    78,    79,
+      80,     0,    85,     0,     0,    57,     0,    63,     0,    59,
+       0,    61,    51,    52,    53,    54,    55,   162,     0,    65,
+      64,     0,     0,     0,     0,     0,     0,     0,    49,    56,
+      62,    58,    60,   162,     0,    95,    86,     0,    92,     0,
+      94,     0,    89,     0,    98,   162,   162,     0,    88,    90,
+       0,    97,   100,   132,    91,    93,    87,    96,   162,     0,
+       0,   140,     0,     0,     0,     0,     0,   162,     0,     0,
+       0,   156,     0,    84,   154,   101,   162,     0,   162,     0,
+       0,   155,     0,     0,     0,   135,   162,   141,   162,     0,
+       0,   103,   162,     0,     0,     0,   102,     0,     0,   109,
+     104,   134,   150,     0,   136,   162,     0,   162,     0,     0,
+     151,     0,     0,     0,   143,     0,     0,   144,   108,   106,
+     107,     0,    99,   112,   110,   113,   133,   162,     0,     0,
+       0,   152,   145,   105,   162,     0,     0,   122,     0,   120,
+       0,   113,   115,   116,   117,   118,   139,     0,     0,   162,
+       0,   153,     0,     0,   162,   162,   162,   125,   114,   138,
+     137,   148,     0,     0,   142,   162,   124,   123,   121,   131,
+       0,   125,     0,   147,   146,   119,   111,   126,     0,     0,
+     162,     0,   149,   128,   129,   130,     0,   127
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int16 yydefgoto[] =
 {
-      -1,     2,    25,     3,     8,    11,    17,    18,    21,    35,
-      48,    63,    80,    14,    51,    24,    37,    68,    87,    49,
-      69,    70,    71,    72,    73,    98,    99,   102,   110,   113,
-     114,   116,   125,   144,   145,   159,   169,   178,   203,   207,
-     208,   187,   188,   132,   154,   155,   136,   156,   174,   175,
-     150,   172,   193,   142,    39,    57,    40
+      -1,     2,     3,     8,    11,    18,    19,    22,    35,    48,
+      64,    76,    13,    25,    38,    50,    66,    80,    99,   114,
+     121,   132,   133,   134,   135,   136,   141,    52,    68,    88,
+      69,    89,    90,    91,    92,    93,   100,   116,   122,   138,
+     155,   161,   162,   164,   173,   179,   197,   210,   211,   241,
+     218,   229,   244,   245,   260,   261,   262,   263,   264,   265,
+     290,   291,   306,   292,   181,   199,   213,   224,   233,   186,
+     215,   207,   236,   237,   250,   299,   231,   272,   193,   194,
+      39,    58,    40
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -152
+#define YYPACT_NINF -70
 static const yytype_int16 yypact[] =
 {
-      22,    19,    21,    34,  -152,    33,  -152,    37,    13,  -152,
-     -12,    44,   -20,  -152,  -152,    54,    69,     2,  -152,  -152,
-      11,    56,  -152,  -152,    -7,    86,  -152,  -152,    46,  -152,
-    -152,    83,  -152,  -152,    15,    55,  -152,    35,  -152,  -152,
-      -6,  -152,  -152,  -152,    81,  -152,  -152,    10,    57,   -10,
-    -152,    74,  -152,  -152,  -152,  -152,  -152,  -152,  -152,    84,
-    -152,  -152,     5,    17,    99,   100,   101,   103,    71,  -152,
-    -152,  -152,  -152,  -152,  -152,  -152,    85,  -152,     1,  -152,
-      95,  -152,  -152,  -152,  -152,    52,  -152,  -152,  -152,  -152,
-    -152,  -152,  -152,    58,  -152,  -152,  -152,    47,    80,    88,
-    -152,   109,   107,    89,  -152,  -152,    66,  -152,  -152,    20,
-      63,   115,   118,     4,  -152,     3,    90,  -152,  -152,    72,
-    -152,  -152,    67,  -152,   116,    92,  -152,  -152,  -152,  -152,
-      93,   117,    94,   121,    97,   124,   -29,    96,   125,   102,
-    -152,   104,  -152,    62,   -15,  -152,    98,  -152,  -152,   130,
-     131,  -152,  -152,    62,   -18,  -152,   133,  -152,    82,   -33,
-     135,    76,  -152,   105,  -152,   106,   108,  -152,  -152,  -152,
-      87,  -152,   111,    62,   -19,  -152,  -152,  -152,    28,   110,
-     112,  -152,   137,    78,  -152,   145,   147,    -5,  -152,  -152,
-    -152,    91,  -152,   113,  -152,  -152,  -152,  -152,   114,   120,
-    -152,  -152,  -152,   119,  -152,  -152,    62,   -24,  -152,   143,
-    -152,  -152,    32,   123,   129,   132,  -152,  -152,  -152
+      12,    29,    14,    22,   -70,     9,   -70,   -36,    84,   -70,
+     -39,    16,    91,    94,   111,   -70,   112,   -70,     3,   -70,
+     -70,     4,    35,   -70,    96,    97,   -70,   -70,    54,   -70,
+     -70,    95,   -70,   -70,     5,    26,   -70,    86,    79,   -70,
+      -6,   -70,   -70,   -70,    99,   -70,   -70,     1,    41,    53,
+     101,   -70,   110,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     103,   -70,   -70,     0,    36,   118,    70,   -70,    87,    -3,
+     -70,   -70,   107,   -70,     6,   -70,   113,   125,   -70,   -70,
+     -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     -70,   -70,   -70,   -70,   -70,    66,   -70,   -70,   126,    15,
+      90,   130,   131,   132,   135,   -70,   -70,   -70,   -70,   -70,
+     -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     -70,    -7,    62,    98,   140,   -70,   141,   -70,   142,   -70,
+     143,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   138,   -70,
+     -70,   109,   145,   146,   147,   148,   144,   104,   -70,   -70,
+     -70,   -70,   -70,   -70,   -35,    92,   -70,   154,   -70,   155,
+     -70,    11,   -70,     7,   114,   -70,   -70,    89,   -70,   -70,
+     105,   -70,    85,   115,   -70,   -70,   -70,   -70,   -70,   152,
+     156,   116,   158,   122,   124,   164,   -40,   -70,   117,   108,
+     128,   -70,   133,   -70,   -70,   -70,   -70,   166,   -70,   168,
+     120,   -70,   173,   134,   175,   -70,   -70,   -70,   -70,   121,
+      -9,   -70,   -70,   -26,   177,   174,   -70,   182,   179,   -70,
+     -70,   -70,   119,   123,   -70,   -70,   137,   -70,   100,   -32,
+     -70,   136,   185,   183,   -70,   127,   -31,   -70,   -70,   -70,
+     -70,   150,   -70,   -70,   -70,   -62,   -70,   -70,   102,   186,
+     184,   129,   -70,   -70,   -70,   193,   194,   -70,   200,   -70,
+     196,   -62,   -70,   -70,   -70,   -70,   -70,   151,   157,   -70,
+     106,   -70,   153,   202,   -70,   -70,   -70,   159,   -70,   -70,
+     -70,   -70,   160,   162,   -70,   -70,   -70,   -70,   -70,   -70,
+     149,   159,   163,   -70,   -70,   -70,   -70,   -70,   206,   205,
+     -70,    93,   -70,   -70,   -70,   -70,   165,   -70
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -152,  -152,  -152,  -152,  -152,  -152,  -152,   139,  -152,  -152,
-    -152,  -152,  -152,  -152,  -152,  -152,  -152,  -152,  -152,  -152,
-    -152,  -152,  -152,  -152,  -152,  -152,    60,  -152,  -152,  -152,
-      39,  -152,  -152,  -152,    18,  -152,  -152,  -152,  -152,  -152,
-     -46,  -152,   -22,  -152,  -152,    12,  -152,  -152,  -152,    -3,
-    -151,  -152,  -152,  -152,   -27,  -152,  -152
+     -70,   -70,   -70,   -70,   -70,   -70,   197,   -70,   -70,   -70,
+     -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     -70,   -70,    57,   -70,   -70,   -70,   -70,   -70,    18,   -70,
+     -70,   -70,   -70,   -70,   -37,   -70,   -70,   -70,   -70,   -70,
+     -69,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,   -70,
+     -70,   -70,   -70,   -11,   -70,   -70,   -70,   -70,   -70,    34,
+     -27,   -70,   -70
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -825,76 +956,105 @@ static const yytype_int16 yypgoto[] =
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -1
-static const yytype_uint8 yytable[] =
+static const yytype_uint16 yytable[] =
 {
-      41,    52,   160,   196,   140,    93,   167,   122,    22,    76,
-      28,    29,   119,   120,    59,    31,   206,   161,   183,    44,
-     151,     6,   182,    36,   168,   143,   153,     4,    32,   173,
-       5,    77,     1,    60,   210,    45,   213,   214,   215,   141,
-      12,     9,    13,    88,    89,    90,    91,     7,    23,    64,
-      65,    66,    67,    15,    16,   209,    94,    26,   123,    19,
-      20,   185,   186,    53,    54,    55,    56,    15,    16,   111,
-     112,    78,    27,    79,    33,    34,    46,    47,   108,    85,
-      86,    61,    62,    96,    97,   111,   112,   165,   166,    10,
-     126,   127,   179,   180,   185,   186,   198,   199,    38,    42,
-      43,    58,    74,    50,    81,    82,    83,    75,    84,    95,
-     101,    92,    97,   100,   105,   106,   109,   115,   117,   104,
-     107,   118,   129,   128,   130,   134,   149,   133,   124,   137,
-     164,   138,   139,   146,   131,   157,   143,   148,   147,   158,
-     135,   163,   153,   170,   171,   191,   192,   176,   194,   177,
-     195,   212,   121,   173,   181,   189,    30,   190,   103,   206,
-     200,   211,   152,   204,   216,   197,   162,   201,   202,   205,
-     217,   184,     0,   218
+      41,    53,   123,   191,    72,    60,    82,    83,    31,    44,
+      95,   170,    28,    29,     6,   254,   251,   242,     9,   222,
+     167,   168,   255,     1,   256,   257,    10,   235,   223,    32,
+     258,   259,    61,    45,    73,   243,   219,     7,     4,    20,
+      21,   209,     5,    14,    15,    16,    17,   157,   158,   159,
+     160,   111,   112,   113,   192,    46,    47,   101,   102,   103,
+     104,    33,    34,   105,   106,   107,   108,    84,    85,    86,
+      87,    96,   171,    62,    63,   124,   125,   126,   127,    78,
+      79,   128,   129,   130,   131,    14,    15,    16,    17,    54,
+      55,    56,    57,   157,   158,   159,   160,   303,   304,   305,
+      74,    12,    75,   139,   140,   239,   240,   267,   268,    23,
+     146,   282,   283,    24,    26,    27,    36,    42,    37,    51,
+      43,    49,    65,    67,    70,    77,   156,    59,    81,    97,
+      98,   109,   115,   110,    71,   117,   118,   119,   174,   175,
+     120,    94,   137,   142,   143,   144,   145,   147,   148,   153,
+     176,   182,   149,   150,   151,   152,   163,   165,   166,   178,
+     195,   183,   172,   187,   154,   184,   188,   180,   189,   202,
+     177,   204,   185,   190,   200,   203,   191,   205,   208,   214,
+     212,   216,   225,   226,   209,   221,   198,   227,   228,   246,
+     247,   269,   248,   270,   196,   235,   274,   275,   234,   206,
+     238,   253,   217,   276,   232,   277,   279,   285,   249,   289,
+     284,   300,   280,   230,   301,    30,   307,   296,   169,   293,
+     266,   294,   297,   271,   278,   252,   201,   273,   220,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,   281,     0,   298,     0,     0,   286,   287,   288,
+       0,     0,     0,     0,     0,     0,     0,     0,   295,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,   302
 };
 
 static const yytype_int16 yycheck[] =
 {
-      27,     7,   153,     8,    33,     4,    39,     4,    28,     4,
-       8,     9,     8,     9,     4,     4,    40,    35,    37,     4,
-      35,     0,   173,    30,    57,    40,    44,     8,    17,    48,
-      11,    26,    10,    23,    58,    20,     4,     5,     6,    68,
-      27,     8,    29,    70,    71,    72,    73,    13,    68,    59,
-      60,    61,    62,    65,    66,   206,    55,     3,    55,    15,
-      16,    66,    67,    69,    70,    71,    72,    65,    66,    65,
-      66,    54,     3,    56,    18,    19,    21,    22,   105,     8,
-       9,    24,    25,    31,    32,    65,    66,     5,     6,    52,
-     117,   118,     5,     6,    66,    67,     5,     6,    12,    53,
-      17,    20,    28,    68,     5,     5,     5,    23,     5,    14,
-      63,    26,    32,    55,     5,     8,    50,    54,     3,    31,
-      31,     3,    55,    51,     8,     8,    64,    34,    38,     8,
-     157,    34,     8,     8,    42,     5,    40,    33,    36,     8,
-      46,     8,    44,     8,    68,     8,    68,    41,     3,    41,
-       3,     8,   113,    48,    43,    45,    17,    45,    98,    40,
-      47,   207,   144,    49,    41,   187,   154,   194,   195,    49,
-      41,   174,    -1,    41
+      27,     7,     9,    43,     4,     4,     9,    10,     4,     4,
+       4,     4,     9,    10,     0,    77,    47,    49,     9,    45,
+       9,    10,    84,    11,    86,    87,    62,    58,    54,    25,
+      92,    93,    31,    28,    34,    67,    45,    15,     9,    23,
+      24,    50,    13,    82,    83,    84,    85,    82,    83,    84,
+      85,    36,    37,    38,    94,    29,    30,    84,    85,    86,
+      87,    26,    27,    90,    91,    92,    93,    70,    71,    72,
+      73,    65,    65,    32,    33,    82,    83,    84,    85,     9,
+      10,    88,    89,    90,    91,    82,    83,    84,    85,    95,
+      96,    97,    98,    82,    83,    84,    85,     4,     5,     6,
+      64,    17,    66,     5,     6,     5,     6,     5,     6,    18,
+     137,     5,     6,    19,     3,     3,    20,    63,    21,    40,
+      25,    35,    69,    22,    14,     7,   153,    28,    41,    16,
+       5,    65,    42,     7,    31,     5,     5,     5,   165,   166,
+       5,    34,    80,     3,     3,     3,     3,     9,    39,     5,
+      61,   178,     7,     7,     7,     7,    64,     3,     3,    74,
+     187,     9,    48,     5,    60,     9,    44,    52,    44,   196,
+      65,   198,    56,     9,    46,     9,    43,     9,     5,   206,
+       5,   208,     5,     9,    50,   212,    78,     5,     9,    53,
+       5,     5,     9,     9,    77,    58,     3,     3,   225,    79,
+     227,    51,    81,     3,    81,     9,    55,     5,    81,    50,
+      57,     5,    55,    94,     9,    18,    51,    68,   161,    59,
+     247,    59,   291,    94,   261,   236,   192,   254,   210,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,   269,    -1,    81,    -1,    -1,   274,   275,   276,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,   285,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,   300
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    10,    74,    76,     8,    11,     0,    13,    77,     8,
-      52,    78,    27,    29,    86,    65,    66,    79,    80,    15,
-      16,    81,    28,    68,    88,    75,     3,     3,     8,     9,
-      80,     4,    17,    18,    19,    82,    30,    89,    12,   127,
-     129,   127,    53,    17,     4,    20,    21,    22,    83,    92,
-      68,    87,     7,    69,    70,    71,    72,   128,    20,     4,
-      23,    24,    25,    84,    59,    60,    61,    62,    90,    93,
-      94,    95,    96,    97,    28,    23,     4,    26,    54,    56,
-      85,     5,     5,     5,     5,     8,     9,    91,   127,   127,
-     127,   127,    26,     4,    55,    14,    31,    32,    98,    99,
-      55,    63,   100,    99,    31,     5,     8,    31,   127,    50,
-     101,    65,    66,   102,   103,    54,   104,     3,     3,     8,
-       9,   103,     4,    55,    38,   105,   127,   127,    51,    55,
-       8,    42,   116,    34,     8,    46,   119,     8,    34,     8,
-      33,    68,   126,    40,   106,   107,     8,    36,    33,    64,
-     123,    35,   107,    44,   117,   118,   120,     5,     8,   108,
-     123,    35,   118,     8,   127,     5,     6,    39,    57,   109,
-       8,    68,   124,    48,   121,   122,    41,    41,   110,     5,
-       6,    43,   123,    37,   122,    66,    67,   114,   115,    45,
-      45,     8,    68,   125,     3,     3,     8,   115,     5,     6,
-      47,   127,   127,   111,    49,    49,    40,   112,   113,   123,
-      58,   113,     8,     4,     5,     6,    41,    41,    41
+       0,    11,   100,   101,     9,    13,     0,    15,   102,     9,
+      62,   103,    17,   111,    82,    83,    84,    85,   104,   105,
+      23,    24,   106,    18,    19,   112,     3,     3,     9,    10,
+     105,     4,    25,    26,    27,   107,    20,    21,   113,   179,
+     181,   179,    63,    25,     4,    28,    29,    30,   108,    35,
+     114,    40,   126,     7,    95,    96,    97,    98,   180,    28,
+       4,    31,    32,    33,   109,    69,   115,    22,   127,   129,
+      14,    31,     4,    34,    64,    66,   110,     7,     9,    10,
+     116,    41,     9,    10,    70,    71,    72,    73,   128,   130,
+     131,   132,   133,   134,    34,     4,    65,    16,     5,   117,
+     135,   179,   179,   179,   179,   179,   179,   179,   179,    65,
+       7,    36,    37,    38,   118,    42,   136,     5,     5,     5,
+       5,   119,   137,     9,    82,    83,    84,    85,    88,    89,
+      90,    91,   120,   121,   122,   123,   124,    80,   138,     5,
+       6,   125,     3,     3,     3,     3,   179,     9,    39,     7,
+       7,     7,     7,     5,    60,   139,   179,    82,    83,    84,
+      85,   140,   141,    64,   142,     3,     3,     9,    10,   141,
+       4,    65,    48,   143,   179,   179,    61,    65,    74,   144,
+      52,   163,   179,     9,     9,    56,   168,     5,    44,    44,
+       9,    43,    94,   177,   178,   179,    77,   145,    78,   164,
+      46,   178,   179,     9,   179,     9,    79,   170,     5,    50,
+     146,   147,     5,   165,   179,   169,   179,    81,   149,    45,
+     147,   179,    45,    54,   166,     5,     9,     5,     9,   150,
+      94,   175,    81,   167,   179,    58,   171,   172,   179,     5,
+       6,   148,    49,    67,   151,   152,    53,     5,     9,    81,
+     173,    47,   172,    51,    77,    84,    86,    87,    92,    93,
+     153,   154,   155,   156,   157,   158,   179,     5,     6,     5,
+       9,    94,   176,   179,     3,     3,     3,     9,   153,    55,
+      55,   179,     5,     6,    57,     5,   179,   179,   179,    50,
+     159,   160,   162,    59,    59,   179,    68,   159,    81,   174,
+       5,     9,   179,     4,     5,     6,   161,    51
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1743,26 +1903,7 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-
-    {
- 	if(parserData->numberOfSolutions > 0){
-		for(int solIdx = 0; solIdx <  parserData->numberOfSolutions; solIdx++){
-			osresult->setSolutionStatus(solIdx, parserData->statusType, parserData->statusDescription);
-			osresult->setPrimalVariableValues(solIdx, parserData->primalSolution[ solIdx]);
-		    osresult->setNumberOfOtherVariableResult(solIdx, parserData->numberOfOtherVariableResult);
-			for(int k = 0; k < parserData->numberOfOtherVariableResult; k++){
-				osresult->setAnOtherVariableResult(solIdx, k, parserData->otherVarVec[ k]->name, parserData->otherVarVec[ k]->description, parserData->otherVarVec[ k]->otherVarText);				
-			}
-			if( (parserData->dualSolution != NULL) &&  (parserData->dualSolution[ solIdx] != NULL) )  osresult->setDualVariableValues(solIdx, parserData->dualSolution[ solIdx]);
-			if( (parserData->objectiveValues != NULL) &&  (parserData->objectiveValues[ solIdx] != NULL) ) osresult->setObjectiveValues(solIdx, parserData->objectiveValues[ solIdx]);
-		    osresult->setSolutionObjectiveIndex(solIdx,  *(parserData->objectiveIdx + solIdx));
-		}
-	}
-}
-    break;
-
-  case 7:
+        case 7:
 
     {if(parserData->generalStatusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for generalStatus element");}
     break;
@@ -1774,235 +1915,486 @@ yyreduce:
 
   case 11:
 
-    { osresult->setGeneralStatusType((yyvsp[(2) - (3)].charval));  free((yyvsp[(2) - (3)].charval));  ; parserData->generalStatusTypePresent = true;}
+    { osresult->setGeneralStatusType((yyvsp[(2) - (3)].sval));  free((yyvsp[(2) - (3)].sval));  ; parserData->generalStatusTypePresent = true;}
     break;
 
   case 12:
 
-    {  osresult->setGeneralStatusDescription((yyvsp[(2) - (3)].charval));    free((yyvsp[(2) - (3)].charval));}
+    { osresult->setGeneralStatusType("");               parserData->generalStatusTypePresent = true;}
     break;
 
-  case 15:
+  case 13:
 
-    {osresult->setServiceURI( (yyvsp[(2) - (3)].charval)); free((yyvsp[(2) - (3)].charval)); parserData->errorText = NULL;}
+    { osresult->setGeneralStatusDescription((yyvsp[(2) - (3)].sval));    free((yyvsp[(2) - (3)].sval));}
     break;
 
-  case 19:
+  case 14:
 
-    {osresult->setServiceName( (yyvsp[(2) - (3)].charval));  free((yyvsp[(2) - (3)].charval));   parserData->errorText = NULL;}
+    { osresult->setGeneralStatusDescription("");}
     break;
 
-  case 23:
+  case 17:
 
-    {osresult->setInstanceName( (yyvsp[(2) - (3)].charval)) ;  free((yyvsp[(2) - (3)].charval));   parserData->errorText = NULL;}
+    {osresult->setServiceURI( (yyvsp[(2) - (3)].sval)); free((yyvsp[(2) - (3)].sval)); parserData->errorText = NULL;}
     break;
 
-  case 27:
+  case 21:
 
-    {osresult->setJobID( (yyvsp[(2) - (3)].charval));  free((yyvsp[(2) - (3)].charval));  parserData->errorText = NULL;}
+    {osresult->setServiceName( (yyvsp[(2) - (3)].sval));  free((yyvsp[(2) - (3)].sval));   parserData->errorText = NULL;}
     break;
 
-  case 31:
+  case 25:
 
-    {osresult->setGeneralMessage( (yyvsp[(2) - (3)].charval));  free((yyvsp[(2) - (3)].charval));  parserData->errorText = NULL;}
+    {osresult->setInstanceName( (yyvsp[(2) - (3)].sval)) ;  free((yyvsp[(2) - (3)].sval));   parserData->errorText = NULL;}
     break;
 
-  case 40:
+  case 29:
 
-    {
-// we now have the basic problem parameters
-	if(parserData->numberOfSolutions > 0){
-			if( parserData->numberOfVariables > 0){
-				parserData->primalSolution = new double* [parserData->numberOfSolutions];
-				for(int i = 0; i < parserData->numberOfSolutions; i++){
-					parserData->primalSolution[ i] = new double[ parserData->numberOfVariables];
-				}
-			}
-			//if( parserData->numberOfConstraints > 0){
-			//	parserData->dualSolution = new double*[ parserData->numberOfSolutions];
-			//	for(int i = 0; i < parserData->numberOfSolutions; i++){
-			//		parserData->dualSolution[ i] = new double[ parserData->numberOfConstraints];
-			//	}
-			//}
-			if( parserData->numberOfObjectives > 0){
-				parserData->objectiveValues = new double*[ parserData->numberOfSolutions];
-				parserData->objectiveIdx = new int[ parserData->numberOfSolutions];
-				for(int i = 0; i < parserData->numberOfSolutions; i++){
-					parserData->objectiveValues[ i] = new double[ parserData->numberOfObjectives];
-				}
-			}
-	}
+    {osresult->setJobID( (yyvsp[(2) - (3)].sval)); free((yyvsp[(2) - (3)].sval));  parserData->errorText = NULL;}
+    break;
+
+  case 33:
+
+    {osresult->setGeneralMessage( (yyvsp[(2) - (3)].sval));  free((yyvsp[(2) - (3)].sval));  parserData->errorText = NULL;}
+    break;
+
+  case 43:
+
+    {	if ((yyvsp[(3) - (4)].ival) < 0) osrlerror(NULL, NULL, NULL, "number of time measurements cannot be negative");
+	parserData->numberOfTimes = (yyvsp[(3) - (4)].ival);
+	parserData->ivar = 0;
 }
     break;
 
-  case 50:
+  case 49:
 
-    {parserData->numberOfSolutions = (yyvsp[(2) - (2)].ival); osresult->setSolutionNumber((yyvsp[(2) - (2)].ival));}
+    {if (parserData->ivar == parserData->numberOfTimes)
+           osrlerror(NULL, NULL, NULL, "Too many time measurements");
+       osresult->addTimingInformation(parserData->timeType, parserData->timeCategory,
+                                      parserData->timeUnit, parserData->timeDescription, parserData->timeValue);       
+       parserData->ivar++;
+       parserData->timeType = "elapsedTime";
+       parserData->timeCategory = "total";
+       parserData->timeUnit = "second";
+       parserData->timeDescription = "";      
+      }
     break;
 
-  case 51:
+  case 56:
 
-    {parserData->numberOfVariables = (yyvsp[(2) - (2)].ival); osresult->setVariableNumber((yyvsp[(2) - (2)].ival)); }
+    {parserData->timeType = (yyvsp[(2) - (3)].sval);  free((yyvsp[(2) - (3)].sval));}
     break;
 
-  case 52:
+  case 58:
 
-    {parserData->numberOfConstraints = (yyvsp[(2) - (2)].ival); osresult->setConstraintNumber((yyvsp[(2) - (2)].ival));}
-    break;
-
-  case 53:
-
-    {parserData->numberOfObjectives = (yyvsp[(2) - (2)].ival); osresult->setObjectiveNumber((yyvsp[(2) - (2)].ival));}
-    break;
-
-  case 57:
-
-    {parserData->solutionIdx++;}
-    break;
-
-  case 59:
-
-    {if((yyvsp[(2) - (3)].ival) >= 0) osrlerror(NULL, NULL, NULL, "objective index must be nonpositive");
-*(parserData->objectiveIdx + parserData->solutionIdx) = (yyvsp[(2) - (3)].ival);}
+    {parserData->timeCategory = (yyvsp[(2) - (3)].sval);  free((yyvsp[(2) - (3)].sval));}
     break;
 
   case 60:
 
-    {if(parserData->statusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for status element");  osresult->setSolutionStatus(parserData->solutionIdx, parserData->statusType, parserData->statusDescription);}
+    {parserData->timeUnit = (yyvsp[(2) - (3)].sval);   free((yyvsp[(2) - (3)].sval));}
     break;
 
-  case 61:
+  case 62:
 
-    {if(parserData->statusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for status element"); parserData->statusTypePresent = false; osresult->setSolutionStatus(parserData->solutionIdx, parserData->statusType, parserData->statusDescription);}
+    {parserData->timeDescription = (yyvsp[(2) - (3)].sval);  free((yyvsp[(2) - (3)].sval));}
     break;
 
   case 64:
 
-    {parserData->statusType = (yyvsp[(2) - (3)].charval); parserData->statusTypePresent = true; free((yyvsp[(2) - (3)].charval));}
+    { parserData->timeValue = (yyvsp[(1) - (1)].dval); }
     break;
 
   case 65:
 
-    {parserData->statusDescription = (yyvsp[(2) - (3)].charval);  free((yyvsp[(2) - (3)].charval));}
-    break;
-
-  case 73:
-
-    { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-	*(parserData->primalSolution[parserData->solutionIdx] + parserData->kounter ) = (yyvsp[(4) - (5)].dval);
-	}
-    break;
-
-  case 74:
-
-    { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-	*(parserData->primalSolution[parserData->solutionIdx] + parserData->kounter) = (yyvsp[(4) - (5)].ival);
-}
+    { parserData->timeValue = (yyvsp[(1) - (1)].ival); }
     break;
 
   case 77:
 
-    {  
-   // parserData->numberOfOtherVariableResult++;
-	parserData->otherVarStruct = new OtherVariableResultStruct(); 
-	parserData->otherVarStruct->otherVarText = new std::string[parserData->numberOfVariables];}
+    { parserData->numberOfSolutions = (yyvsp[(3) - (3)].ival); osresult->setSolutionNumber((yyvsp[(3) - (3)].ival));}
     break;
 
   case 78:
 
-    {if(parserData->otherNamePresent == false) osrlerror(NULL, NULL, NULL, "other element requires name attribute"); 
-	parserData->otherNamePresent = false;  
-	}
+    {parserData->numberOfVariables = (yyvsp[(3) - (3)].ival); osresult->setVariableNumber((yyvsp[(3) - (3)].ival)); }
     break;
 
   case 79:
 
-    {parserData->otherVarVec.push_back( parserData->otherVarStruct); parserData->numberOfOtherVariableResult++; }
+    {parserData->numberOfConstraints = (yyvsp[(3) - (3)].ival); osresult->setConstraintNumber((yyvsp[(3) - (3)].ival));}
     break;
 
-  case 82:
+  case 80:
 
-    { 
-std::ostringstream outStr;
-outStr << (yyvsp[(4) - (5)].charval);
-parserData->otherVarStruct->otherVarText[parserData->kounter] =  outStr.str();
-free((yyvsp[(4) - (5)].charval)); parserData->errorText = NULL;
-if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-}
+    {parserData->numberOfObjectives = (yyvsp[(3) - (3)].ival); osresult->setObjectiveNumber((yyvsp[(3) - (3)].ival));}
     break;
 
   case 83:
 
-    { 
-if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-std::ostringstream outStr;
-outStr << (yyvsp[(4) - (5)].dval);
-parserData->otherVarStruct->otherVarText[parserData->kounter] =  outStr.str();
-}
+    {parserData->numberOfVar = 0;  parserData->numberOfCon = 0;  parserData->numberOfObj = 0;}
     break;
 
   case 84:
 
-    { 
-if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-std::ostringstream outStr;
-outStr << (yyvsp[(4) - (5)].ival);
-parserData->otherVarStruct->otherVarText[parserData->kounter] =  outStr.str();
-}
+    {
+   if (parserData->solutionIdx == parserData->numberOfSolutions) 
+        osrlerror(NULL, NULL, NULL, "too many solutions"); 
+    parserData->solutionIdx++;
+    
+
+    
+   }
+    break;
+
+  case 86:
+
+    {
+	if((yyvsp[(3) - (4)].ival) >= 0) osrlerror(NULL, NULL, NULL, "target objective index must be negative");
+/*  	osresult->optimization->solution[parserData->solutionIdx]->targetObjectiveIdx = $3;*/
+  	osresult->setSolutionTargetObjectiveIdx(parserData->solutionIdx, (yyvsp[(3) - (4)].ival));
+ }
     break;
 
   case 87:
 
-    { parserData->otherNamePresent = true; parserData->otherVarStruct->name = (yyvsp[(2) - (3)].charval);  free((yyvsp[(2) - (3)].charval));}
+    {if(parserData->statusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for status element");  osresult->setSolutionStatus(parserData->solutionIdx, parserData->statusType, parserData->statusDescription);}
     break;
 
   case 88:
 
-    {   parserData->otherVarStruct->description = (yyvsp[(2) - (3)].charval);  free((yyvsp[(2) - (3)].charval));}
+    {if(parserData->statusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for status element"); parserData->statusTypePresent = false; osresult->setSolutionStatus(parserData->solutionIdx, parserData->statusType, parserData->statusDescription);}
+    break;
+
+  case 91:
+
+    {parserData->statusType = (yyvsp[(2) - (3)].sval); parserData->statusTypePresent = true; free((yyvsp[(2) - (3)].sval));}
+    break;
+
+  case 92:
+
+    {parserData->statusType = ""; parserData->statusTypePresent = true;}
     break;
 
   case 93:
 
-    { *(parserData->objectiveValues[parserData->solutionIdx] + (parserData->kounter + parserData->numberOfObjectives)) = (yyvsp[(4) - (5)].dval);
-}
+    {parserData->statusDescription = (yyvsp[(2) - (3)].sval);  free((yyvsp[(2) - (3)].sval));}
     break;
 
   case 94:
 
-    { *(parserData->objectiveValues[parserData->solutionIdx] + (parserData->kounter + parserData->numberOfObjectives)) = (yyvsp[(4) - (5)].ival);}
+    {parserData->statusDescription = "";}
     break;
 
   case 96:
 
-    {
-			if( parserData->numberOfConstraints > 0){
-				parserData->dualSolution = new double*[ parserData->numberOfSolutions];
-				for(int i = 0; i < parserData->numberOfSolutions; i++){
-					parserData->dualSolution[ i] = new double[ parserData->numberOfConstraints];
-				}
-			}
-}
+    {/*osresult->optimization->solution[parserData->solutionIdx]->message = $2; */
+		osresult->setSolutionMessage(parserData->solutionIdx, (yyvsp[(2) - (3)].sval)); free((yyvsp[(2) - (3)].sval));
+	}
     break;
 
-  case 100:
+  case 97:
 
-    { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfConstraints- 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of constraints");
-	*(parserData->dualSolution[parserData->solutionIdx] + parserData->kounter) = (yyvsp[(4) - (5)].dval);}
+    {/*osresult->optimization->solution[parserData->solutionIdx]->message = "";*/
+		osresult->setSolutionMessage(parserData->solutionIdx, "");
+	}
+    break;
+
+  case 99:
+
+    {
+  	if(parserData->primalVals.size() !=  parserData->numberOfVar){
+  		osrlerror(NULL, NULL, parserData, "numberOfVar not consistent with the number of primal values");
+  	} else{
+ 		osresult->setPrimalVariableValuesSparse(parserData->solutionIdx, parserData->primalVals); 
+		osresult->optimization->solution[ parserData->solutionIdx]->variables->values->numberOfVar = parserData->numberOfVar;
+ 	}
+  }
     break;
 
   case 101:
 
-    { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfConstraints- 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of constraints");
-	*(parserData->dualSolution[parserData->solutionIdx] + parserData->kounter) = (yyvsp[(4) - (5)].ival);}
+    {  
+	osresult->setNumberOfOtherVariableResults(parserData->solutionIdx, (yyvsp[(3) - (4)].ival));
+	 parserData->iOther = 0;
+	 parserData->tmpOtherValue = "";
+	 parserData->tmpOtherName = "";
+	 parserData->tmpOtherDescription = "";
+	}
     break;
 
   case 102:
 
-    {parserData->kounter = (yyvsp[(2) - (3)].ival);}
+    {
+	//osresult->setNumberOfPrimalVariableValues(parserData->solutionIdx, $3);
+	parserData->numberOfVar = (yyvsp[(3) - (4)].ival);
+	}
+    break;
+
+  case 106:
+
+    {parserData->tempVal = (yyvsp[(1) - (1)].ival);  
+ 	parserData->primalValPair->value = (yyvsp[(1) - (1)].ival);
+	parserData->primalVals.push_back( parserData->primalValPair);  
+   }
+    break;
+
+  case 107:
+
+    {parserData->tempVal = (yyvsp[(1) - (1)].dval); 
+ 	parserData->primalValPair->value = (yyvsp[(1) - (1)].dval);
+	parserData->primalVals.push_back( parserData->primalValPair); 
+  }
+    break;
+
+  case 108:
+
+    { parserData->primalValPair = new IndexValuePair();   parserData->primalValPair->idx = (yyvsp[(2) - (3)].ival);}
+    break;
+
+  case 111:
+
+    { 	 
+		
+		parserData->otherVarVec.push_back( parserData->otherVarStruct); 
+		parserData->numberOfOtherVariableResults++; 
+		parserData->otherNamePresent = false;	
+		
+	
+		osresult->setAnOtherVariableResultSparse(parserData->solutionIdx, parserData->iOther,  parserData->otherVarStruct->name,
+			parserData->otherVarStruct->value, parserData->otherVarStruct->description, parserData->otherVarStruct->otherVarIndex,
+			parserData->otherVarStruct->otherVarText, parserData->otherVarStruct->numberOfVar );
+							
+		parserData->iOther++;  
+		parserData->tmpOtherName = "";
+		parserData->tmpOtherValue = "";
+		parserData->tmpOtherDescription = "";			
+				
+	}
+    break;
+
+  case 112:
+
+    {  // parserData->numberOfOtherVariableResults++;
+		parserData->otherVarStruct = new OtherVariableResultStruct(); 
+		//parserData->otherVarStruct->otherVarText  = new std::string[ parserData->otherVarStruct->numberOfVar];	 
+		//parserData->otherVarStruct->otherVarIndex = new int[  parserData->otherVarStruct->numberOfVar];	 
+		parserData->kounter = 0;
+	}
+    break;
+
+  case 113:
+
+    {	if(parserData->otherNamePresent == false) 
+			osrlerror(NULL, NULL, parserData, "other element requires name attribute"); 
+	}
+    break;
+
+  case 119:
+
+    {
+	parserData->otherVarStruct->numberOfVar = (yyvsp[(3) - (4)].ival);
+	parserData->otherVarStruct->otherVarText  = new std::string[ parserData->otherVarStruct->numberOfVar];	 
+	parserData->otherVarStruct->otherVarIndex = new int[  parserData->otherVarStruct->numberOfVar];	
+ 	//osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->numberOfVar = $3;
+}
+    break;
+
+  case 120:
+
+    {parserData->tmpOtherValue=""; parserData->otherVarStruct->value = "";  
+/*  osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->value = "";*/
+}
+    break;
+
+  case 121:
+
+    {parserData->tmpOtherValue=(yyvsp[(2) - (3)].sval); parserData->otherVarStruct->value = (yyvsp[(2) - (3)].sval);  
+/*  osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->value = $2; */
+  free((yyvsp[(2) - (3)].sval));}
+    break;
+
+  case 122:
+
+    { 
+	parserData->tmpOtherName=""; 
+	parserData->otherNamePresent = true; 
+	parserData->otherVarStruct->name = "";
+}
+    break;
+
+  case 123:
+
+    {
+parserData->tmpOtherName=(yyvsp[(2) - (3)].sval); parserData->otherNamePresent = true; parserData->otherVarStruct->name = (yyvsp[(2) - (3)].sval);  free((yyvsp[(2) - (3)].sval));
+ /* osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->name = $2;*/
+}
+    break;
+
+  case 124:
+
+    {
+parserData->tmpOtherDescription=(yyvsp[(2) - (3)].sval); parserData->otherVarStruct->description = (yyvsp[(2) - (3)].sval);  free((yyvsp[(2) - (3)].sval));
+  /*osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->description = $2;*/
+}
+    break;
+
+  case 127:
+
+    {  
+parserData->otherVarStruct->otherVarText[parserData->kounter] =  parserData->outStr.str();
+//reset the buffer;
+parserData->outStr.str("");
+parserData->otherVarStruct->otherVarIndex[parserData->kounter] =  parserData->ivar;
+parserData->errorText = NULL;
+//if (parserData->kounter == osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->numberOfVar)
+if (parserData->kounter == osresult->getAnOtherVariableResultNumberOfVar(parserData->solutionIdx, parserData->iOther))
+    osrlerror(NULL, NULL, parserData, "too many variables"); 
+if (parserData->numberOfVariables > 0 && (parserData->ivar < 0 || parserData->ivar > parserData->numberOfVariables - 1) ) 
+    osrlerror(NULL, NULL, parserData, "index must be greater than 0 and less than the number of variables");
+   
+
+parserData->kounter++;
+}
+    break;
+
+  case 128:
+
+    { parserData->outStr << (yyvsp[(1) - (1)].sval); free((yyvsp[(1) - (1)].sval)); }
+    break;
+
+  case 129:
+
+    { parserData->outStr << (yyvsp[(1) - (1)].ival); /*free($1);*/ }
+    break;
+
+  case 130:
+
+    { parserData->outStr << (yyvsp[(1) - (1)].dval); /*free($1);*/ }
+    break;
+
+  case 131:
+
+    {	if(parserData->otherVarStruct->numberOfVar <= 0) 
+			osrlerror(NULL, NULL,  parserData, "must specify the number of variables") ;
+	}
+    break;
+
+  case 133:
+
+    {
+	if(parserData->numberOfObj != parserData->objVals.size()){
+		osrlerror(NULL, NULL, parserData, "numberOfObj not consistent with the number of objective values");	
+	}else{
+
+		osresult->setObjectiveValuesSparse(parserData->solutionIdx, parserData->objVals);
+	}
+}
+    break;
+
+  case 134:
+
+    {
+			parserData->numberOfObj = (yyvsp[(3) - (4)].ival);
+}
+    break;
+
+  case 137:
+
+    { 
+
+	parserData->objValPair->value = (yyvsp[(4) - (5)].dval);
+	parserData->objVals.push_back( parserData->objValPair);
+
+}
+    break;
+
+  case 138:
+
+    {
+
+
+ 	parserData->objValPair->value = (yyvsp[(4) - (5)].ival);
+	parserData->objVals.push_back( parserData->objValPair);
+  }
+    break;
+
+  case 139:
+
+    { parserData->objValPair = new IndexValuePair();   parserData->objValPair->idx = (yyvsp[(2) - (3)].ival);   }
+    break;
+
+  case 141:
+
+    {
+
+			
+			
+}
+    break;
+
+  case 142:
+
+    {
+ 
+	if(parserData->numberOfCon != parserData->dualVals.size()){
+		osrlerror(NULL, NULL, parserData, "numberOfCon not consistent with the number of dual values");	
+	}else{
+
+		osresult->setDualVariableValuesSparse(parserData->solutionIdx, parserData->dualVals);
+		osresult->optimization->solution[ parserData->solutionIdx]->constraints->dualValues->numberOfCon = parserData->numberOfCon;
+	}
+ }
+    break;
+
+  case 143:
+
+    {
+	parserData->numberOfCon = (yyvsp[(3) - (4)].ival);
+
+}
+    break;
+
+  case 146:
+
+    { 
+	
+	parserData->dualValPair->value = (yyvsp[(4) - (5)].dval);
+	parserData->dualVals.push_back( parserData->dualValPair); 
+	
+	
+	}
+    break;
+
+  case 147:
+
+    { 
+	
+	parserData->dualValPair->value = (yyvsp[(4) - (5)].ival);
+	parserData->dualVals.push_back( parserData->dualValPair); 
+	
+	}
+    break;
+
+  case 148:
+
+    { parserData->dualValPair = new IndexValuePair();   parserData->dualValPair->idx = (yyvsp[(2) - (3)].ival);   }
+    break;
+
+  case 149:
+
+    {parserData->ivar = (yyvsp[(2) - (3)].ival);    }
+    break;
+
+  case 156:
+
+    {
+
+	//
+    //delete the old vectors
+	osrl_empty_vectors( parserData);
+    
+}
     break;
 
 
@@ -2232,6 +2624,7 @@ yyreturn:
 
 void osrlerror(YYLTYPE* mytype, OSResult *osresult, OSrLParserData* parserData, const char* errormsg )
 {
+	osrl_empty_vectors( parserData);
 	std::ostringstream outStr;
 	std::string error = errormsg;
 	error = "Input is either not valid or well formed: "  + error;
@@ -2261,5 +2654,44 @@ void  yygetOSResult(const char *parsestring, OSResult *osresult, OSrLParserData 
 		throw ErrorClass(  eclass.errormsg); 
 	}
 } //end yygetOSResult
+
+void osrl_empty_vectors( OSrLParserData* parserData){
+
+    int k;
+    int numOtherVarVec = parserData->otherVarVec.size();
+   
+    for( k = 0; k < numOtherVarVec; k++){
+    	if( (parserData->otherVarVec[ k]  != NULL) && (parserData->otherVarVec[ k]->otherVarText != NULL) ) 
+			delete[] parserData->otherVarVec[ k]->otherVarText;
+		if( (parserData->otherVarVec[ k]  != NULL) && (parserData->otherVarVec[ k]->otherVarIndex != NULL) ) 
+			delete[] parserData->otherVarVec[ k]->otherVarIndex;
+			
+		if( parserData->otherVarVec[ k]  != NULL) delete parserData->otherVarVec[ k];
+    }
+  	parserData->otherVarVec.clear(); 
+  	
+  	int numDualVals =  parserData->dualVals.size();
+  	for(k = 0; k < numDualVals; k++){
+  		if( parserData->dualVals[ k]  != NULL  ) 
+			delete parserData->dualVals[ k];
+  	}
+  	parserData->dualVals.clear();
+  	
+  	
+   	int numObjVals =  parserData->objVals.size();
+  	for(k = 0; k < numObjVals; k++){
+  		if( parserData->objVals[ k]  != NULL  ) 
+			delete parserData->objVals[ k];
+  	}
+  	parserData->objVals.clear();
+  	
+  	
+   	int numPrimalVals =  parserData->primalVals.size();
+  	for(k = 0; k < numPrimalVals; k++){	
+  		if( parserData->primalVals[ k]  != NULL  ) 
+			delete parserData->primalVals[ k];
+  	}
+  	parserData->primalVals.clear();
+}//end osrl_empty_vectors
 
 

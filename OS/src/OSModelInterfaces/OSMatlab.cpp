@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSMatlab.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -233,7 +234,7 @@ void OSMatlab::createOSInstance(){
 		outStr << "x";
 		outStr << i ;
 		varNames[ i] = outStr.str();
-		osinstance->addVariable(i, varNames[ i] , vl[ i], vu[ i], varType[ i], OSNAN, "");
+		osinstance->addVariable(i, varNames[ i] , vl[ i], vu[ i], varType[ i]);
 		outStr.str("");
 	}
 	//

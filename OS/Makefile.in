@@ -61,12 +61,17 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/../config.sub $(srcdir)/../install-sh \
 	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/os_addlibs.txt.in $(top_srcdir)/configure \
-	$(top_srcdir)/examples/addCuts/Makefile.in \
-	$(top_srcdir)/examples/algorithmicDiff/Makefile.in \
+	$(srcdir)/os_addlibs.txt.in \
+	$(top_srcdir)/applications/fileUpload/Makefile.in \
+	$(top_srcdir)/configure \
+	$(top_srcdir)/examples/branchCutPrice/Makefile.in \
+	$(top_srcdir)/examples/cglCuts/Makefile.in \
 	$(top_srcdir)/examples/instanceGenerator/Makefile.in \
+	$(top_srcdir)/examples/osModificationDemo/Makefile.in \
 	$(top_srcdir)/examples/osRemoteTest/Makefile.in \
-	$(top_srcdir)/examples/osTestCode/Makefile.in \
+	$(top_srcdir)/examples/osResultDemo/Makefile.in \
+	$(top_srcdir)/examples/osSolverDemo/Makefile.in \
+	$(top_srcdir)/examples/template/Makefile.in \
 	$(top_srcdir)/inc/config_os.h.in AUTHORS
 @HAVE_EXTERNALS_TRUE@am__append_2 = Externals
 @HAVE_EXTERNALS_TRUE@am__append_3 = .Externals-stamp
@@ -81,9 +86,11 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/inc/config_os.h
 CONFIG_CLEAN_FILES = examples/instanceGenerator/Makefile \
-	examples/osTestCode/Makefile examples/algorithmicDiff/Makefile \
-	examples/addCuts/Makefile examples/osRemoteTest/Makefile \
-	os_addlibs.txt
+	examples/cglCuts/Makefile examples/osModificationDemo/Makefile \
+	examples/osRemoteTest/Makefile examples/osSolverDemo/Makefile \
+	examples/osResultDemo/Makefile examples/template/Makefile \
+	examples/branchCutPrice/Makefile \
+	applications/fileUpload/Makefile os_addlibs.txt
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -124,6 +131,9 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AUX_DIR = @AUX_DIR@
 AWK = @AWK@
+BCPDOCDIR = @BCPDOCDIR@
+BCPOBJDIR = @BCPOBJDIR@
+BCPSRCDIR = @BCPSRCDIR@
 BONMINDOCDIR = @BONMINDOCDIR@
 BONMINOBJDIR = @BONMINOBJDIR@
 BONMINSRCDIR = @BONMINSRCDIR@
@@ -148,6 +158,8 @@ COIN_BUILD_GLPK_FALSE = @COIN_BUILD_GLPK_FALSE@
 COIN_BUILD_GLPK_TRUE = @COIN_BUILD_GLPK_TRUE@
 COIN_HAS_ASL_FALSE = @COIN_HAS_ASL_FALSE@
 COIN_HAS_ASL_TRUE = @COIN_HAS_ASL_TRUE@
+COIN_HAS_BCP_FALSE = @COIN_HAS_BCP_FALSE@
+COIN_HAS_BCP_TRUE = @COIN_HAS_BCP_TRUE@
 COIN_HAS_BONMIN_FALSE = @COIN_HAS_BONMIN_FALSE@
 COIN_HAS_BONMIN_TRUE = @COIN_HAS_BONMIN_TRUE@
 COIN_HAS_CBC_FALSE = @COIN_HAS_CBC_FALSE@
@@ -158,6 +170,8 @@ COIN_HAS_CLP_FALSE = @COIN_HAS_CLP_FALSE@
 COIN_HAS_CLP_TRUE = @COIN_HAS_CLP_TRUE@
 COIN_HAS_COINUTILS_FALSE = @COIN_HAS_COINUTILS_FALSE@
 COIN_HAS_COINUTILS_TRUE = @COIN_HAS_COINUTILS_TRUE@
+COIN_HAS_COUENNE_FALSE = @COIN_HAS_COUENNE_FALSE@
+COIN_HAS_COUENNE_TRUE = @COIN_HAS_COUENNE_TRUE@
 COIN_HAS_CPPAD_FALSE = @COIN_HAS_CPPAD_FALSE@
 COIN_HAS_CPPAD_TRUE = @COIN_HAS_CPPAD_TRUE@
 COIN_HAS_CPX_FALSE = @COIN_HAS_CPX_FALSE@
@@ -180,6 +194,11 @@ COIN_HAS_SYMPHONY_FALSE = @COIN_HAS_SYMPHONY_FALSE@
 COIN_HAS_SYMPHONY_TRUE = @COIN_HAS_SYMPHONY_TRUE@
 COIN_HAS_VOL_FALSE = @COIN_HAS_VOL_FALSE@
 COIN_HAS_VOL_TRUE = @COIN_HAS_VOL_TRUE@
+COMPILE_BONCOUENNE_FALSE = @COMPILE_BONCOUENNE_FALSE@
+COMPILE_BONCOUENNE_TRUE = @COMPILE_BONCOUENNE_TRUE@
+COUENNEDOCDIR = @COUENNEDOCDIR@
+COUENNEOBJDIR = @COUENNEOBJDIR@
+COUENNESRCDIR = @COUENNESRCDIR@
 CPP = @CPP@
 CPPADDOCDIR = @CPPADDOCDIR@
 CPPADOBJDIR = @CPPADOBJDIR@
@@ -302,6 +321,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+bcplib = @bcplib@
 bindir = @bindir@
 bonminlib = @bonminlib@
 build = @build@
@@ -313,6 +333,7 @@ cbclib = @cbclib@
 cgllib = @cgllib@
 clplib = @clplib@
 coinutilslib = @coinutilslib@
+couennelib = @couennelib@
 datadir = @datadir@
 dylplib = @dylplib@
 exec_prefix = @exec_prefix@
@@ -434,13 +455,21 @@ distclean-hdr:
 	-rm -f inc/config_os.h inc/stamp-h1
 examples/instanceGenerator/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/instanceGenerator/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/osTestCode/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/osTestCode/Makefile.in
+examples/cglCuts/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/cglCuts/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/algorithmicDiff/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/algorithmicDiff/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-examples/addCuts/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/addCuts/Makefile.in
+examples/osModificationDemo/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/osModificationDemo/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 examples/osRemoteTest/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/osRemoteTest/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+examples/osSolverDemo/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/osSolverDemo/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+examples/osResultDemo/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/osResultDemo/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+examples/template/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/template/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+examples/branchCutPrice/Makefile: $(top_builddir)/config.status $(top_srcdir)/examples/branchCutPrice/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+applications/fileUpload/Makefile: $(top_builddir)/config.status $(top_srcdir)/applications/fileUpload/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 os_addlibs.txt: $(top_builddir)/config.status $(srcdir)/os_addlibs.txt.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
@@ -590,7 +619,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/examples/addCuts $(distdir)/examples/algorithmicDiff $(distdir)/examples/instanceGenerator $(distdir)/examples/osRemoteTest $(distdir)/examples/osTestCode $(distdir)/inc $(distdir)/m4
+	$(mkdir_p) $(distdir)/. $(distdir)/.. $(distdir)/../BuildTools $(distdir)/applications/fileUpload $(distdir)/examples/branchCutPrice $(distdir)/examples/cglCuts $(distdir)/examples/instanceGenerator $(distdir)/examples/osModificationDemo $(distdir)/examples/osRemoteTest $(distdir)/examples/osResultDemo $(distdir)/examples/osSolverDemo $(distdir)/examples/template $(distdir)/inc $(distdir)/m4
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -851,6 +880,7 @@ run_parsers:
 	flex -Posrl  -o${abs_source_dir}/src/OSParsers/OSParseosrl.cpp ${abs_source_dir}/src/OSParsers/OSParseosrl.l
 	$(YACC) -ldv -p osil  -o ${abs_source_dir}/src/OSParsers/OSParseosil.tab.cpp ${abs_source_dir}/src/OSParsers/OSParseosil.y
 	flex -Posil -o${abs_source_dir}/src/OSParsers/OSParseosil.cpp ${abs_source_dir}/src/OSParsers/OSParseosil.l
+	$(YACC) -ldv -p osol  -o ${abs_source_dir}/src/OSParsers/OSParseosol.tab.cpp ${abs_source_dir}/src/OSParsers/OSParseosol.y
 	flex -Posol -o${abs_source_dir}/src/OSParsers/OSParseosol.cpp ${abs_source_dir}/src/OSParsers/OSParseosol.l
 	flex -Posss -o${abs_source_dir}/src/OSParsers/OSParseosss.cpp ${abs_source_dir}/src/OSParsers/OSParseosss.l
 	make

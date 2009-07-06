@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSiLReader.h
  * 
  *
@@ -59,12 +60,12 @@ public:
 	OSInstance* readOSiL(const std::string& osil) throw(ErrorClass);
 
 private:
-	/** osintance is the OSInstance object returned by 
+	/** m_osinstance is the OSInstance object returned by 
 	 * the OSiLReader
 	 */
 	OSInstance *m_osinstance;
 	
-	/** parerData is the  object used in the parser to temporarily store data 
+	/** m_parserData is the object used in the parser to temporarily store data 
 	 */
 	OSiLParserData *m_parserData;
 };

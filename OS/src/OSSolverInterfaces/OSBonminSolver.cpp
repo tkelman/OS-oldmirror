@@ -1,39 +1,47 @@
+/* $Id$ */
 /** @file BonminSolver.cpp
  * 
  * \brief This file defines the BonminSolver class.
  * \detail Read an OSInstance object and convert in Ipopt data structures
  *
- * @author  Jun Ma, Guss Gassmann, Kipp Martin, 
- * @version 1.0, 07/05/2008
+ * @author  Jun Ma, Horand Gassmann, Kipp Martin, 
+ * @version 1.1, 11/04/2008
  * @since   OS1.0
  *
  * \remarks
- * Copyright (C) 2008, Jun Ma, Guss Gassmann, Kipp Martin,
- * Northwestern University, and the University of Chicago.
+ * Copyright (C) 2008, Jun Ma, Horand Gassmann, Kipp Martin,
+ * Northwestern University, Dalhousie University and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Common Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  */
+
+//#define DEBUG
+
 #include <iostream>
 
-#include "OSCommonUtil.h"
-#include "OSBonminSolver.h"
 
+#include "OSBonminSolver.h"
+#include "OSDataStructures.h"
+#include "OSParameters.h" 
+#include "OSMathUtil.h"
+#include "CoinFinite.hpp"
 #include "BonOsiTMINLPInterface.hpp"
-#include "BonCbc.hpp"
-#include "BonBonminSetup.hpp"
+#include "BonTMINLP.hpp"
+
+
+#include "CoinTime.hpp"
 
 using std::cout; 
 using std::endl; 
 using std::ostringstream;
 
-
-
 BonminSolver::BonminSolver() {
 	osrlwriter = new OSrLWriter();
-	osresult = new OSResult();
+	osresult = new OSResult();	
 	m_osilreader = NULL;
+	m_osolreader = NULL;
 	bonminErrorMsg = "";
 
 } 
@@ -44,12 +52,16 @@ BonminSolver::~BonminSolver() {
 	#endif
 	if(m_osilreader != NULL) delete m_osilreader;
 	m_osilreader = NULL;
-	delete osresult;
-	osresult = NULL;
-	delete osrlwriter;
+	if(m_osolreader != NULL) delete m_osolreader;
+	m_osolreader = NULL;
+
+	if(osrlwriter != NULL )delete osrlwriter;
 	osrlwriter = NULL;
-	//delete osinstance;
-	//osinstance = NULL;
+		if(osresult != NULL ){
+			delete osresult;
+			osresult = NULL;
+			//cout << "DELETING OS RESULT" << endl;
+		}
 	#ifdef DEBUG
 	cout << "leaving BonminSolver destructor" << endl;
 	#endif
@@ -155,10 +167,12 @@ bool BonminProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	n = osinstance->getVariableNumber();
 	// number of constraints
 	m = osinstance->getConstraintNumber();
-	cout << "number variables  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << n << endl;
-	cout << "number constraints  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << m << endl;
+	#ifdef DEBUG
+	cout << "Bonmin number variables  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << n << endl;
+	cout << "Bonmin number constraints  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << m << endl;
+	#endif
 	try{
-		osinstance->initForAlgDiff( );
+		osinstance->initForAlgDiff( ); 
 	}
 	catch(const ErrorClass& eclass){
 		bonminErrorMsg = eclass.errormsg;
@@ -170,6 +184,7 @@ bool BonminProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	SparseJacobianMatrix *sparseJacobian = NULL;
 	try{
 		sparseJacobian = osinstance->getJacobianSparsityPattern();
+		//cout << "Get sparse Jacobian pattern" << std::endl;
 	}
 	catch(const ErrorClass& eclass){
 		bonminErrorMsg = eclass.errormsg;
@@ -177,7 +192,9 @@ bool BonminProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	}
 	//std::cout << "Done calling sparse jacobian" << std::endl;
 	nnz_jac_g = sparseJacobian->valueSize;
+	#ifdef DEBUG
 	cout << "nnz_jac_g  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << nnz_jac_g << endl;	
+	#endif
 	// nonzeros in upper hessian
 	
 	if( (osinstance->getNumberOfNonlinearExpressions() == 0) && (osinstance->getNumberOfQuadraticTerms() == 0) ) {
@@ -190,12 +207,12 @@ bool BonminProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		//std::cout << "Done Getting Lagrangain Hessian Sparsity Pattern " << std::endl;
 		nnz_h_lag = sparseHessian->hessDimension;
 	}
+	#ifdef DEBUG
 	cout << "nnz_h_lag  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << nnz_h_lag << endl;	
+	#endif
 	// use the C style indexing (0-based)
 	index_style = TNLP::C_STYLE;
   
-  /////
-
   return true;
 }//get_nlp_info
 
@@ -203,6 +220,7 @@ bool BonminProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 bool  BonminProblem::get_bounds_info(Index n, Number* x_l, Number* x_u,
                                 Index m, Number* g_l, Number* g_u){
  	int i; 
+
 	double * mdVarLB = osinstance->getVariableLowerBounds();
 	//std::cout << "GET BOUNDS INFORMATION FOR BONMIN !!!!!!!!!!!!!!!!!" << std::endl;
 	// variables upper bounds
@@ -211,8 +229,10 @@ bool  BonminProblem::get_bounds_info(Index n, Number* x_l, Number* x_u,
 	for(i = 0; i < n; i++){
 		x_l[ i] = mdVarLB[ i];
 		x_u[ i] = mdVarUB[ i];
-		//cout << "x_l !!!!!!!!!!!!!!!!!!!!!!!!!!!" << x_l[i] << endl;
-		//cout << "x_u !!!!!!!!!!!!!!!!!!!!!!!!!!!" << x_u[i] << endl;
+		#ifdef DEBUG
+		cout << "x_l !!!!!!!!!!!!!!!!!!!!!!!!!!!" << x_l[i] << endl;
+		cout << "x_u !!!!!!!!!!!!!!!!!!!!!!!!!!!" << x_u[i] << endl;
+		#endif
 	}
 	// Bonmin interprets any number greater than nlp_upper_bound_inf as
 	// infinity. The default value of nlp_upper_bound_inf and nlp_lower_bound_inf
@@ -227,8 +247,10 @@ bool  BonminProblem::get_bounds_info(Index n, Number* x_l, Number* x_u,
 	for(int i = 0; i < m; i++){
 		g_l[ i] = mdConLB[ i];
 		g_u[ i] = mdConUB[ i];
-		//cout << "lower !!!!!!!!!!!!!!!!!!!!!!!!!!!" << g_l[i] << endl;
-		//cout << "upper !!!!!!!!!!!!!!!!!!!!!!!!!!!" << g_u[i] << endl;
+		#ifdef DEBUG
+		cout << "lower !!!!!!!!!!!!!!!!!!!!!!!!!!!" << g_l[i] << endl;
+		cout << "upper !!!!!!!!!!!!!!!!!!!!!!!!!!!" << g_u[i] << endl;
+		#endif
 	}  
   	return true;
 }//get_bounds_info
@@ -244,38 +266,138 @@ bool BonminProblem::get_starting_point(Index n, bool init_x, Number* x,
   	assert(init_x == true);
   	assert(init_z == false);
   	assert(init_lambda == false);
-  	int i;
-  	//cout << "get initial values !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
- 	double *mdXInit = osinstance->getVariableInitialValues(); 
- 	if( mdXInit != NULL) {
- 		for(i = 0; i < n; i++){
- 			if( CommonUtil::ISOSNAN( mdXInit[ i]) == true){ 
- 				x[ i] = 1.7171; 
- 				//std::cout << "INITIAL VALUE !!!!!!!!!!!!!!!!!!!!  " << x[ i] << std::endl;
- 			}
- 			else x[ i] = mdXInit[ i];
- 			//std::cout << "INITIAL VALUE !!!!!!!!!!!!!!!!!!!!  " << x[ i] << std::endl;	
- 		}	
+  	int i, m1, n1;
+  	
+
+#ifdef DEBUG
+  	cout << "get initial values !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
+#endif
+  	
+	//now set initial values
+#ifdef DEBUG
+  	cout << "get number of initial values !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
+#endif
+	int k;
+	if (osoption != NULL)
+		m1 = osoption->getNumberOfInitVarValues();
+	else
+		m1 = 0;
+#ifdef DEBUG
+	cout << "number of variables initialed: " << m1 << endl;
+#endif
+
+	n1 = osinstance->getVariableNumber();
+	bool* initialed;
+	initialed = new bool[n1];
+#ifdef DEBUG
+	cout << "number of variables in total: " << n1 << endl;
+#endif
+
+
+	for(k = 0; k < n1; k++)
+		initialed[k] = false;
+
+	if (m1 > 0)
+	{
+#ifdef DEBUG
+			cout << "get initial values " << endl;
+#endif
+
+		InitVarValue**  initVarVector = osoption->getInitVarValuesSparse();
+#ifdef DEBUG
+		cout << "done " << endl;
+#endif
+
+		double initval;
+		try 
+		{
+			for(k = 0; k < m1; k++)
+			{	
+				i = initVarVector[k]->idx;
+				if (initVarVector[k]->idx > n1)
+					throw ErrorClass ("Illegal index value in variable initialization");
+
+				initval = initVarVector[k]->value;
+				if (osinstance->instanceData->variables->var[i]->ub == OSDBL_MAX)
+				{	if (osinstance->instanceData->variables->var[i]->lb > initval)
+						throw ErrorClass ("Initial value outside of bounds");
+				}
+				else
+					if (osinstance->instanceData->variables->var[i]->lb == -OSDBL_MAX)
+					{	if (osinstance->instanceData->variables->var[i]->ub < initval)
+							throw ErrorClass ("Initial value outside of bounds");
+					}
+					else
+					{	if ((osinstance->instanceData->variables->var[i]->lb > initval) ||
+							(osinstance->instanceData->variables->var[i]->ub < initval))
+							throw ErrorClass ("Initial value outside of bounds");
+					}
+
+				x[initVarVector[k]->idx] = initval;
+				initialed[initVarVector[k]->idx] = true;
+			}
+		}
+		catch(const ErrorClass& eclass){
+			cout << "Error in BonminProblem::get_starting_point (OSBonminSolver.cpp)";
+			cout << endl << endl << endl;
+		}	
+	}  //  end if (m1 > 0)		
+
+	double default_initval;
+	default_initval = 1.7171;
+	
+
+	for(k = 0; k < n1; k++)
+	{
+		if (!initialed[k])
+			if (osinstance->instanceData->variables->var[k]->ub == OSDBL_MAX)
+				if (osinstance->instanceData->variables->var[k]->lb <= default_initval)
+					x[k] = default_initval;
+				else
+					x[k] = osinstance->instanceData->variables->var[k]->lb;
+			else
+				if (osinstance->instanceData->variables->var[k]->lb == -OSDBL_MAX)
+					if (osinstance->instanceData->variables->var[k]->ub >= default_initval)
+						x[k] = default_initval;
+					else
+						x[k] = osinstance->instanceData->variables->var[k]->ub;
+				else
+					if ((osinstance->instanceData->variables->var[k]->lb <= default_initval) && 
+						(osinstance->instanceData->variables->var[k]->ub >= default_initval))
+						x[k] = default_initval;
+					else
+						if (osinstance->instanceData->variables->var[k]->lb > default_initval)
+							x[k] = osinstance->instanceData->variables->var[k]->lb;
+						else
+							x[k] = osinstance->instanceData->variables->var[k]->ub;
+	}
+ 	for(i = 0; i < n1; i++){
+		#ifdef DEBUG
+ 		std::cout << "INITIAL VALUE !!!!!!!!!!!!!!!!!!!!  " << x[ i] << std::endl;
+		#endif
  	}
- 	else{
- 		for(i = 0; i < n; i++){
- 			x[ i] = 1.7171;
- 		}
- 	}
-  	//cout << "got initial values !!!!!!!!!!!!!!!!!!!!!!!!!! " << endl;
+ 
+
+	delete[] initialed;
   	return true;
 }//get_starting_point
+
 
 // returns the value of the objective function
 bool BonminProblem::eval_f(Index n, const Number* x, bool new_x, Number& obj_value){
 	try{
-		obj_value  = osinstance->calculateAllObjectiveFunctionValues( const_cast<double*>(x), NULL, NULL, new_x, 0 )[ 0];
+		if( osinstance->instanceData->objectives->obj[ 0]->maxOrMin.compare("min") == 0){
+			obj_value  = osinstance->calculateAllObjectiveFunctionValues( const_cast<double*>(x), NULL, NULL, new_x, 0 )[ 0];	
+  		}else{// we have a max
+			obj_value  = -osinstance->calculateAllObjectiveFunctionValues( const_cast<double*>(x), NULL, NULL, new_x, 0 )[ 0];
+		}
+		
 	}
 	catch(const ErrorClass& eclass){
 		bonminErrorMsg = eclass.errormsg;
 		throw;  
 	}
-	if( CommonUtil::ISOSNAN( (double)obj_value) ) return false;
+	if( CoinIsnan( (double)obj_value) ) return false;
   	return true;
 }
 
@@ -293,10 +415,14 @@ bool BonminProblem::eval_grad_f(Index n, const Number* x, bool new_x, Number* gr
 		throw;  
 	}
   	for(i = 0; i < n; i++){
-  		grad_f[ i]  = objGrad[ i];
+		if( osinstance->instanceData->objectives->obj[ 0]->maxOrMin.compare("min") == 0){
+			grad_f[ i]  = objGrad[ i];
+		}else{
+			grad_f[ i]  = -objGrad[ i];
+		}
   		//std::cout << grad_f[ i]  << std::endl;
   	}
-  	//std::cout << "DONE WITH Calculate Objective function gradient " << std::endl;
+//std::cout << "DONE WITH Calculate Objective function gradient " << std::endl;
   	return true;
 }//eval_grad_f
 
@@ -306,7 +432,7 @@ bool BonminProblem::eval_g(Index n, const Number* x, bool new_x, Index m, Number
  		double *conVals = osinstance->calculateAllConstraintFunctionValues( const_cast<double*>(x), NULL, NULL, new_x, 0 );
  		int i;
  		for(i = 0; i < m; i++){
- 			if( CommonUtil::ISOSNAN( (double)conVals[ i] ) ) return false;
+ 			if( CoinIsnan( (double)conVals[ i] ) ) return false;
  			g[i] = conVals[ i]  ;	
  		} 
 		return true;
@@ -402,7 +528,7 @@ bool BonminProblem::eval_h(Index n, const Number* x, bool new_x,
 		double* objMultipliers = new double[1];
 		objMultipliers[0] = obj_factor;
 		try{
-			sparseHessian = osinstance->calculateLagrangianHessian( const_cast<double*>(x), objMultipliers, (double*)lambda ,  new_x, 2);
+			sparseHessian = osinstance->calculateLagrangianHessian( const_cast<double*>(x), objMultipliers, const_cast<double*>(lambda) ,  new_x, 2);
 		delete[]  objMultipliers;
 		}
 		catch(const ErrorClass& eclass){
@@ -438,144 +564,22 @@ bool BonminProblem::get_scaling_parameters(Number& obj_scaling,
 
 
 
-void
-BonminProblem::finalize_solution(TMINLP::SolverReturn status,
+void BonminProblem::finalize_solution(TMINLP::SolverReturn status_,
                             Index n, const Number* x, Number obj_value)
 {
-	OSrLWriter *osrlwriter ;
-	osrlwriter = new OSrLWriter();
-	std::cout<<"Problem status: "<<status<<std::endl;
-	std::cout<<"Objective value: "<<obj_value<<std::endl;
-	if(printSol_ && x != NULL){
-		std::cout<<"Solution:"<<std::endl;
-		for(int i = 0 ; i < n ; i++){
-			std::cout<<"x["<<i<<"] = "<<x[i];
-			if(i < n-1) std::cout<<", ";
-		}
-		std::cout<<std::endl;
-	}
 	
-	  printf("\n\nObjective value\n");
-	  printf("f(x*) = %e\n", obj_value);
-	int solIdx = 0;
-	ostringstream outStr;
-	double* mdObjValues = new double[1];
-	std::string message = "Bonmin solver finishes to the end.";
-	std::string solutionDescription = "";	
+	status = status_;
+	#ifdef DEBUG
+	std::cout << "FINALIZE OBJ SOLUTION VALUE = " << obj_value << std::endl;
+	#endif
 
-	try{
-		// resultHeader infomration
-		if(osresult->setServiceName( "Bonmin solver service") != true)
-			throw ErrorClass("OSResult error: setServiceName");
-		if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
-			throw ErrorClass("OSResult error: setInstanceName");
-
-		//if(osresult->setJobID( osoption->jobID) != true)
-		//	throw ErrorClass("OSResult error: setJobID");
-
-		// set basic problem parameters
-		if(osresult->setVariableNumber( osinstance->getVariableNumber()) != true)
-			throw ErrorClass("OSResult error: setVariableNumer");
-		if(osresult->setObjectiveNumber( 1) != true)
-			throw ErrorClass("OSResult error: setObjectiveNumber");
-		if(osresult->setConstraintNumber( osinstance->getConstraintNumber()) != true)
-			throw ErrorClass("OSResult error: setConstraintNumber");
-		if(osresult->setSolutionNumber(  1) != true)
-			throw ErrorClass("OSResult error: setSolutionNumer");	
-
-
-		if(osresult->setGeneralMessage( message) != true)
-			throw ErrorClass("OSResult error: setGeneralMessage");
-
-		switch( status){
-			case SUCCESS:
-				solutionDescription = "SUCCESS[BONMIN]: Algorithm terminated successfully at a locally optimal point, satisfying the convergence tolerances.";
-				osresult->setSolutionStatus(solIdx,  "locallyOptimal", solutionDescription);
-				osresult->setPrimalVariableValues(solIdx, const_cast<double*>(x));
-				//osresult->setDualVariableValues(solIdx, const_cast<double*>( lambda));
-				mdObjValues[0] = obj_value;
-				osresult->setObjectiveValues(solIdx, mdObjValues);
-			break;
-			case MAXITER_EXCEEDED:
-				solutionDescription = "MAXITER_EXCEEDED[BONMIN]: Maximum number of iterations exceeded.";
-				osresult->setSolutionStatus(solIdx,  "stoppedByLimit", solutionDescription);
-				osresult->setPrimalVariableValues(solIdx, const_cast<double*>(x));
-				//osresult->setDualVariableValues(solIdx, const_cast<double*>( lambda));
-				mdObjValues[0] = obj_value;
-				osresult->setObjectiveValues(solIdx, mdObjValues);
-			break;
-			case STOP_AT_TINY_STEP:
-				solutionDescription = "STOP_AT_TINY_STEP[BONMIN]: Algorithm proceeds with very little progress.";
-				osresult->setSolutionStatus(solIdx,  "stoppedByLimit", solutionDescription);
-				osresult->setPrimalVariableValues(solIdx, const_cast<double*>( x));
-				//osresult->setDualVariableValues(solIdx, const_cast<double*>( lambda));
-				mdObjValues[0] = obj_value;
-				osresult->setObjectiveValues(solIdx, mdObjValues);
-			break;
-			case STOP_AT_ACCEPTABLE_POINT:
-				solutionDescription = "STOP_AT_ACCEPTABLE_POINT[BONMIN]: Algorithm stopped at a point that was converged, not to _desired_ tolerances, but to _acceptable_ tolerances";
-				osresult->setSolutionStatus(solIdx,  "BonminAccetable", solutionDescription);
-				osresult->setPrimalVariableValues(solIdx, const_cast<double*>(x));
-				//osresult->setDualVariableValues(solIdx, const_cast<double*>( lambda));
-				mdObjValues[0] = obj_value;
-				osresult->setObjectiveValues(solIdx, mdObjValues);
-			break;
-			case LOCAL_INFEASIBILITY:
-				solutionDescription = "LOCAL_INFEASIBILITY[BONMIN]: Algorithm converged to a point of local infeasibility. Problem may be infeasible.";
-				osresult->setSolutionStatus(solIdx,  "infeasible", solutionDescription);
-			break;
-			case USER_REQUESTED_STOP:
-				solutionDescription = "USER_REQUESTED_STOP[BONMIN]: The user call-back function  intermediate_callback returned false, i.e., the user code requested a premature termination of the optimization.";
-				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);
-			break;
-			case DIVERGING_ITERATES:
-				solutionDescription = "DIVERGING_ITERATES[BONMIN]: It seems that the iterates diverge.";
-				osresult->setSolutionStatus(solIdx,  "unbounded", solutionDescription);
-			break;
-			case RESTORATION_FAILURE:
-				solutionDescription = "RESTORATION_FAILURE[BONMIN]: Restoration phase failed, algorithm doesn't know how to proceed.";
-				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);
-			break;
-			case ERROR_IN_STEP_COMPUTATION:
-				solutionDescription = "ERROR_IN_STEP_COMPUTATION[BONMIN]: An unrecoverable error occurred while IPOPT tried to compute the search direction.";
-				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);
-			break;
-			case INVALID_NUMBER_DETECTED:
-				solutionDescription = "INVALID_NUMcatBER_DETECTED[BONMIN]: Algorithm received an invalid number (such as NaN or Inf) from the NLP; see also option check_derivatives_for_naninf.";
-				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);
-			break;
-			case INTERNAL_ERROR:
-				solutionDescription = "INTERNAL_ERROR[BONMIN]: An unknown internal error occurred. Please contact the IPOPT authors through the mailing list.";
-				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);
-			break;
-			default:
-				solutionDescription = "OTHER[BONMIN]: other unknown solution status from Bonmin solver";
-				osresult->setSolutionStatus(solIdx,  "other", solutionDescription);
-		}
-		osresult->setGeneralStatusType("success");
-		delete osrlwriter;
-		delete[] mdObjValues;
-		osrlwriter = NULL;
-
-	}
-	
-	catch(const ErrorClass& eclass){
-		osresult->setGeneralMessage( eclass.errormsg);
-		osresult->setGeneralStatusType( "error");
-		std::string osrl = osrlwriter->writeOSrL( osresult);
-		delete osrlwriter;
-		osrlwriter = NULL;
-		throw ErrorClass(  osrl) ;
-		delete[] mdObjValues;
-		mdObjValues = NULL;
-	}
 }
 
 
-
+   
 
 void BonminSolver::buildSolverInstance() throw (ErrorClass) {
-	try{
+	try{	
 		
 		if(osil.length() == 0 && osinstance == NULL) throw ErrorClass("there is no instance");
 		if(osinstance == NULL){
@@ -583,10 +587,10 @@ void BonminSolver::buildSolverInstance() throw (ErrorClass) {
 			osinstance = m_osilreader->readOSiL( osil);
 		}
 		// Create a new instance of your nlp 
-		tminlp = new BonminProblem( osinstance, osresult);
-		//tminlp = new BonminProblem( osinstance, osresult);
-		//app = new BonminApplication();
+		tminlp = new BonminProblem( osinstance, osoption);
 		this->bCallbuildSolverInstance = true;
+		//Now initialize from tminlp
+		//bonminSetup.initialize( GetRawPtr(tminlp) );
 	}
 	catch(const ErrorClass& eclass){
 		std::cout << "THERE IS AN ERROR" << std::endl;
@@ -598,64 +602,136 @@ void BonminSolver::buildSolverInstance() throw (ErrorClass) {
 }//end buildSolverInstance() 
 
 
-//void BonminSolver::solve() throw (ErrorClass) {
-void BonminSolver::solve() throw (ErrorClass) {
-	if( this->bCallbuildSolverInstance == false) buildSolverInstance();
+
+void BonminSolver::setSolverOptions() throw (ErrorClass) {
 	try{
-		clock_t start, finish;
-		double duration;
-		start = clock();
-		//OSiLWriter osilwriter;
-		//cout << osilwriter.writeOSiL( osinstance) << endl;
-		if(osinstance->getVariableNumber() <= 0)throw ErrorClass("Bonmin requires decision variables");
-		finish = clock();
-		duration = (double) (finish - start) / CLOCKS_PER_SEC;
-		cout << "Parsing took (seconds): "<< duration << endl;
-		
-		
-		
-		
-		
-		  BonminSetup bonmin;
-		  bonmin.initializeOptionsAndJournalist();
-		  //Register an additional option
-		  bonmin.roptions()->AddStringOption2("print_solution","Do we print the solution or not?",
+		this->bSetSolverOptions = true;
+		bonminSetup.initializeOptionsAndJournalist();
+		//Register an additional option -- just an example
+		bonminSetup.roptions()->AddStringOption2("print_solution","Do we print the solution or not?",
 		                                 "yes",
 		                                 "no", "No, we don't.",
 		                                 "yes", "Yes, we do.",
 		                                 "A longer comment can be put here");
 		  
+		 // Here we can change the default value of some Bonmin or Ipopt option
+		bonminSetup.options()->SetNumericValue("bonmin.time_limit", 5000); //changes bonmin's time limit
+		//bonminSetup.options()->SetIntegerValue("bonmin.num_resolve_at_node", 3); 
+		//bonminSetup.options()->SetIntegerValue("bonmin.num_resolve_at_root", 3); 
+		//bonminSetup.options()->SetIntegerValue("bonmin.num_retry_unsolved_random_point", 30); 
+		//bonminSetup.options()->SetIntegerValue("print_level", 12); 
+		//bonminSetup.options()->SetIntegerValue("bonmin.bb_log_level", 4); 
+		//bonminSetup.options()->SetStringValue("bonmin.nlp_failure_behavior", "fathom");
+		//bonminSetup.options()->SetNumericValue("bonmin.allowable_gap", -1);
+		//bonminSetup.options()->SetNumericValue("bonmin.allowable_fraction_gap", -.1);
+		//bonminSetup.options()->SetNumericValue("bonmin.cutoff_decr", -1);
+		//bonminSetup.options()->SetStringValue("mu_oracle","loqo");
+	
+	
+		//Here we read several option files
+		//bonminSetup.readOptionsFile("Mybonmin.opt");
+		//bonminSetup.readOptionsFile();// This reads the default file "bonmin.opt"
 		  
+		// Options can also be set by using a string with a format similar to the bonmin.opt file
+		bonminSetup.readOptionsString("bonmin.algorithm B-BB\n");
+		
+				//turn off a lot of output -- this can be overridden by using OSOptions
+		bonminSetup.options()->SetIntegerValue("bonmin.bb_log_level", 0 );
+		bonminSetup.options()->SetIntegerValue("bonmin.nlp_log_level", 0 );
 		  
-		  // Here we can change the default value of some Bonmin or Ipopt option
-		  bonmin.options()->SetNumericValue("bonmin.time_limit", 1000); //changes bonmin's time limit
-		  bonmin.options()->SetStringValue("mu_oracle","loqo");
-		  
-		  //Here we read several option files
-		  bonmin.readOptionsFile("Mybonmin.opt");
-		  bonmin.readOptionsFile();// This reads the default file "bonmin.opt"
-		  
-		  // Options can also be set by using a string with a format similar to the bonmin.opt file
-		  bonmin.readOptionsString("bonmin.algorithm B-BB\n");
-		  
-		  // Now we can obtain the value of the new option
-		  int printSolution;
-		  bonmin.options()->GetEnumValue("print_solution", printSolution,"");
-		  if(printSolution == 1){
-		    tminlp->printSolutionAtEndOfAlgorithm();
-		  }
+		// Now we can obtain the value of the new option
+		int printSolution;
+		bonminSetup.options()->GetEnumValue("print_solution", printSolution,"");
+		if(printSolution == 1){
+			tminlp->printSolutionAtEndOfAlgorithm();
+		}	
+		//
+		if(osoption == NULL && osol.length() > 0)
+		{
+			m_osolreader = new OSoLReader();
+			osoption = m_osolreader->readOSoL( osol);
+		}
 
-		  //Now initialize from tminlp
-		  bonmin.initialize(GetRawPtr(tminlp));
+		if(osoption != NULL && osoption->getNumberOfSolverOptions() > 0 ){
+			char *pEnd;
+			int i;
+			std::vector<SolverOption*> optionsVector;
+			optionsVector = osoption->getSolverOptions( "bonmin");
+			int num_bonmin_options = optionsVector.size();
+			for(i = 0; i < num_bonmin_options; i++){
+				if(optionsVector[ i]->type == "numeric" ){
+					std::cout << "FOUND A  NUMERIC OPTION  "  <<  os_strtod( optionsVector[ i]->value.c_str(), &pEnd ) << std::endl;
+					if(optionsVector[ i]->category == "ipopt"){
+						bonminSetup.options()->SetNumericValue(optionsVector[ i]->name, os_strtod( optionsVector[ i]->value.c_str(), &pEnd ) );	
+					}else{
+						if(optionsVector[ i]->category == "cbc" ){
+							bonminSetup.options()->SetNumericValue("milp_solver."+optionsVector[ i]->name, os_strtod( optionsVector[ i]->value.c_str(), &pEnd ) );
+						}
+						else{
+							bonminSetup.options()->SetNumericValue("bonmin."+optionsVector[ i]->name, os_strtod( optionsVector[ i]->value.c_str(), &pEnd ) );	
+						}
+					}
+				}  
+				else if(optionsVector[ i]->type == "integer" ){
+					std::cout << "FOUND AN INTEGER OPTION  "  <<optionsVector[ i]->name << std::endl;
+					if(optionsVector[ i]->category == "ipopt"){
+						bonminSetup.options()->SetIntegerValue(optionsVector[ i]->name, atoi( optionsVector[ i]->value.c_str() ) );	
+					}else{
+						if(optionsVector[ i]->category == "cbc" ){
+							std::cout << "SETTING INTEGER CBC OPTION" << std::endl;
+							bonminSetup.options()->SetIntegerValue("milp_solver."+optionsVector[ i]->name, atoi( optionsVector[ i]->value.c_str() ));
+						}
+						else{
+							bonminSetup.options()->SetIntegerValue("bonmin."+optionsVector[ i]->name, atoi( optionsVector[ i]->value.c_str() )  );	
+						}
+					}					
+				}
+				else if(optionsVector[ i]->type == "string" ){
+					std::cout << "FOUND A STRING OPTION  "  <<optionsVector[ i]->name << std::endl;
+					if(optionsVector[ i]->category == "ipopt"){
+						bonminSetup.options()->SetStringValue(optionsVector[ i]->name, optionsVector[ i]->value );	
+					}else{
+						if(optionsVector[ i]->category == "cbc" ){
+							bonminSetup.options()->SetStringValue("milp_solver."+optionsVector[ i]->name, optionsVector[ i]->value);
+						}
+						else{
+							bonminSetup.options()->SetStringValue("bonmin."+optionsVector[ i]->name, optionsVector[ i]->value);	
+						}
+					}	
+
+				}
+			}	
+		}
+		
+	}
+	
+	catch(const ErrorClass& eclass){
+		std::cout << "THERE IS AN ERROR" << std::endl;
+		osresult->setGeneralMessage( eclass.errormsg);
+		osresult->setGeneralStatusType( "error");
+		osrl = osrlwriter->writeOSrL( osresult);
+		throw ErrorClass( osrl) ;
+	}				
+}//end setSolverOptions() 
 
 
+//void BonminSolver::solve() throw (ErrorClass) {
+void BonminSolver::solve() throw (ErrorClass) {
+		if( this->bCallbuildSolverInstance == false) buildSolverInstance();
+		if( this->bSetSolverOptions == false) setSolverOptions();
+	try{
 
-		  //Set up done, now let's branch and bound
-		  //double time1 = 0.0;
+		if(osinstance->getObjectiveNumber() <= 0) throw ErrorClass("Bonmin NEEDS AN OBJECTIVE FUNCTION");
+		//double start = CoinCpuTime();
+		//OSiLWriter osilwriter;
+		//cout << osilwriter.writeOSiL( osinstance) << endl;
+		if(osinstance->getVariableNumber() <= 0)throw ErrorClass("Bonmin requires decision variables");
+		//double duration = CoinCpuTime() - start;
+
 		  try {
-		    Bab bb;
-		    bb(bonmin);//process parameter file using Ipopt and do branch and bound using Cbc
-
+			  bonminSetup.initialize( GetRawPtr(tminlp) );
+		    // bb is a Bonmin BonCbc object;;
+		    bb(  bonminSetup);  //process parameter file using Ipopt and do branch and bound using Cbc
 
 		  }
 		  catch(TNLPSolver::UnsolvedError *E) {
@@ -672,38 +748,60 @@ void BonminSolver::solve() throw (ErrorClass) {
 			     <<std::endl
 			     <<E.message()<<std::endl;
 		  }
-		
-		//dataEchoCheck();
-		/***************now the ipopt invokation*********************/
-		//app->Options()->SetNumericValue("tol", 1e-9);
-		//app->Options()->SetIntegerValue("print_level", 0);
-		//app->Options()->SetIntegerValue("max_iter", 20000);
-		//app->Options()->SetStringValue("mu_strategy", "adaptive");
-		//app->Options()->SetStringValue("output_file", "ipopt.out");
-		//app->Options()->SetStringValue("check_derivatives_for_naninf", "yes");
-		// see if we have a linear program
-		if(osinstance->getObjectiveNumber() <= 0) throw ErrorClass("Bonmin NEEDS AN OBJECTIVE FUNCTION");
-		if( (osinstance->getNumberOfNonlinearExpressions() == 0) && (osinstance->getNumberOfQuadraticTerms() == 0) ) 
-			//app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-		// if it is a max problem call scaling and set to -1
-		if( osinstance->instanceData->objectives->obj[ 0]->maxOrMin.compare("min") != 0){
-  			//app->Options()->SetStringValue("nlp_scaling_method", "user-scaling");
-  		}
-		// Intialize the BonminApplication and process the options
-		std::cout << "Call Bonmin Initialize" << std::endl;
-		//app->Initialize();
-		std::cout << "Finished Bonmin Initialize" << std::endl;
-		//nlp->osinstance = this->osinstance;
-		// Ask Bonmin to solve the problem
-		std::cout << "Call Bonmin Optimize" << std::endl;
-		//ApplicationReturnStatus status = app->OptimizeTNLP( nlp);
-		std::cout << "Finish Bonmin Optimize" << std::endl;
-		osrl = osrlwriter->writeOSrL( osresult);
-		std::cout << "Finish writing the osrl" << std::endl;
-		//if (status != Solve_Succeeded) {
-		//if (status < -2) {
-		//	throw ErrorClass("Bonmin FAILED TO SOLVE THE PROBLEM: " + bonminErrorMsg);
-		//}	
+		  
+	if(( bb.model().isContinuousUnbounded() == true) && (osinstance->getNumberOfIntegerVariables() + osinstance->getNumberOfBinaryVariables() <= 0) ){
+		std::string solutionDescription = "";
+		std::string message = "Success";
+		int solIdx = 0;
+		if(osresult->setServiceName( "Bonin solver service") != true)
+			throw ErrorClass("OSResult error: setServiceName");
+		if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
+			throw ErrorClass("OSResult error: setInstanceName");
+		if(osresult->setVariableNumber( osinstance->getVariableNumber()) != true)
+			throw ErrorClass("OSResult error: setVariableNumer");
+		if(osresult->setObjectiveNumber( 1) != true)
+			throw ErrorClass("OSResult error: setObjectiveNumber");
+		if(osresult->setConstraintNumber( osinstance->getConstraintNumber()) != true)
+			throw ErrorClass("OSResult error: setConstraintNumber");
+		if(osresult->setSolutionNumber(  1) != true)
+			throw ErrorClass("OSResult error: setSolutionNumer");		
+		if(osresult->setGeneralMessage( message) != true)
+			throw ErrorClass("OSResult error: setGeneralMessage");
+		solutionDescription = "The problem is unbounded";
+			osresult->setSolutionStatus(solIdx,  "error", solutionDescription);	
+		osresult->setGeneralStatusType("normal");
+		osrl = osrlwriter->writeOSrL( osresult);		
+		return;
+	}
+	
+	
+	if(( bb.model().isProvenInfeasible() == true)  ){
+		std::string solutionDescription = "";
+		std::string message = "Success";
+		int solIdx = 0;
+		if(osresult->setServiceName( "Bonin solver service") != true)
+			throw ErrorClass("OSResult error: setServiceName");
+		if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
+			throw ErrorClass("OSResult error: setInstanceName");
+		if(osresult->setVariableNumber( osinstance->getVariableNumber()) != true)
+			throw ErrorClass("OSResult error: setVariableNumer");
+		if(osresult->setObjectiveNumber( 1) != true)
+			throw ErrorClass("OSResult error: setObjectiveNumber");
+		if(osresult->setConstraintNumber( osinstance->getConstraintNumber()) != true)
+			throw ErrorClass("OSResult error: setConstraintNumber");
+		if(osresult->setSolutionNumber(  1) != true)
+			throw ErrorClass("OSResult error: setSolutionNumer");		
+		if(osresult->setGeneralMessage( message) != true)
+			throw ErrorClass("OSResult error: setGeneralMessage");
+		solutionDescription = "The problem is infeasible";
+			osresult->setSolutionStatus(solIdx,  "error", solutionDescription);	
+		osresult->setGeneralStatusType("normal");
+		osrl = osrlwriter->writeOSrL( osresult);		
+		return;
+	}
+	    status = tminlp->status;
+	    writeResult();
+
 	}
 	catch(const ErrorClass& eclass){
 		osresult->setGeneralMessage( eclass.errormsg);
@@ -712,6 +810,122 @@ void BonminSolver::solve() throw (ErrorClass) {
 		throw ErrorClass( osrl) ;
 	}
 }//solve
+
+
+
+
+void BonminSolver::writeResult(){
+	double *x = NULL;
+	double *z = NULL;
+	int i = 0;
+	int solIdx = 0;
+	std::string solutionDescription = "";
+	std::string message = "Bonmin solver finishes to the end.";
+	
+	
+	try{
+		x = new double[osinstance->getVariableNumber() ];
+		z = new double[1];		
+		// resultHeader information
+		if(osresult->setServiceName( "Bonmin solver service") != true)
+			throw ErrorClass("OSResult error: setServiceName");
+		if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
+			throw ErrorClass("OSResult error: setInstanceName");	
+		//if(osresult->setJobID( osoption->jobID) != true)
+		//	throw ErrorClass("OSResult error: setJobID");	
+		// set basic problem parameters
+		
+		if(osresult->setVariableNumber( osinstance->getVariableNumber()) != true)
+			throw ErrorClass("OSResult error: setVariableNumer");
+		if(osresult->setObjectiveNumber( 1) != true)
+			throw ErrorClass("OSResult error: setObjectiveNumber");
+		if(osresult->setConstraintNumber( osinstance->getConstraintNumber()) != true)
+			throw ErrorClass("OSResult error: setConstraintNumber");
+		if(osresult->setSolutionNumber(  1) != true)
+			throw ErrorClass("OSResult error: setSolutionNumer");		
+		if(osresult->setGeneralMessage( message) != true)
+			throw ErrorClass("OSResult error: setGeneralMessage");
+	
+		switch( status){
+			case  TMINLP::SUCCESS:
+				solutionDescription = "SUCCESS[BONMIN]: Algorithm terminated normally at a locally optimal point, satisfying the convergence tolerances.";
+				//std::cout << solutionDescription << std::endl;
+				osresult->setSolutionStatus(solIdx,  "locallyOptimal", solutionDescription);		
+				/* Retrieve the solution */
+				*(z + 0)  =  osinstance->calculateAllObjectiveFunctionValues( const_cast<double*>(bb.bestSolution()), true)[ 0];
+				osresult->setObjectiveValuesDense(solIdx, z); 
+				for(i=0; i < osinstance->getVariableNumber(); i++){
+					*(x + i) = bb.bestSolution()[i];
+					//std::cout <<  *(x + i)  << std::endl;
+				}
+				osresult->setPrimalVariableValuesDense(solIdx, x);
+			break;
+			
+			case TMINLP::LIMIT_EXCEEDED:
+				solutionDescription = "LIMIT_EXCEEDED[BONMIN]: A resource limit was exceeded, we provide the current solution.";
+				//std::cout << solutionDescription << std::endl;
+				osresult->setSolutionStatus(solIdx,  "stoppedByLimit", solutionDescription);
+				//osresult->setPrimalVariableValuesDense(solIdx, const_cast<double*>(x));
+				//osresult->setDualVariableValuesDense(solIdx, const_cast<double*>( lambda));	
+				/* Retrieve the solution */
+				*(z + 0)  =  osinstance->calculateAllObjectiveFunctionValues( const_cast<double*>(bb.model().getColSolution()), true)[ 0];
+				osresult->setObjectiveValuesDense(solIdx, z); 
+				for(i=0; i < osinstance->getVariableNumber(); i++){
+					*(x + i) = bb.model().getColSolution()[i];
+					//std::cout <<  *(x + i)  << std::endl;
+				}
+				osresult->setPrimalVariableValuesDense(solIdx, x); 
+			break;
+			
+			case TMINLP::MINLP_ERROR:
+				solutionDescription = "MINLP_ERROR [BONMIN]: Algorithm stopped with unspecified error.";
+				//std::cout << solutionDescription << std::endl;
+				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);	
+
+			break;
+			
+			case TMINLP::CONTINUOUS_UNBOUNDED:
+				solutionDescription = "CONTINUOUS_UNBOUNDED [BONMIN]: The continuous relaxation is unbounded, the MINLP may or may not be unbounded.";
+				//std::cout << solutionDescription << std::endl;
+				osresult->setSolutionStatus(solIdx,  "error", solutionDescription);	
+
+			break;
+			
+		
+			case TMINLP::INFEASIBLE:
+				solutionDescription = "INFEASIBLE [BONMIN]: Problem may be infeasible.";
+				//std::cout << solutionDescription << std::endl;
+				osresult->setSolutionStatus(solIdx,  "infeasible", solutionDescription);
+			break;
+			
+			
+			default:
+				solutionDescription = "OTHER[BONMIN]: other unknown solution status from Bonmin solver";
+				//std::cout << solutionDescription << std::endl;
+				osresult->setSolutionStatus(solIdx,  "other", solutionDescription);
+		}//switch end	
+		osresult->setGeneralStatusType("normal");
+		osrl = osrlwriter->writeOSrL( osresult);
+		delete[] x;
+		x = NULL;
+		delete[] z;	
+		z = NULL;
+	}//end try
+	
+	
+	catch(const ErrorClass& eclass){
+		delete[] x;
+		x = NULL;
+		delete[] z;	
+		z = NULL;
+		osresult->setGeneralMessage( eclass.errormsg);
+		osresult->setGeneralStatusType( "error");
+		osrl = osrlwriter->writeOSrL( osresult);
+		throw ErrorClass( osrl) ;
+	}	
+	
+	
+}// end writeResult()
 
 
 void BonminSolver::dataEchoCheck(){
@@ -775,9 +989,9 @@ void BonminSolver::dataEchoCheck(){
 } // end dataEchoCheck
 
 
-BonminProblem::BonminProblem(OSInstance *osinstance_,  OSResult *osresult_) {
+BonminProblem::BonminProblem(OSInstance *osinstance_,  OSOption *osoption_) {
 	osinstance = osinstance_;
-	osresult = osresult_;
+	osoption = osoption_;
 	printSol_ = false;
 }
 

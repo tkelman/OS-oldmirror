@@ -55,11 +55,15 @@
 #ifdef COIN_HAS_BONMIN    
 #include "OSBonminSolver.h"
 #endif 
+#ifdef COIN_HAS_COUENNE    
+#include "OSCouenneSolver.h"
+#endif
 #include "OSFileUtil.h"
 #include "OSDefaultSolver.h"
 #include "OSSolverAgent.h"
 #include "OShL.h"
 #include "OSErrorClass.h"
+#include "CoinError.hpp"
 #include <sstream>
 
 #ifdef HAVE_CSTRING
@@ -72,7 +76,8 @@
 # endif
 #endif
 
-
+#include "CoinError.hpp"
+#include "CoinHelperFunctions.hpp"
 //AMPL includes must be last.
 #include <asl.h>
 using std::cerr;
@@ -127,7 +132,7 @@ int main(int argc, char **argv)
 	std::string osrl = "";
 	std::string sSolverName = "";
 	// note that default solver is coin and default subSolver is Cbc
-	std::string osol = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <osol xmlns=\"os.optimizationservices.org\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"os.optimizationservices.org http://www.optimizationservices.org/schemas/OSoL.xsd\"></osol>";
+	std::string osol = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <osol xmlns=\"os.optimizationservices.org\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"os.optimizationservices.org http://www.optimizationservices.org/schemas/2.0/OSoL.xsd\"></osol>";
 	
 	char *num_procOption = NULL;
 	char *num_processors = NULL;
@@ -287,21 +292,42 @@ int main(int argc, char **argv)
 												if(bBonminIsPresent == false) throw ErrorClass( "the Bonmin solver requested is not present");												
 											}
 											else{
-												throw ErrorClass( "a supported solver has not been selected");
+												if( strstr(amplclient_options, "couenne") != NULL){
+													bool bCouenneIsPresent = false;
+													#ifdef COIN_HAS_COUENNE
+													bCouenneIsPresent = true;
+													sSolverName = "couenne";
+													solver_option = getenv("couenne_options");
+													if( solver_option != NULL) cout << "HERE ARE THE Couenne SOLVER OPTIONS " <<   solver_option << endl;
+													if( ( solver_option == NULL) || (strstr(solver_option, "service") == NULL) ){
+														solverType = new CouenneSolver();
+														solverType->sSolverName = "counenne";
+													}
+													#endif
+														if(bCouenneIsPresent == false) throw ErrorClass( "the Couenne solver requested is not present");	
+												}
+												else{
+													throw ErrorClass( "a supported solver has not been selected");
+												}
 											}
 										}
 									}	
 								} 
 							}
 						}
-					}
+					} 
 				}
 			}
 		}
 		// do a local solve
 		if( ( solver_option == NULL) || (strstr(solver_option, "service") == NULL)  ){
 			solverType->osol = osol;
-			//std::cout << osol << std::endl;
+			std::cout << osol << std::endl;
+			OSiLWriter osilwriter;
+			std::cout << "WRITE THE INSTANCE" << std::endl;
+			std::cout << osilwriter.writeOSiL( osinstance) << std::endl;
+			std::cout << "DONE WRITE THE INSTANCE" << std::endl;
+
 			solverType->osinstance = osinstance;
 			solverType->buildSolverInstance();
 			solverType->solve();
@@ -328,6 +354,7 @@ int main(int argc, char **argv)
 			osilwriter = new OSiLWriter();
 			std::string  osil = osilwriter->writeOSiL( osinstance);
 			////
+		
 			agent_address = strstr(solver_option, "service");
 			agent_address += 7;
 			URL = strtok( agent_address, delims );
@@ -339,8 +366,8 @@ int main(int argc, char **argv)
 			string::size_type iStringpos;
 			iStringpos = osol.find("</osol");
 			//std::cout <<  solverType->sSolverName << std::endl;
-			std::string solverInput = "<other name=\"os_solver\">"
-				+ sSolverName  + "</other>";
+			std::string solverInput = "<general><solverToInvoke>" + sSolverName 
+				 + "</solverToInvoke></general>";
 			osol.insert(iStringpos, solverInput);
 			cout << "Place remote synchronous call: " + sURL << endl << endl << endl;
 			cout << osol << endl;
@@ -379,12 +406,51 @@ int main(int argc, char **argv)
 
 			//
 			sReport = " ";
-			write_sol(  const_cast<char*>(sReport.c_str()), 
-					osresult->getOptimalPrimalVariableValues( -1), 
-					osresult->getOptimalDualVariableValues( -1) , NULL);
+			int i;
+			int vecSize;
+			double *x;
+			double *y;
+			int numVars = osresult->getVariableNumber();
+			int numCons = osresult->getConstraintNumber();
+			x = new double[ numVars];
+			y = new double[ numCons];
+			
+			std::vector<IndexValuePair*> primalValPair;
+			std::vector<IndexValuePair*> dualValPair;
+			dualValPair = osresult->getOptimalDualVariableValues( 0);
+			primalValPair = osresult->getOptimalPrimalVariableValues( 0);
+			
+			for(i = 0; i < numVars; i++){
+				x[ 0] = 0.0;
+			}
+			vecSize = primalValPair.size();
+			for(i = 0; i < vecSize; i++){
+				x[ primalValPair[i]->idx ] = primalValPair[i]->value;
+				//std::cout << "index =  " <<   primalValPair[i]->idx  << std::endl;
+				//std::cout << "value =  " <<   primalValPair[i]->value  << std::endl;
+			}
+			
+			
+			for(i = 0; i < numCons; i++){
+				y[ 0] = 0.0;
+			}
+			vecSize = dualValPair.size();
+			for(i = 0; i < vecSize; i++){
+				y[ dualValPair[i]->idx ] = dualValPair[i]->value;  
+				//std::cout << "index =  " <<   primalValPair[i]->idx  << std::endl;
+				//std::cout << "value =  " <<   primalValPair[i]->value  << std::endl;
+			}
+			
+
+			
+			write_sol(  const_cast<char*>(sReport.c_str()),  x, y , NULL);
 			
 			delete osrlreader;
 			osrlreader = NULL;
+			//delete[] x;
+			//x = NULL;
+			//delete y;
+			//y = NULL;
 		}else{
 			// do the following so output is not written twice
 			// see page 23 of hooking solver to AMPL

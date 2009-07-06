@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSiLParserData.h
  * 
  * @author  Robert Fourer, Gus Gassmann, Jun Ma, Kipp Martin, 
@@ -184,8 +185,7 @@ public:
 	bool stageConstraintsOrdered;
 	bool stageObjectivesOrdered;
 
-	/**  ...we need to track the first variable, constraint, objective
-	 *   are given in temporal order... */
+	/**  ...we need to track the first variable, constraint, objective... */
 	int stageVariableStartIdx;
 	int stageConstraintStartIdx;
 	int stageObjectiveStartIdx;

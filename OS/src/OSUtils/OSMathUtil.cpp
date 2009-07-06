@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file MathUtil.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -119,6 +120,8 @@ std::string os_dtoa_format(double  x){
     // get the sign, 1 for negative
     if( sign == 1) outStr << "-";
     strLength = strlen( charResult);
+	
+	
     // return charResult if we have nan or infinity  -- if so, return orginal string
     if(decimalPointPos == 9999){
     	for(k = 0; k < strLength; k++)outStr << charResult[ k];
@@ -130,13 +133,24 @@ std::string os_dtoa_format(double  x){
     } 
     if(decimalPointPos >= 0){
     	if(decimalPointPos > strLength){
-    		// put in all of the characters from charResult
-    		outStr << charResult[ 0];
-    		outStr <<  ".";
-    		for(k = 1; k < strLength; k++) outStr << charResult[ k];
-    		//for(k = strLength; k < decimalPointPos; k++) outStr <<  "0";
-    		outStr <<  "e";
-    		outStr <<  decimalPointPos -  1;
+			if(strLength == 1){
+				// put in all of the characters from charResult
+				outStr << charResult[ 0];
+				if(decimalPointPos <= 5){ //hey for than 5 zeros go for e notataion
+					for(k = strLength; k < decimalPointPos; k++) outStr <<  "0";
+				}else{
+					outStr <<  ".";
+					for(k = 1; k < strLength; k++) outStr << charResult[ k];
+					outStr <<  "e";
+					outStr <<  decimalPointPos -  1;
+				}
+			}else{
+				outStr << charResult[ 0];
+				outStr <<  ".";
+				for(k = 1; k < strLength; k++) outStr << charResult[ k];
+				outStr <<  "e";
+				outStr <<  decimalPointPos -  1;
+			}
     	}else{
     		for(k = 0; k < decimalPointPos; k++) outStr << charResult[ k];
     		outStr <<  ".";

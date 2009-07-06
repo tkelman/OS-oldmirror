@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file LindoSolver.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -20,6 +21,11 @@
 #include "OSFileUtil.h"
 #include "OSErrorClass.h"
 
+#include "OSDataStructures.h"
+#include "OSParameters.h" 
+#include "OSMathUtil.h"
+
+#include "CoinTime.hpp"
 
 
 #ifdef HAVE_CTIME
@@ -95,7 +101,8 @@ LindoSolver::LindoSolver():
 	m_msConName( NULL),
 	m_mcVarType( NULL),
 	m_mdObjConstant( 0),
-	osrlwriter( NULL)
+	osrlwriter( NULL),
+	cpuTime( 0)
 	
 {
 #ifdef DEBUG
@@ -182,13 +189,31 @@ void LindoSolver::buildSolverInstance() throw (ErrorClass) {
 	}				
 }//end buildSolverInstance()
 
+
+
+void LindoSolver::setSolverOptions() throw (ErrorClass) {
+	try{
+		
+	}
+	catch(const ErrorClass& eclass){
+		std::cout << "THERE IS AN ERROR" << std::endl;
+		osresult->setGeneralMessage( eclass.errormsg);
+		osresult->setGeneralStatusType( "error");
+		osrl = osrlwriter->writeOSrL( osresult);
+		throw ErrorClass( osrl) ;
+	}				
+}//end setSolverOptions() 
+
  
 void LindoSolver::solve()  {
 	if( this->bCallbuildSolverInstance == false) buildSolverInstance();
 	try{
-
+		double start = CoinCpuTime();
 		if( optimize() != true) throw ErrorClass("problem optimizing model");
-
+		cpuTime = CoinCpuTime() - start;
+		osresult->setGeneralStatusType("normal");
+		osresult->setTime(cpuTime);
+		osrl = osrlwriter->writeOSrL( osresult);
 	}
 	catch(const ErrorClass& eclass){
 		osresult->setGeneralMessage( eclass.errormsg);
@@ -452,6 +477,7 @@ bool LindoSolver::optimize(){
 	// resultHeader infomration
 	if(osresult->setServiceName( "Solved using a LINDO service") != true)
 		throw ErrorClass("OSResult error: setServiceName");
+
 	if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
 		throw ErrorClass("OSResult error: setInstanceName");
 	//if(osresult->setJobID( osresultdata->jobID) != true)
@@ -503,7 +529,7 @@ bool LindoSolver::optimize(){
 		if(osresult->setSolutionNumber(  1) != true)
 			throw ErrorClass("OSResult error: setSolutionNumer");
 		cout << "Solution Status  = " <<  nSolStatus << endl;
-		osresult->setGeneralStatusType("success");
+		osresult->setGeneralStatusType("normal");
 		osresult->setSolutionStatus(solIdx, "optimal", description);	
 		x = new double[ osinstance->getVariableNumber() + m_iNumberNewSlacks];
 		srcost = new std::string[ osinstance->getVariableNumber() + m_iNumberNewSlacks];
@@ -534,7 +560,7 @@ bool LindoSolver::optimize(){
 					m_iLindoErrorCode = LSgetPrimalSolution( pModel_, x);  
 					lindoAPIErrorCheck("Error trying to obtain primal solution with NO integer variables present");
 				}
-				osresult->setPrimalVariableValues(solIdx, x);
+				osresult->setPrimalVariableValuesDense(solIdx, x);
 				// Get the dual values result
 				if( (osinstance->getNumberOfIntegerVariables() + osinstance->getNumberOfBinaryVariables() > 0)
 					|| (isNonlinear == false) ){
@@ -545,7 +571,7 @@ bool LindoSolver::optimize(){
 					m_iLindoErrorCode = LSgetDualSolution( pModel_, y);
 					lindoAPIErrorCheck("Error trying to obtain dual solution with NO integer variables present");
 				}
-				osresult->setDualVariableValues(solIdx, y);
+				osresult->setDualVariableValuesDense(solIdx, y);
 				// get the reduced cost result
 				if( ( osinstance->getNumberOfIntegerVariables() + osinstance->getNumberOfBinaryVariables() > 0)
 					|| (isNonlinear == false ) ) {
@@ -561,13 +587,13 @@ bool LindoSolver::optimize(){
 					int numberOfOtherVariableResult = 1;
 					int otherIdx = 0;
 					// first set the number of Other Variable Results
-					osresult->setNumberOfOtherVariableResult(solIdx, numberOfOtherVariableResult);
+					osresult->setNumberOfOtherVariableResults(solIdx, numberOfOtherVariableResult);
 					for(int i = 0; i <  osinstance->getVariableNumber() + m_iNumberNewSlacks; i++){
 						outStr << drcost[i];
 						srcost[ i] = outStr.str();
 						outStr.str("");
 					}
-					osresult->setAnOtherVariableResult(solIdx, otherIdx, "reduced costs", "the variable reduced costs", srcost);
+					osresult->setAnOtherVariableResultDense(solIdx, otherIdx, "reduced costs", "", "the variable reduced costs", srcost);
 					/* Get the value of the objective */
 					if( ( osinstance->getNumberOfIntegerVariables() + osinstance->getNumberOfBinaryVariables() > 0)
 						|| (isNonlinear == false ) ) {
@@ -578,7 +604,7 @@ bool LindoSolver::optimize(){
 						LSgetInfo( pModel_, LS_DINFO_GOP_OBJ, &z[0]);
 						lindoAPIErrorCheck("Error trying to obtain optimal objective value with NO integer variables present");	
 					}	
-					osresult->setObjectiveValues(solIdx, z);
+					osresult->setObjectiveValuesDense(solIdx, z);
 				}
 				break;
 			case 3:
@@ -590,7 +616,7 @@ bool LindoSolver::optimize(){
 			default:
 				osresult->setSolutionStatus(solIdx,  "other", description);
 		}
-		osrl = osrlwriter->writeOSrL( osresult);
+
 		delete[] x;
 		delete[] y;
 		delete[] z;
@@ -605,7 +631,7 @@ bool LindoSolver::optimize(){
 		osrl = osrlwriter->writeOSrL( osresult);
 		throw ;
 	}
-} //end solve
+} //end optimize
 
 
 bool LindoSolver::processQuadraticTerms(){

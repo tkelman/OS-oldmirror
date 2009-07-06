@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSiLWriter.cpp
  * 
  *
@@ -17,9 +18,9 @@
 #include "OSiLWriter.h"
 #include "OSInstance.h"
 #include "OSParameters.h" 
-#include "OSCommonUtil.h"
 #include "OSBase64.h"
 #include "OSMathUtil.h"
+#include "CoinFinite.hpp"
 
 #include <sstream>  
 
@@ -45,7 +46,10 @@ std::string OSiLWriter::writeOSiL( const OSInstance *theosinstance){
 	int i, j;
 	if(m_OSInstance == NULL)  return outStr.str();
 	outStr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ;
-	outStr << "<osil xmlns=\"os.optimizationservices.org\"   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"os.optimizationservices.org http://www.optimizationservices.org/schemas/OSiL.xsd\" >" ;
+	outStr << "<osil xmlns=\"os.optimizationservices.org\"   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
+	outStr << "xsi:schemaLocation=\"os.optimizationservices.org http://www.optimizationservices.org/schemas/";
+	outStr << OS_SCHEMA_VERSION;
+	outStr << "/OSiL.xsd\" >" ;
 	outStr << "<instanceHeader>" ;
 	if( m_bWhiteSpace == true) outStr << endl;
 	if(m_OSInstance->instanceHeader != NULL){
@@ -97,18 +101,19 @@ std::string OSiLWriter::writeOSiL( const OSInstance *theosinstance){
 						outStr << os_dtoa_format( m_OSInstance->instanceData->variables->var[i]->ub) ;
 						outStr <<  "\"";
 					}
-					/*
-					if(CommonUtil::ISOSNAN(m_OSInstance->instanceData->variables->var[i]->init) == false){
+					/* we no longer do init
+					if(CoinIsnan(m_OSInstance->instanceData->variables->var[i]->init) == false){
 						outStr << " init=\"" ;
 						outStr << os_dtoa_format(m_OSInstance->instanceData->variables->var[i]->init) ;
 						outStr <<  "\"";
 					}
-					*/
+					
 					if(m_OSInstance->instanceData->variables->var[i]->initString != ""){
 						outStr << " initString=\"" ;
 						outStr << m_OSInstance->instanceData->variables->var[i]->initString ;
 						outStr <<  "\"";
 					}
+					*/
 					outStr << "/>" ;
 					if( m_bWhiteSpace == true) outStr << endl;
 				}
@@ -366,7 +371,7 @@ std::string OSiLWriter::writeOSiL( const OSInstance *theosinstance){
 					outStr << "\"";
 					if(m_OSInstance->instanceData->quadraticCoefficients->qTerm[i]->coef != 0){
 						outStr << "  coef=\"";
-						outStr << m_OSInstance->instanceData->quadraticCoefficients->qTerm[i]->coef;
+						outStr << os_dtoa_format(m_OSInstance->instanceData->quadraticCoefficients->qTerm[i]->coef);
 						outStr << "\"";
 					}
 					outStr << "/>" ;

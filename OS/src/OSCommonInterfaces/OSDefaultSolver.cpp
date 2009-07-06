@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file DefaultSolver.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -25,11 +26,13 @@ DefaultSolver::DefaultSolver():
 	osil(""),
 	osol(""),
 	osrl(""),
-	osinstance(NULL),
-	osresult(NULL),
+	osinstance( NULL),
+	osresult( NULL),
+	osoption( NULL),
 	insList(""),
 	sSolverName(""),
-	bCallbuildSolverInstance( false)
+	bCallbuildSolverInstance( false),
+	bSetSolverOptions( false)
 
 { 
 

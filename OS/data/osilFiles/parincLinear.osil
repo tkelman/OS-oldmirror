@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <osil xmlns="os.optimizationservices.org" 
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="os.optimizationservices.org 
-   http://www.optimizationservices.org/schemas/OSiL.xsd">
+   xsi:schemaLocation="os.optimizationservices.org http://www.optimizationservices.org/schemas/2.0/OSiL.xsd">
 	<instanceHeader>
 		<name>Par Inc. </name>
-		<source>Anderson, Sweeney, and Williams</source>
-		<description> A production scheduling problem </description>
+		<source>Anderson, Sweeney, Williams, Camm and Martin</source>
+		<description> A linear production scheduling problem: optimal solution is x0 = 540 and x1 = 252 for optimal objective function value of 7668. </description>
 	</instanceHeader>
 	<instanceData>
 		<variables numberOfVariables="2">
-			<var name="x0"  lb="0"  />
-			<var name="x1" lb="0"  />
+			<var name="x0"  lb="0"  type="C" />
+			<var name="x1" lb="0" type="C" />
 		</variables>
 		<objectives numberOfObjectives="1">
 			<obj name = "Par, Inc. Objective Function" 
@@ -43,15 +42,15 @@
 				<el>3</el>
 			</rowIdx>
 			<value>
-				<el>.7</el>
+				<el>0.7</el>
 				<el>.5</el>
 				<el>1.</el>				
 				<el>.1</el>
 				<el>1.0</el>
-				<el>0.8333</el>
-				<el>0.6667</el>
+				<el>0.833333333333333333333</el>
+				<el>0.666666666666666666667</el>
 				<el>0.25</el>
 			</value>
-	</linearConstraintCoefficients>
+		</linearConstraintCoefficients>
 	</instanceData>
 </osil>

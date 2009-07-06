@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file algorithmicDiffTest.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -101,6 +102,7 @@
  
 
 int  main(){	
+	WindowsErrorPopupBlocker();
 	using std::cout;
 	using std::endl;
 	using CppAD::AD;
@@ -186,6 +188,24 @@ int  main(){
 				std::cout <<  "Variable Index = "   << posVarIndexMap->first  << std::endl ;
 		}
 		std::cout << "Number of nonlinear variables =  " << varIndexMap.size() << std::endl;
+		
+		//
+		
+		// get the number of nonlinear terms
+		
+		int mm = osinstance->getNumberOfNonlinearExpressionTreeModIndexes();
+		
+		int jj;
+		
+		for(jj = 0; jj < mm; jj++){
+			std::cout << osinstance->getNonlinearExpressionTreeModIndexes()[ jj] << std::endl;
+		}
+		
+		std::cout << "Number of unique nonlinear terms =  " <<  mm << std::endl;
+		//return 0;
+		
+		
+		
 		// domain space vector
 		size_t n  = varIndexMap.size(); // three variables
 		// range space vector
@@ -713,8 +733,8 @@ int  main(){
 		//Vector s(m);
 		for(i = 0; i < m; i++)
 		e[i] = false;
-		e[ 0] = false;
-		e[ 1] = true;
+		e[ 0] = true;
+		e[ 1] = false;
 		std::vector<bool> h( n*n);
 		//Vector h(n * n);
 		std::cout << "Computing Sparse Hessian" << std::endl;

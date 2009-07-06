@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file CoinSolver.h
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -16,39 +17,18 @@
 #ifndef COINSOLVER_H 
 #define COINSOLVER_H
 
-#include <CoinPackedMatrix.hpp>
-#include <OsiSolverInterface.hpp>
-#include <OsiClpSolverInterface.hpp> 
-#include <OsiCbcSolverInterface.hpp> 
-
 #include "OSConfig.h" 
 #include "OSDefaultSolver.h"
 #include "OSrLWriter.h"
 #include "OSErrorClass.h"
 #include "OSiLReader.h"
-
-#ifdef COIN_HAS_CPX
-#include <OsiCpxSolverInterface.hpp>
-#endif
-
-#ifdef COIN_HAS_GLPK
-#include <OsiGlpkSolverInterface.hpp>
-#endif
-
-#ifdef COIN_HAS_DYLP
-#include <OsiDylpSolverInterface.hpp>
-#endif
-
-#ifdef COIN_HAS_SYMPHONY
-#include <OsiSymSolverInterface.hpp>
-#endif
-
-#ifdef COIN_HAS_VOL
-#include <OsiVolSolverInterface.hpp>
-#endif
+#include "OSoLReader.h"
+#include "CbcModel.hpp"
 
 #include <string>
 
+class OsiSolverInterface;
+class CoinPackedMatrix;
 
 /*! \class CoinSolver class.h "CoinSolver.h"
  *  \brief Implements a solve method for the Coin solvers.
@@ -81,6 +61,12 @@ public:
 	 *  \return void.
 	 */	
 	virtual void  buildSolverInstance() throw(ErrorClass);
+	
+	/*! \fn void setSolverOptions() 
+	 *  \brief The implementation of the virtual functions. 
+	 *  \return void.
+	 */	
+	virtual void  setSolverOptions() throw(ErrorClass);
 	
 	
 	/*! \fn bool CoinSolver::setCoinPackedMatrix() 
@@ -115,8 +101,20 @@ public:
 	 */		
 	OSiLReader *m_osilreader;
 	
- 
+	/** 
+	 * m_osolreader is an OSoLReader object used to create an osoption from an
+	 * osol string if needed	 
+	 */		
+	OSoLReader *m_osolreader;
+
+
+	void writeResult(OsiSolverInterface *solver);
 	
+	// use this for when we solve with Cbc --AND-- have integer variables
+	void writeResult(CbcModel *model);
+
+
+
 private:
 
 
@@ -130,6 +128,17 @@ private:
 	
 	/** osrlwriter object used to write osrl from and OSResult object */
 	OSrLWriter  *osrlwriter;
+	
+	/** when Cbc is the solver, these are the arguments sent to
+	 * Cbc Solve
+	 */	
+	const char **cbc_argv;
+
+	/** the number of arguments in the argument list to the Cbc Solver
+	 */	
+	int num_cbc_argv;
+	
+	double cpuTime;
 
 };
 #endif

@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSmps2osil.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -62,14 +63,12 @@ bool OSmps2osil::createOSInstance( )
 	//
 	// get the variable information
 	//
-	std::string initString;
-	double init = OSNAN;
 	osinstance->setVariableNumber( numvar);
 	for(i = 0; i < numvar; i++)
 	{
 		osinstance->addVariable(i, m_MpsData->columnName( i), 
 			m_MpsData->getColLower()[ i], m_MpsData->getColUpper()[ i], 
-			m_MpsData->isInteger( i)? 'I':'C', init, initString);
+			m_MpsData->isInteger( i)? 'I':'C');
 	}
 	//
 	// now create the objective function

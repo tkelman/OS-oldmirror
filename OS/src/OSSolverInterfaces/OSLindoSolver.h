@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file LindoSolver.h
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -67,6 +68,11 @@ public:
 	 */	
 	virtual void  buildSolverInstance() throw(ErrorClass);
 	
+	/*! \fn void setSolverOptions() 
+	 *  \brief The implementation of the virtual functions. 
+	 *  \return void.
+	 */	
+	virtual void  setSolverOptions() throw(ErrorClass);
 
 	// Lindo specific methods
 	
@@ -207,6 +213,8 @@ private:
 
 	/** osrlwriter object used to write osrl from and OSResult object */
 	OSrLWriter  *osrlwriter;
+	
+	double cpuTime;
 	
 	protected:
 	 /**

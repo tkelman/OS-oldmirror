@@ -1,12 +1,13 @@
-/** @file parseosrl.l
+/* $Id$ */
+/** @file parseosrl.y
  * 
- * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
- * @version 1.0, 10/05/2005
+ * @author  Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin, 
+ * @version 2.0, 02/04/2009
  * @since   OS1.0
  *
  * \remarks
- * Copyright (C) 2005, Robert Fourer, Jun Ma, Kipp Martin,
- * Northwestern University, and the University of Chicago.
+ * Copyright (C) 2005-2009, Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Northwestern University, Dalhousie University, and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Common Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
@@ -16,13 +17,16 @@
 %{
 
  
-  
-
+#include "OSDataStructures.h"
+#include "OSMathUtil.h"
+#include "OSParameters.h"
+#include "OSConfig.h"
 #include "OSErrorClass.h"
 #include "OSResult.h"
 #include "OSrLParserData.h"
 #include <iostream>
 #include <sstream> 
+#include <stdio.h>
 
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
@@ -34,6 +38,7 @@ char *osrlget_text (void* yyscanner );
 void osrlset_lineno (int line_number , void* yyscanner );
 void osrlset_extra (OSrLParserData* parserData , void* yyscanner );
 void  yygetOSResult(const char *ch, OSResult* m_osresult, OSrLParserData *m_parserData ) throw(ErrorClass);
+void osrl_empty_vectors( OSrLParserData* parserData);
 
 
 %}
@@ -52,11 +57,11 @@ void  yygetOSResult(const char *ch, OSResult* m_osresult, OSrLParserData *m_pars
 %union {
 	double dval;
 	int ival;
-	char* charval;
+	char* sval;
 }
 
 /* %name-prefix="osrl" 
-this fails on in Mac OS X
+this fails in Mac OS X
 */
 
 %{
@@ -67,22 +72,26 @@ int osrllex(YYSTYPE* lvalp,  YYLTYPE* llocp, void* scanner);
 #define scanner parserData->scanner
 %}
 
-%token <charval> ATTRIBUTETEXT
-%token <charval> ELEMENTTEXT
+%token <sval> ATTRIBUTETEXT
+%token <sval> ELEMENTTEXT
 %token <ival> INTEGER
 %token <dval> DOUBLE
 
 
 
 
-%token QUOTE GREATERTHAN ENDOFELEMENT 
-%token OSRLSTART OSRLATTRIBUTETEXT OSRLEND
-%token RESULTHEADERSTART RESULTHEADEREND 
+%token QUOTE TWOQUOTES GREATERTHAN ENDOFELEMENT 
+%token OSRLSTART OSRLSTARTEMPTY OSRLATTRIBUTETEXT OSRLEND
+%token GENERALSTART GENERALEND 
+%token SYSTEMSTART  SYSTEMEND 
+%token SERVICESTART SERVICEEND 
+%token JOBSTART JOBEND 
 %token SERVICEURISTARTANDEND  SERVICEURISTART SERVICEURIEND
 %token SERVICENAMESTARTANDEND SERVICENAMESTART SERVICENAMEEND
 %token INSTANCENAMESTARTANDEND INSTANCENAMESTART INSTANCENAMEEND
 %token JOBIDSTARTANDEND JOBIDSTART JOBIDEND
-%token RESULTDATASTART RESULTDATAEND RESULTDATASTARTANDEND
+%token TIMINGINFORMATIONSTART  TIMINGINFORMATIONEND
+%token TIMESTARTANDEND TIMESTART TIMEEND
 %token OPTIMIZATIONSTART OPTIMIZATIONEND
 %token SOLUTIONSTART SOLUTIONEND  VALUESSTART VALUESEND 
 %token DUALVALUESSTART DUALVALUESEND  
@@ -93,48 +102,39 @@ int osrllex(YYSTYPE* lvalp,  YYLTYPE* llocp, void* scanner);
 %token MESSAGESTART MESSAGEEND MESSAGESTARTANDEND OTHERSTART OTHEREND
 
 
-
+%token NUMBEROFTIMESATT
 %token NUMBEROFSOLUTIONSATT NUMBEROFVARIABLESATT NUMBEROFCONSTRAINTSATT NUMBEROFOBJECTIVESATT
-%token OBJECTIVEIDXATT IDXATT TYPEATT DESCRIPTIONATT NAMEATT
+%token NUMBEROFOTHERVARIABLERESULTSATT NUMBEROFOTHEROBJECTIVERESULTSATT NUMBEROFOTHERCONSTRAINTRESULTSATT
+
+%token NUMBEROFVARATT NUMBEROFOBJATT NUMBEROFCONATT TARGETOBJECTIVEIDXATT IDXATT 
+%token TYPEATT EMPTYTYPEATT DESCRIPTIONATT EMPTYDESCRIPTIONATT NAMEATT EMPTYNAMEATT 
+%token CATEGORYATT EMPTYCATEGORYATT UNITATT EMPTYUNITATT VALUEATT EMPTYVALUEATT
 
 %token DUMMY
 
 %%
 
 
-osrldoc: osrlstart resultHeader resultData 
-{
- 	if(parserData->numberOfSolutions > 0){
-		for(int solIdx = 0; solIdx <  parserData->numberOfSolutions; solIdx++){
-			osresult->setSolutionStatus(solIdx, parserData->statusType, parserData->statusDescription);
-			osresult->setPrimalVariableValues(solIdx, parserData->primalSolution[ solIdx]);
-		    osresult->setNumberOfOtherVariableResult(solIdx, parserData->numberOfOtherVariableResult);
-			for(int k = 0; k < parserData->numberOfOtherVariableResult; k++){
-				osresult->setAnOtherVariableResult(solIdx, k, parserData->otherVarVec[ k]->name, parserData->otherVarVec[ k]->description, parserData->otherVarVec[ k]->otherVarText);				
-			}
-			if( (parserData->dualSolution != NULL) &&  (parserData->dualSolution[ solIdx] != NULL) )  osresult->setDualVariableValues(solIdx, parserData->dualSolution[ solIdx]);
-			if( (parserData->objectiveValues != NULL) &&  (parserData->objectiveValues[ solIdx] != NULL) ) osresult->setObjectiveValues(solIdx, parserData->objectiveValues[ solIdx]);
-		    osresult->setSolutionObjectiveIndex(solIdx,  *(parserData->objectiveIdx + solIdx));
-		}
-	}
-}
-OSRLEND;
+osrldoc: osrlstart generalElement systemElement serviceElement jobElement 
+         optimizationElement OSRLEND ;
 
-osrlstart:	OSRLSTART  GREATERTHAN 
+osrlstart:	OSRLSTART  GREATERTHAN  
 			| OSRLSTART OSRLATTRIBUTETEXT GREATERTHAN ;
 
 
 
-resultHeader: RESULTHEADERSTART generalStatus serviceURI serviceName instanceName jobID headerMessage RESULTHEADEREND  ; 
+generalElement: | GENERALSTART generalStatus serviceURI serviceName instanceName jobID headerMessage GENERALEND ; 
    
 generalStatus: GENERALSTATUSSTART anotherGeneralStatusATT GREATERTHAN GENERALSTATUSEND {if(parserData->generalStatusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for generalStatus element");}
 | GENERALSTATUSSTART anotherGeneralStatusATT ENDOFELEMENT {if(parserData->generalStatusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for generalStatus element"); parserData->generalStatusTypePresent = false;};
 
 anotherGeneralStatusATT: generalstatusatt
-	| anotherGeneralStatusATT generalstatusatt  ;
+	| anotherGeneralStatusATT generalstatusatt;
 
-generalstatusatt: TYPEATT ATTRIBUTETEXT quote  { osresult->setGeneralStatusType($2);  free($2);  ; parserData->generalStatusTypePresent = true;}   
-		|  DESCRIPTIONATT ATTRIBUTETEXT  quote {  osresult->setGeneralStatusDescription($2);    free($2);}    
+generalstatusatt: TYPEATT ATTRIBUTETEXT quote { osresult->setGeneralStatusType($2);  free($2);  ; parserData->generalStatusTypePresent = true;}   
+    |        EMPTYTYPEATT                     { osresult->setGeneralStatusType("");               parserData->generalStatusTypePresent = true;}   
+    |      DESCRIPTIONATT ATTRIBUTETEXT quote { osresult->setGeneralStatusDescription($2);    free($2);} 
+    | EMPTYDESCRIPTIONATT                     { osresult->setGeneralStatusDescription("");}; 
 
 
 serviceURI: 
@@ -155,7 +155,7 @@ instanceName:
 
 jobID: 
 | JOBIDSTARTANDEND
-| JOBIDSTART ELEMENTTEXT JOBIDEND {osresult->setJobID( $2);  free($2);  parserData->errorText = NULL;}
+| JOBIDSTART ELEMENTTEXT JOBIDEND {osresult->setJobID( $2); free($2);  parserData->errorText = NULL;}
 | JOBIDSTART JOBIDEND ;
 
 headerMessage: 
@@ -163,81 +163,102 @@ headerMessage:
 | MESSAGESTART ELEMENTTEXT MESSAGEEND {osresult->setGeneralMessage( $2);  free($2);  parserData->errorText = NULL;}
 | MESSAGESTART MESSAGEEND ;
 
-resultData: RESULTDATASTARTANDEND 
-|  RESULTDATASTART statistics optimization otherResultData RESULTDATAEND
-| RESULTDATASTART RESULTDATAEND
+systemElement: | SYSTEMSTART SYSTEMEND ;
 
-otherResultData:
-| DUMMY;
-   
-statistics:
-| DUMMY
+serviceElement: | SERVICESTART SERVICEEND ;
 
-optimization: OPTIMIZATIONSTART anotherOptATT
-{
-// we now have the basic problem parameters
-	if(parserData->numberOfSolutions > 0){
-			if( parserData->numberOfVariables > 0){
-				parserData->primalSolution = new double* [parserData->numberOfSolutions];
-				for(int i = 0; i < parserData->numberOfSolutions; i++){
-					parserData->primalSolution[ i] = new double[ parserData->numberOfVariables];
-				}
-			}
-			//if( parserData->numberOfConstraints > 0){
-			//	parserData->dualSolution = new double*[ parserData->numberOfSolutions];
-			//	for(int i = 0; i < parserData->numberOfSolutions; i++){
-			//		parserData->dualSolution[ i] = new double[ parserData->numberOfConstraints];
-			//	}
-			//}
-			if( parserData->numberOfObjectives > 0){
-				parserData->objectiveValues = new double*[ parserData->numberOfSolutions];
-				parserData->objectiveIdx = new int[ parserData->numberOfSolutions];
-				for(int i = 0; i < parserData->numberOfSolutions; i++){
-					parserData->objectiveValues[ i] = new double[ parserData->numberOfObjectives];
-				}
-			}
-	}
-}
-optend ;
+jobElement: | JOBSTART timingInformation JOBEND;
+
+timingInformation:
+| TIMINGINFORMATIONSTART numberoftimes timingContent;
+
+numberoftimes: NUMBEROFTIMESATT QUOTE INTEGER QUOTE 
+{	if ($3 < 0) osrlerror(NULL, NULL, NULL, "number of time measurements cannot be negative");
+	parserData->numberOfTimes = $3;
+	parserData->ivar = 0;
+};
+
+timingContent: ENDOFELEMENT | GREATERTHAN listOfTimes TIMINGINFORMATIONEND;
+
+listOfTimes: | listOfTimes time;
+
+time: TIMESTARTANDEND
+    | TIMESTART timeAttList GREATERTHAN timeValue TIMEEND
+      {if (parserData->ivar == parserData->numberOfTimes)
+           osrlerror(NULL, NULL, NULL, "Too many time measurements");
+       osresult->addTimingInformation(parserData->timeType, parserData->timeCategory,
+                                      parserData->timeUnit, parserData->timeDescription, parserData->timeValue);       
+       parserData->ivar++;
+       parserData->timeType = "elapsedTime";
+       parserData->timeCategory = "total";
+       parserData->timeUnit = "second";
+       parserData->timeDescription = "";      
+      };
+
+timeAttList: | timeAttList timeAtt;
+
+timeAtt: timeType | timeCategory | timeUnit | timeDescription;
+
+timeType: TYPEATT ATTRIBUTETEXT QUOTE {parserData->timeType = $2;  free($2);}
+   | EMPTYTYPEATT ;
+
+timeCategory: CATEGORYATT ATTRIBUTETEXT QUOTE {parserData->timeCategory = $2;  free($2);}
+   | EMPTYCATEGORYATT ;
+
+timeUnit: UNITATT ATTRIBUTETEXT QUOTE {parserData->timeUnit = $2;   free($2);}
+   | EMPTYUNITATT ;
+
+timeDescription: DESCRIPTIONATT ATTRIBUTETEXT QUOTE {parserData->timeDescription = $2;  free($2);}
+   | EMPTYDESCRIPTIONATT;
+
+timeValue:
+  DOUBLE  { parserData->timeValue = $1; }
+| INTEGER { parserData->timeValue = $1; };
+
+optimizationElement: | OPTIMIZATIONSTART optimizationContent OPTIMIZATIONEND;
+
+optimizationContent:   anotherOptATT  optend ;
 
 
 optend:   ENDOFELEMENT 
 		| GREATERTHAN  solution ;
 
 anotherOptATT: 
-	| anotherOptATT optatt  ;
+	| anotherOptATT  optatt  ;
 
-optatt:  optnumsolatt  quote
-		| optnumvaratt   quote          
+optatt:   optnumsolatt  quote
+		| optnumvaratt  quote          
 		| optnumconatt  quote
-		| optnumobjatt   quote
+		| optnumobjatt  quote
 		;
 
 
-optnumsolatt: NUMBEROFSOLUTIONSATT INTEGER   {parserData->numberOfSolutions = $2; osresult->setSolutionNumber($2);}  ;
-	
-optnumvaratt: NUMBEROFVARIABLESATT INTEGER  {parserData->numberOfVariables = $2; osresult->setVariableNumber($2); } ; 
-	
-optnumconatt: NUMBEROFCONSTRAINTSATT INTEGER   {parserData->numberOfConstraints = $2; osresult->setConstraintNumber($2);}  ;
-
-optnumobjatt: NUMBEROFOBJECTIVESATT INTEGER   {parserData->numberOfObjectives = $2; osresult->setObjectiveNumber($2);}  ;
+optnumsolatt: NUMBEROFSOLUTIONSATT quote INTEGER   { parserData->numberOfSolutions = $3; osresult->setSolutionNumber($3);} ;	
+optnumvaratt: NUMBEROFVARIABLESATT quote INTEGER  {parserData->numberOfVariables = $3; osresult->setVariableNumber($3); } ; 
+optnumconatt: NUMBEROFCONSTRAINTSATT quote INTEGER   {parserData->numberOfConstraints = $3; osresult->setConstraintNumber($3);}  ;
+optnumobjatt: NUMBEROFOBJECTIVESATT quote INTEGER   {parserData->numberOfObjectives = $3; osresult->setObjectiveNumber($3);}  ;
 	
 
-
-solution:  OPTIMIZATIONEND
-| anothersolution  OPTIMIZATIONEND
-| solution anothersolution  OPTIMIZATIONEND;
+solution:  
+| solution anothersolution;  
 
 
-anothersolution: SOLUTIONSTART objectiveIDXATT GREATERTHAN status message variables objectives  constraints  otherSolution   {parserData->solutionIdx++;};
+anothersolution: SOLUTIONSTART {parserData->numberOfVar = 0;  parserData->numberOfCon = 0;  parserData->numberOfObj = 0;} targetObjectiveIDXATT GREATERTHAN status message variables objectives  constraints  otherSolution
+   {
+   if (parserData->solutionIdx == parserData->numberOfSolutions) 
+        osrlerror(NULL, NULL, NULL, "too many solutions"); 
+    parserData->solutionIdx++;
+    
 
+    
+   };
 
-
-
-
-objectiveIDXATT: 
-| OBJECTIVEIDXATT INTEGER quote {if($2 >= 0) osrlerror(NULL, NULL, NULL, "objective index must be nonpositive");
-*(parserData->objectiveIdx + parserData->solutionIdx) = $2;};
+targetObjectiveIDXATT: 
+| TARGETOBJECTIVEIDXATT quote INTEGER quote {
+	if($3 >= 0) osrlerror(NULL, NULL, NULL, "target objective index must be negative");
+/*  	osresult->optimization->solution[parserData->solutionIdx]->targetObjectiveIdx = $3;*/
+  	osresult->setSolutionTargetObjectiveIdx(parserData->solutionIdx, $3);
+ };
 
 status: STATUSSTART anotherStatusATT GREATERTHAN  STATUSEND {if(parserData->statusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for status element");  osresult->setSolutionStatus(parserData->solutionIdx, parserData->statusType, parserData->statusDescription);}
 | STATUSSTART anotherStatusATT ENDOFELEMENT {if(parserData->statusTypePresent == false) osrlerror(NULL, NULL, NULL, "a type attribute required for status element"); parserData->statusTypePresent = false; osresult->setSolutionStatus(parserData->solutionIdx, parserData->statusType, parserData->statusDescription);};
@@ -246,112 +267,259 @@ status: STATUSSTART anotherStatusATT GREATERTHAN  STATUSEND {if(parserData->stat
 anotherStatusATT: statusatt
 	| anotherStatusATT statusatt  ;
 
-statusatt:  TYPEATT ATTRIBUTETEXT  quote  {parserData->statusType = $2; parserData->statusTypePresent = true; free($2);}  
-		|  DESCRIPTIONATT ATTRIBUTETEXT quote  {parserData->statusDescription = $2;  free($2);}  ;
+statusatt:     TYPEATT ATTRIBUTETEXT quote  {parserData->statusType = $2; parserData->statusTypePresent = true; free($2);}  
+ |        EMPTYTYPEATT                      {parserData->statusType = ""; parserData->statusTypePresent = true;}  
+ |      DESCRIPTIONATT ATTRIBUTETEXT quote  {parserData->statusDescription = $2;  free($2);}  
+ | EMPTYDESCRIPTIONATT                      {parserData->statusDescription = "";}  ;
 
 message:
-| MESSAGESTART ELEMENTTEXT MESSAGEEND
-| MESSAGESTART MESSAGEEND;
+| MESSAGESTART ELEMENTTEXT MESSAGEEND 
+	{/*osresult->optimization->solution[parserData->solutionIdx]->message = $2; */
+		osresult->setSolutionMessage(parserData->solutionIdx, $2); free($2);
+	}
+| MESSAGESTART MESSAGEEND
+	{/*osresult->optimization->solution[parserData->solutionIdx]->message = "";*/
+		osresult->setSolutionMessage(parserData->solutionIdx, "");
+	}
+;
 
 variables:
-| VARIABLESSTART GREATERTHAN VALUESSTART GREATERTHAN var VALUESEND 
- otherVariables VARIABLESEND;
+| VARIABLESSTART numberOfOtherVariableResults GREATERTHAN VALUESSTART numberOfVarATT 
+  GREATERTHAN var VALUESEND otherVariables VARIABLESEND
+  {
+  	if(parserData->primalVals.size() !=  parserData->numberOfVar){
+  		osrlerror(NULL, NULL, parserData, "numberOfVar not consistent with the number of primal values");
+  	} else{
+ 		osresult->setPrimalVariableValuesSparse(parserData->solutionIdx, parserData->primalVals); 
+		osresult->optimization->solution[ parserData->solutionIdx]->variables->values->numberOfVar = parserData->numberOfVar;
+ 	}
+  };
 
-var: anothervar
+numberOfOtherVariableResults:
+| NUMBEROFOTHERVARIABLERESULTSATT quote INTEGER quote 
+	{  
+	osresult->setNumberOfOtherVariableResults(parserData->solutionIdx, $3);
+	 parserData->iOther = 0;
+	 parserData->tmpOtherValue = "";
+	 parserData->tmpOtherName = "";
+	 parserData->tmpOtherDescription = "";
+	}
+;
+
+numberOfVarATT: NUMBEROFVARATT quote INTEGER quote 
+	{
+	//osresult->setNumberOfPrimalVariableValues(parserData->solutionIdx, $3);
+	parserData->numberOfVar = $3;
+	}
+; 
+
+var:  anothervar
 | var anothervar;
 
-anothervar: VARSTART anIDXATT GREATERTHAN DOUBLE VAREND { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-	*(parserData->primalSolution[parserData->solutionIdx] + parserData->kounter ) = $4;
-	}
-|  VARSTART anIDXATT GREATERTHAN INTEGER VAREND { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-	*(parserData->primalSolution[parserData->solutionIdx] + parserData->kounter) = $4;
-}; 
+anothervar: VARSTART aVARIDXATT GREATERTHAN DoubleOrInt VAREND; 
 
+DoubleOrInt: 
+   INTEGER {parserData->tempVal = $1;  
+ 	parserData->primalValPair->value = $1;
+	parserData->primalVals.push_back( parserData->primalValPair);  
+   }
+   
+  | DOUBLE {parserData->tempVal = $1; 
+ 	parserData->primalValPair->value = $1;
+	parserData->primalVals.push_back( parserData->primalValPair); 
+  };
+  
+  
+aVARIDXATT: IDXATT INTEGER quote { parserData->primalValPair = new IndexValuePair();   parserData->primalValPair->idx = $2;};
+  
 
 
 otherVariables:
 | otherVariables otherVariableResult;
 
-otherVariableResult:  OTHERSTART {  
-   // parserData->numberOfOtherVariableResult++;
-	parserData->otherVarStruct = new OtherVariableResultStruct(); 
-	parserData->otherVarStruct->otherVarText = new std::string[parserData->numberOfVariables];} anotherotherVarATT GREATERTHAN {if(parserData->otherNamePresent == false) osrlerror(NULL, NULL, NULL, "other element requires name attribute"); 
-	parserData->otherNamePresent = false;  
-	}  othervar OTHEREND {parserData->otherVarVec.push_back( parserData->otherVarStruct); parserData->numberOfOtherVariableResult++; };
- 
-othervar: anotherothervar
-| othervar anotherothervar;
+otherVariableResult: otherVariableStart otherVariableATTlist GREATERTHAN othervarlist OTHEREND
+	{ 	 
+		
+		parserData->otherVarVec.push_back( parserData->otherVarStruct); 
+		parserData->numberOfOtherVariableResults++; 
+		parserData->otherNamePresent = false;	
+		
+	
+		osresult->setAnOtherVariableResultSparse(parserData->solutionIdx, parserData->iOther,  parserData->otherVarStruct->name,
+			parserData->otherVarStruct->value, parserData->otherVarStruct->description, parserData->otherVarStruct->otherVarIndex,
+			parserData->otherVarStruct->otherVarText, parserData->otherVarStruct->numberOfVar );
+							
+		parserData->iOther++;  
+		parserData->tmpOtherName = "";
+		parserData->tmpOtherValue = "";
+		parserData->tmpOtherDescription = "";			
+				
+	};
 
-anotherothervar: VARSTART anIDXATT  GREATERTHAN ELEMENTTEXT  VAREND { 
-std::ostringstream outStr;
-outStr << $4;
-parserData->otherVarStruct->otherVarText[parserData->kounter] =  outStr.str();
-free($4); parserData->errorText = NULL;
-if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
+otherVariableStart: OTHERSTART 
+	{  // parserData->numberOfOtherVariableResults++;
+		parserData->otherVarStruct = new OtherVariableResultStruct(); 
+		//parserData->otherVarStruct->otherVarText  = new std::string[ parserData->otherVarStruct->numberOfVar];	 
+		//parserData->otherVarStruct->otherVarIndex = new int[  parserData->otherVarStruct->numberOfVar];	 
+		parserData->kounter = 0;
+	}; 
+
+otherVariableATTlist: 
+	{	if(parserData->otherNamePresent == false) 
+			osrlerror(NULL, NULL, parserData, "other element requires name attribute"); 
+	}  
+	| othervariableATT otherVariableATTlist;
+
+othervariableATT: numberOfOtherVarATT | otherVarValueATT | otherVarNameATT | otherVarDescriptionATT;
+  
+numberOfOtherVarATT: NUMBEROFVARATT quote INTEGER quote 
+{
+	parserData->otherVarStruct->numberOfVar = $3;
+	parserData->otherVarStruct->otherVarText  = new std::string[ parserData->otherVarStruct->numberOfVar];	 
+	parserData->otherVarStruct->otherVarIndex = new int[  parserData->otherVarStruct->numberOfVar];	
+ 	//osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->numberOfVar = $3;
+}; 
+
+otherVarValueATT: 
+  EMPTYVALUEATT {parserData->tmpOtherValue=""; parserData->otherVarStruct->value = "";  
+/*  osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->value = "";*/
 }
-|
-VARSTART anIDXATT  GREATERTHAN DOUBLE  VAREND { 
-if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-std::ostringstream outStr;
-outStr << $4;
-parserData->otherVarStruct->otherVarText[parserData->kounter] =  outStr.str();
-}
-|VARSTART anIDXATT  GREATERTHAN INTEGER  VAREND { 
-if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfVariables - 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of variables");
-std::ostringstream outStr;
-outStr << $4;
-parserData->otherVarStruct->otherVarText[parserData->kounter] =  outStr.str();
+  |    VALUEATT ATTRIBUTETEXT quote {parserData->tmpOtherValue=$2; parserData->otherVarStruct->value = $2;  
+/*  osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->value = $2; */
+  free($2);}
+;
+
+otherVarNameATT: 
+  EMPTYNAMEATT 
+{ 
+	parserData->tmpOtherName=""; 
+	parserData->otherNamePresent = true; 
+	parserData->otherVarStruct->name = "";
+};
+  | NAMEATT ATTRIBUTETEXT quote
+{
+parserData->tmpOtherName=$2; parserData->otherNamePresent = true; parserData->otherVarStruct->name = $2;  free($2);
+ /* osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->name = $2;*/
 };
 
- 
-anotherotherVarATT: otheratt
-	|  anotherotherVarATT otheratt  ; 
+otherVarDescriptionATT: DESCRIPTIONATT ATTRIBUTETEXT quote
+{
+parserData->tmpOtherDescription=$2; parserData->otherVarStruct->description = $2;  free($2);
+  /*osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->description = $2;*/
+};
 
-otheratt:  NAMEATT ATTRIBUTETEXT quote  { parserData->otherNamePresent = true; parserData->otherVarStruct->name = $2;  free($2);}
-		| DESCRIPTIONATT ATTRIBUTETEXT  quote {   parserData->otherVarStruct->description = $2;  free($2);}    ;
 
+
+
+othervarlist: 
+| othervar othervarlist;
+
+othervar: othervarstart anIDXATT  GREATERTHAN ElementValue VAREND {  
+parserData->otherVarStruct->otherVarText[parserData->kounter] =  parserData->outStr.str();
+//reset the buffer;
+parserData->outStr.str("");
+parserData->otherVarStruct->otherVarIndex[parserData->kounter] =  parserData->ivar;
+parserData->errorText = NULL;
+//if (parserData->kounter == osresult->optimization->solution[parserData->solutionIdx]->variables->other[parserData->iOther]->numberOfVar)
+if (parserData->kounter == osresult->getAnOtherVariableResultNumberOfVar(parserData->solutionIdx, parserData->iOther))
+    osrlerror(NULL, NULL, parserData, "too many variables"); 
+if (parserData->numberOfVariables > 0 && (parserData->ivar < 0 || parserData->ivar > parserData->numberOfVariables - 1) ) 
+    osrlerror(NULL, NULL, parserData, "index must be greater than 0 and less than the number of variables");
+   
+
+parserData->kounter++;
+};
+
+ElementValue: 
+    ELEMENTTEXT  { parserData->outStr << $1; free($1); }
+  | INTEGER      { parserData->outStr << $1; /*free($1);*/ }
+  | DOUBLE       { parserData->outStr << $1; /*free($1);*/ };
+  
+othervarstart: VARSTART 
+	{	if(parserData->otherVarStruct->numberOfVar <= 0) 
+			osrlerror(NULL, NULL,  parserData, "must specify the number of variables") ;
+	}; 
 
 objectives:
-| OBJECTIVESSTART GREATERTHAN VALUESSTART GREATERTHAN obj VALUESEND otherObjectives OBJECTIVESEND;
+| OBJECTIVESSTART GREATERTHAN VALUESSTART  numberOfObjATT GREATERTHAN obj VALUESEND otherObjectives OBJECTIVESEND{
+	if(parserData->numberOfObj != parserData->objVals.size()){
+		osrlerror(NULL, NULL, parserData, "numberOfObj not consistent with the number of objective values");	
+	}else{
 
-obj: anotherobj
+		osresult->setObjectiveValuesSparse(parserData->solutionIdx, parserData->objVals);
+	}
+};
+
+numberOfObjATT: NUMBEROFOBJATT quote INTEGER quote{
+			parserData->numberOfObj = $3;
+} ;
+
+obj: 
 | obj anotherobj;
 
-anotherobj: OBJSTART anIDXATT GREATERTHAN DOUBLE OBJEND { *(parserData->objectiveValues[parserData->solutionIdx] + (parserData->kounter + parserData->numberOfObjectives)) = $4;
+anotherobj: OBJSTART anOBJIDXATT GREATERTHAN DOUBLE OBJEND { 
+
+	parserData->objValPair->value = $4;
+	parserData->objVals.push_back( parserData->objValPair);
+
 }
-| OBJSTART anIDXATT GREATERTHAN INTEGER OBJEND { *(parserData->objectiveValues[parserData->solutionIdx] + (parserData->kounter + parserData->numberOfObjectives)) = $4;};
+| OBJSTART anOBJIDXATT GREATERTHAN INTEGER OBJEND {
+
+
+ 	parserData->objValPair->value = $4;
+	parserData->objVals.push_back( parserData->objValPair);
+  };
+
+
+anOBJIDXATT: IDXATT INTEGER quote { parserData->objValPair = new IndexValuePair();   parserData->objValPair->idx = $2;   };
 
 
 constraints:
-| CONSTRAINTSSTART GREATERTHAN DUALVALUESSTART
+| CONSTRAINTSSTART GREATERTHAN DUALVALUESSTART numberOfConATT
 {
-			if( parserData->numberOfConstraints > 0){
-				parserData->dualSolution = new double*[ parserData->numberOfSolutions];
-				for(int i = 0; i < parserData->numberOfSolutions; i++){
-					parserData->dualSolution[ i] = new double[ parserData->numberOfConstraints];
-				}
-			}
+
+			
+			
 }
- GREATERTHAN con DUALVALUESEND otherConstraints CONSTRAINTSEND;
+ GREATERTHAN con DUALVALUESEND otherConstraints CONSTRAINTSEND {
+ 
+	if(parserData->numberOfCon != parserData->dualVals.size()){
+		osrlerror(NULL, NULL, parserData, "numberOfCon not consistent with the number of dual values");	
+	}else{
+
+		osresult->setDualVariableValuesSparse(parserData->solutionIdx, parserData->dualVals);
+		osresult->optimization->solution[ parserData->solutionIdx]->constraints->dualValues->numberOfCon = parserData->numberOfCon;
+	}
+ };
+ 
+ 
+numberOfConATT: NUMBEROFCONATT quote INTEGER quote
+{
+	parserData->numberOfCon = $3;
+
+};
 
 con: anothercon
 | con anothercon;
 
-anothercon: CONSTART anIDXATT GREATERTHAN DOUBLE CONEND { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfConstraints- 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of constraints");
-	*(parserData->dualSolution[parserData->solutionIdx] + parserData->kounter) = $4;}
-|  CONSTART anIDXATT GREATERTHAN INTEGER CONEND { 
-	if(parserData->kounter < 0 || parserData->kounter > parserData->numberOfConstraints- 1) osrlerror(NULL, NULL, NULL, "index must be greater than 0 and less than the number of constraints");
-	*(parserData->dualSolution[parserData->solutionIdx] + parserData->kounter) = $4;} ;
+anothercon: CONSTART aCONIDXATT GREATERTHAN DOUBLE CONEND { 
+	
+	parserData->dualValPair->value = $4;
+	parserData->dualVals.push_back( parserData->dualValPair); 
+	
+	
+	}
+|  CONSTART aCONIDXATT GREATERTHAN INTEGER CONEND { 
+	
+	parserData->dualValPair->value = $4;
+	parserData->dualVals.push_back( parserData->dualValPair); 
+	
+	} ;
 
 
+aCONIDXATT: IDXATT INTEGER quote { parserData->dualValPair = new IndexValuePair();   parserData->dualValPair->idx = $2;   };
 
-
-anIDXATT: IDXATT INTEGER quote {parserData->kounter = $2;};
-
-
+anIDXATT: IDXATT INTEGER quote {parserData->ivar = $2;    };
 
 
 
@@ -361,12 +529,16 @@ otherObjectives:
 otherConstraints:
 | DUMMY;
 
-otherSolution: SOLUTIONEND
-| DUMMY SOLUTIONEND;
+otherSolution: solutionEnd 
+| DUMMY solutionEnd;
+    
+solutionEnd: SOLUTIONEND  {
 
-
-
-
+	//
+    //delete the old vectors
+	osrl_empty_vectors( parserData);
+    
+};
 
 quote: xmlWhiteSpace QUOTE;
 
@@ -383,6 +555,7 @@ xmlWhiteSpace:
 
 void osrlerror(YYLTYPE* mytype, OSResult *osresult, OSrLParserData* parserData, const char* errormsg )
 {
+	osrl_empty_vectors( parserData);
 	std::ostringstream outStr;
 	std::string error = errormsg;
 	error = "Input is either not valid or well formed: "  + error;
@@ -412,4 +585,43 @@ void  yygetOSResult(const char *parsestring, OSResult *osresult, OSrLParserData 
 		throw ErrorClass(  eclass.errormsg); 
 	}
 } //end yygetOSResult
+
+void osrl_empty_vectors( OSrLParserData* parserData){
+
+    int k;
+    int numOtherVarVec = parserData->otherVarVec.size();
+   
+    for( k = 0; k < numOtherVarVec; k++){
+    	if( (parserData->otherVarVec[ k]  != NULL) && (parserData->otherVarVec[ k]->otherVarText != NULL) ) 
+			delete[] parserData->otherVarVec[ k]->otherVarText;
+		if( (parserData->otherVarVec[ k]  != NULL) && (parserData->otherVarVec[ k]->otherVarIndex != NULL) ) 
+			delete[] parserData->otherVarVec[ k]->otherVarIndex;
+			
+		if( parserData->otherVarVec[ k]  != NULL) delete parserData->otherVarVec[ k];
+    }
+  	parserData->otherVarVec.clear(); 
+  	
+  	int numDualVals =  parserData->dualVals.size();
+  	for(k = 0; k < numDualVals; k++){
+  		if( parserData->dualVals[ k]  != NULL  ) 
+			delete parserData->dualVals[ k];
+  	}
+  	parserData->dualVals.clear();
+  	
+  	
+   	int numObjVals =  parserData->objVals.size();
+  	for(k = 0; k < numObjVals; k++){
+  		if( parserData->objVals[ k]  != NULL  ) 
+			delete parserData->objVals[ k];
+  	}
+  	parserData->objVals.clear();
+  	
+  	
+   	int numPrimalVals =  parserData->primalVals.size();
+  	for(k = 0; k < numPrimalVals; k++){	
+  		if( parserData->primalVals[ k]  != NULL  ) 
+			delete parserData->primalVals[ k];
+  	}
+  	parserData->primalVals.clear();
+}//end osrl_empty_vectors
 

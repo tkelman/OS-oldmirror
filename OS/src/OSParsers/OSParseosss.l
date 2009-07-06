@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file parseosssl.l
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -118,7 +119,7 @@ browserState (on|off)
 
 
 (-config{xmlwhitespace}+{optionValue}) {
-	printf("Found option:  %s\n", yytext);  
+	//printf("Found option:  %s\n", yytext);  
 	//char *ch = strdup(yytext);
 	char *ch = yytext;
 	// move past -config
@@ -131,26 +132,26 @@ browserState (on|off)
 
 
 (--help) {
-	printf("Found option:  %s\n", yytext);  
+	//printf("Found option:  %s\n", yytext);  
 	yyextra->invokeHelp = true;
 	//printf("gsgersdf= %d\n", gster);
 }
 
 (-h) {
-	printf("Found option:  %s\n", yytext); 
+	//printf("Found option:  %s\n", yytext); 
 	yyextra->invokeHelp = true;
 	//printf("gsgersdf= %d\n", gster); 
 	
 }
 
 (--version) {
-	printf("Found option:  %s\n", yytext);  
+	//printf("Found option:  %s\n", yytext);  
 	yyextra->writeVersion = true;
 	//printf("gsgersdf= %d\n", gster);
 }
 
 (-v) {
-	printf("Found option:  %s\n", yytext); 
+	//printf("Found option:  %s\n", yytext); 
 	yyextra->writeVersion = true;
 	//printf("gsgersdf= %d\n", gster); 
 	
@@ -160,7 +161,7 @@ browserState (on|off)
 
 (-osil{xmlwhitespace}+{optionValue}) {
 	if(yyextra->osilFile == ""){
-		printf("Found option:  %s\n", yytext);  
+		//printf("Found option:  %s\n", yytext);  
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -osil
@@ -173,7 +174,7 @@ browserState (on|off)
 
 (-osrl{xmlwhitespace}+{optionValue}) {
 	if(yyextra->osrlFile == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -osrl
@@ -186,7 +187,7 @@ browserState (on|off)
 
 (-insList{xmlwhitespace}+{optionValue}) {
 	if(yyextra->insListFile == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -insList
@@ -199,7 +200,7 @@ browserState (on|off)
 
 (-osol{xmlwhitespace}+{optionValue}) {
 	if(yyextra->osolFile == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -osol
@@ -214,7 +215,7 @@ browserState (on|off)
 
 (-osplInput{xmlwhitespace}+{optionValue}) {
 	if(yyextra->osplInputFile == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -osplInput
@@ -227,7 +228,7 @@ browserState (on|off)
 
 (-osplOutput{xmlwhitespace}+{optionValue}) {
 	if(yyextra->osplOutputFile == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -osplInput
@@ -240,7 +241,7 @@ browserState (on|off)
 
 (-serviceMethod{xmlwhitespace}+{serviceMethod}) {
 	if(yyextra->serviceMethod == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -serviceMethod
@@ -253,7 +254,7 @@ browserState (on|off)
 
 (-serviceLocation{xmlwhitespace}+{optionValue}) {
 	if(yyextra->serviceLocation == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//yyextra->serviceLocation = strdup(yytext);
 		yyextra->serviceLocation =  yytext;
 		//char *ch = strdup(yytext);
@@ -268,7 +269,7 @@ browserState (on|off)
 
 (-mps{xmlwhitespace}+{optionValue}) {
 	if(yyextra->mpsFile == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -mps
@@ -281,7 +282,7 @@ browserState (on|off)
 
 (-nl{xmlwhitespace}+{optionValue}) {
 	if(yyextra->nlFile == ""){
-		printf("Found option:  %s\n", yytext);
+		//printf("Found option:  %s\n", yytext);
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -nl
@@ -294,7 +295,7 @@ browserState (on|off)
 
 (-solver{xmlwhitespace}+{optionValue}) {
 	if(yyextra->solverName == ""){
-		printf("Found option:  %s\n", yytext); 
+		//printf("Found option:  %s\n", yytext); 
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -solver
@@ -307,7 +308,7 @@ browserState (on|off)
  
 (-browser{xmlwhitespace}+{optionValue}) {
 	if(yyextra->browser == ""){
-		printf("Found option:  %s\n", yytext);  
+		//printf("Found option:  %s\n", yytext);  
 		//char *ch = strdup(yytext);
 		char *ch = yytext;
 		// move past -browser

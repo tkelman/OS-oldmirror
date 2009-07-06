@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<osil xmlns="os.optimizationservices.org">
+<osil xmlns="os.optimizationservices.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="os.optimizationservices.org http://www.optimizationservices.org/schemas/2.0/OSiL.xsd">
 	<instanceHeader>
 		<name>Bonmin Example</name>
 		<source>Bonmin example folder</source>
@@ -17,9 +18,9 @@
 		</variables>
 		<objectives numberOfObjectives=" 1">
 			<obj maxOrMin="min" name="minCost" numberOfObjCoef="3">
-				<coef idx="0">1</coef>
-				<coef idx="1">-1</coef>
-				<coef idx="2">-1</coef>
+				<coef idx="0">10</coef>
+				<coef idx="1">-10</coef>
+				<coef idx="2">-10</coef>
 			</obj>
 		</objectives>
 		<constraints numberOfConstraints="3">
@@ -39,13 +40,15 @@
 				<el>2</el>
 			</rowIdx>
 			<value>
-				<el>1.0</el>
+				<el>1.0  
+
+</el>
 				<el>-1.0</el>
 				<el>1.0</el>
 				<el>1.0</el>
 				<el>1.0</el>
 			</value>
-</linearConstraintCoefficients>
+		</linearConstraintCoefficients>
 		<nonlinearExpressions numberOfNonlinearExpressions="1">
 			<nl idx="0"> 
 				<plus>

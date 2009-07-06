@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<osol xmlns="os.optimizationservices.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="os.optimizationservices.org http://www.optimizationservices.org/schemas/OSoL.xsd">
+<osol xmlns="os.optimizationservices.org" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="os.optimizationservices.org http://www.optimizationservices.org/schemas/2.0/OSoL.xsd">
  	<general>  
- 		<jobID>GSBKIP__192.168.0.219_128.135.211.219_192.168.234.235__2008-04-20T16.04.55.936-05.00544633780</jobID>
+ 		<jobID>xyz1234Aug3010AM</jobID>
  		<contact transportType="smtp">
  			kipp.martin@chicagogsb.edu
- 		</contact>       
+ 		</contact> 
+ 		<solverToInvoke>ipopt</solverToInvoke>      
 	</general>
-    <optimization>
-    	<other name="os_solver">ipopt</other>
-    </optimization>
 </osol>

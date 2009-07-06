@@ -28,6 +28,12 @@ libOSCommonInterfaces_la_SOURCES = \
 	OSiLReader.h \
 	OSiLWriter.cpp \
 	OSiLWriter.h \
+        OSoLWriter.h \
+        OSoLWriter.cpp \
+        OSoLReader.h \
+        OSoLReader.cpp \
+        OSOption.h \
+        OSOption.cpp \
 	OSnLNode.cpp \
 	OSnLNode.h \
 	OSrLReader.cpp \
@@ -47,7 +53,11 @@ AM_CPPFLAGS =\
 	-I`$(CYGPATH_W) $(OSSRCDIR)/src/OSUtils` \
 	-I`$(CYGPATH_W) $(OSSRCDIR)/src/OSSolverInterfaces`	\
 	-I`$(CYGPATH_W) $(CPPADSRCDIR)` \
-	-I`$(CYGPATH_W) $(OSSRCDIR)/src/OSParsers`	
+	-I`$(CYGPATH_W) $(OSSRCDIR)/src/OSParsers`	\
+	-I`$(CYGPATH_W) $(COINUTILSSRCDIR)/src` \
+	-I`$(CYGPATH_W) $(COINUTILSSRCDIR)/inc` \
+	-I`$(CYGPATH_W) $(COINUTILSOBJDIR)/inc` 
+	
 	
 	
 if COIN_HAS_ASL
@@ -85,6 +95,9 @@ includecoin_HEADERS = \
 	OSnLNode.h \
 	OSrLReader.h \
 	OSrLWriter.h \
-	OSDefaultSolver.h
+	OSDefaultSolver.h \
+        OSoLWriter.h \
+        OSoLReader.h \
+        OSOption.h 
 
 

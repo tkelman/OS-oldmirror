@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file FileUtil.cpp
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -16,10 +17,12 @@
  * Optimization Services (OS) framework. </p>
  */
 
+#include <cstring>
 #include "OSFileUtil.h"
 #include "OSErrorClass.h"
 using std::cout;
 using std::endl;
+
 
 FileUtil::FileUtil(){
 } // end constructor
@@ -33,7 +36,7 @@ std::string FileUtil::getFileAsString( const char* fname){
 		std::ostringstream outStr;
 		std::string soutString;
 		char ch;
-		//std::cout << "Inside FileUtil:getFileAsString and calling inFile" << std::endl;
+		//std::cout << "Inside FileUtil:getFileAsString and calling inFile " << fname << std::endl;
 		std::ifstream inFile( fname);
 		if( !inFile){
 			throw ErrorClass(" Could not read the given file");
@@ -111,29 +114,66 @@ char* FileUtil::getFileAsChar(const  char* fname){
 
 
 bool FileUtil::writeFileFromString(char* fname, std::string sname){
-	std::ofstream outFile;
-	outFile.open( fname);
-	if(!outFile.is_open()){
-		return false;
+	//std::ofstream outFile;
+	//std::fstream outFile;
+	//outFile.open( fname);
+	//if(!outFile.is_open()){
+	//	return false;
+	//}
+	//outFile << sname;
+	//outFile.close();
+	//return true;
+	
+	FILE *ft ;
+	try{
+		ft = fopen ( fname, "w") ;
+	    if ( ft == NULL ) {
+	    	throw ErrorClass(" There was a problem opening the file");
+	    }
+		char *cstr;
+		cstr = new char [sname.size() + 1];
+		strcpy (cstr, sname.c_str());
+	    size_t i;
+	    for(i = 0; i < sname.size() + 1; i++){
+	    	if(cstr[ i] != '\0')     fputc ( cstr[ i], ft )  ;   	
+	    }
+//	    fputc( '\n', ft);
+	    fclose ( ft);
+		return true;
 	}
-	outFile << sname;
-	outFile.close();
-	return true;
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg) ;
+	}
 } // end writeFileFromString
 
+
 bool FileUtil::writeFileFromString(std::string  fname, std::string sname){
-	std::ofstream outFile;
-	outFile.open( fname.c_str()  );
-	if(!outFile.is_open()){
-		return false;
+	
+	FILE *ft ;
+	try{
+		ft = fopen ( fname.c_str(), "w") ;
+	    if ( ft == NULL ) {
+	    	throw ErrorClass(" There was a problem opening the file");
+	    }
+		char *cstr;
+		cstr = new char [sname.size() + 1];
+		strcpy (cstr, sname.c_str());
+	    size_t i;
+	    for(i = 0; i < sname.size() + 1; i++){
+	    	if(cstr[ i] != '\0')     fputc ( cstr[ i], ft )  ;   	
+	    }
+//	    fputc( '\n', ft);
+	    fclose ( ft);
+		return true;
 	}
-	outFile << sname;
-	outFile.close();
-	return true;
+	catch(const ErrorClass& eclass){
+		throw ErrorClass( eclass.errormsg) ;
+	}
 } // end writeFileFromString
 
 bool FileUtil::writeFileFromChar(char* fname, char* ch){
-	std::ofstream outFile;
+	//std::ofstream outFile;
+	std::fstream outFile;
 	outFile.open( fname);
 	if(!outFile.is_open()){
 		return false;

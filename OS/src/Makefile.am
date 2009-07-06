@@ -67,7 +67,9 @@ bin_PROGRAMS = OSSolverService
 OSSolverService_SOURCES = OSSolverService.cpp 
 
 
-
+if COIN_HAS_COUENNE
+     OSSolverService_SOURCES += $(COUENNESRCDIR)/src/main/BonCouenneInfo.cpp $(COUENNESRCDIR)/src/main/BonCouenneInfo.hpp
+endif
 
 
 # List all additionally required COIN libraries
@@ -78,14 +80,25 @@ LDADD +=  \
 
 OSSolverService_DEPENDENCIES += libOS.la
 
+if COIN_HAS_COUENNE
+   LDADD += $(COUENNEOBJDIR)/src/main/libBonCouenne.la $(COUENNEOBJDIR)/src/readnl/libCouenneReadnl.la $(COUENNEOBJDIR)/src/libCouenne.la
+if COIN_HAS_ASL
+   LDADD += $(BONMINOBJDIR)/src/CbcBonmin/libbonminampl.la
+endif
+endif
+
 if COIN_HAS_BONMIN
-   LDADD += $(BONMINOBJDIR)/src/CbcBonmin/libbonmin.la
-#   OSSolverService_DEPENDENCIES +=  $(BONMINOBJDIR)/src/CbcBonmin/libbonmin.la
+   LDADD += $(BONMINOBJDIR)/src/CbcBonmin/libbonmin.la 
+#    	$(BONMINOBJDIR)/src/Interfaces/libbonmininterfaces.la 
 endif
 
 
 if COIN_HAS_IPOPT
-  LDADD += $(IPOPTOBJDIR)/src/Interfaces/libipopt.la
+if COIN_HAS_ASL
+#      LDADD += $(IPOPTOBJDIR)/src/Apps/AmplSolver/libamplinterface.la 
+endif
+  LDADD += $(IPOPTOBJDIR)/src/Interfaces/libipopt.la \
+        $(IPOPTOBJDIR)/src/LinAlg/liblinalg.la
   ADDLIBS += `cat $(IPOPTOBJDIR)/src/Interfaces/ipopt_addlibs_cpp.txt`
 endif
 
@@ -118,7 +131,8 @@ if COIN_HAS_CPX
  OSSolverService_DEPENDENCIES += $(OSIOBJDIR)/src/OsiCpx/libOsiCpx.la
 endif
 
- LDADD += $(CBCOBJDIR)/src/libCbc.la 
+LDADD += $(CBCOBJDIR)/src/libCbcSolver.la 
+LDADD += $(CBCOBJDIR)/src/libCbc.la 
 ADDLIBS += `cat $(CBCOBJDIR)/cbc_addlibs.txt`
 OSSolverService_DEPENDENCIES += $(CBCOBJDIR)/src/libCbc.la
 
@@ -181,6 +195,8 @@ AM_CPPFLAGS =\
 	-I`$(CYGPATH_W) $(CBCOBJDIR)/inc` \
 	-I`$(CYGPATH_W) $(CLPSRCDIR)/src` \
 	-I`$(CYGPATH_W) $(CLPOBJDIR)/inc` \
+	-I`$(CYGPATH_W) $(CGLSRCDIR)/src` \
+	-I`$(CYGPATH_W) $(CGLOBJDIR)/inc` \
 	-I`$(CYGPATH_W) $(OSISRCDIR)/src` \
 	-I`$(CYGPATH_W) $(OSIOBJDIR)/inc` \
 	-I`$(CYGPATH_W) $(OSISRCDIR)/src/OsiCbc` \
@@ -259,9 +275,33 @@ endif
 if COIN_HAS_BONMIN
   AM_CPPFLAGS += \
 	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Interfaces` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Interfaces/Ampl` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Interfaces/Ipopt` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Interfaces/Filter` \
 	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Algorithms` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Algorithms/OaGenerators` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Algorithms/QuadCuts` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Algorithms/Ampl` \
+	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/Algorithms/Branching` \
 	-I`$(CYGPATH_W) $(BONMINSRCDIR)/src/CbcBonmin` \
 	-I`$(CYGPATH_W) $(BONMINOBJDIR)/inc`
+endif
+
+
+if COIN_HAS_COUENNE
+  AM_CPPFLAGS += \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/bound_tightening` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/branch` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/convex` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/disjunctive` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/expression` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/main` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/problem` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/readnl` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/standardize` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src/util` \
+	-I`$(CYGPATH_W) $(COUENNESRCDIR)/src` \
+	-I`$(CYGPATH_W) $(COUENNEOBJDIR)/inc`
 endif
 
 if COIN_HAS_KNITRO

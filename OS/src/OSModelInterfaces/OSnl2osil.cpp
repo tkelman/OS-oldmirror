@@ -1,3 +1,4 @@
+/* $Id$ */
 /**
  * @(#)nl2osil 1.0 10/05/2005
  *
@@ -23,7 +24,7 @@ data parinc.dat;
 option solver nl2osil;
 option nl2osil_oopt g; 
 option nl2osil_solver lindo; 
-sovle;
+solve;
 
 Alternatively, if you want to name the file and not use the AMPL randomly 
 generate file name, do the following:
@@ -51,15 +52,28 @@ you should get x1 = 540, x2 = 252
 #include "OSnl2osil.h"
 #include "OSErrorClass.h"
 
+#include "CoinHelperFunctions.hpp"
+
 
 #include "nlp.h"
 #include "getstub.h"
 #include "r_opn.hd" /* for N_OPS */
 #include "opcode.hd"
 
-#define R_OPS ((ASL_fg*)asl)->I.r_ops_
+
+#ifdef HAVE_CMATH
+# include <cmath>
+#else
+# ifdef HAVE_CMATH_H
+#  include <cmath.h>
+# endif
+#endif
+
+
+
+#define R_OPS  ((ASL_fg*)asl)->I.r_ops_
 #define OBJ_DE ((ASL_fg*)asl)->I.obj_de_
-#define VAR_E  ((ASL_fg *) asl) -> I.var_e_
+#define VAR_E  ((ASL_fg*)asl)->I.var_e_
 #define CON_DE ((ASL_fg*)asl)->I.con_de_
 
 efunc *r_ops_int[N_OPS];
@@ -74,6 +88,7 @@ using std::endl;
 #include <stdint.h>
 #endif
    
+//#define AMPLDEBUG
 
 OSnl2osil::OSnl2osil(std::string nlfilename){	
 	//Initialize the AMPL library
@@ -383,11 +398,11 @@ bool OSnl2osil::createOSInstance(){
 	//
 	// get the variable information
 	//
-	std::string initString;
 	std::string colName;
-	double init = OSNAN;
 	char vartype = 'C';
 	osinstance->setVariableNumber( n_var);
+	
+	/*
 	int firstBinaryVar = n_var - nbv - niv;
 	int firstIntegerVar = n_var - niv;
 	for(i = 0; i < n_var; i++){
@@ -397,37 +412,214 @@ bool OSnl2osil::createOSInstance(){
 		osinstance->addVariable(i, var_name(i), 
 			LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
 			LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
-			vartype, OSNAN, initString);
+			vartype);
+	}
+	*/
+	
+	
+	
+		
+	//first the nonlinear variables
+	//welcome to the world of the ASL API
+	
+	int lower;
+	int upper;
+	lower = 0;
+	upper = nlvb - nlvbi;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //continuous in an objective and in a constraint
+		vartype = 'C';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+	lower = nlvb - nlvbi;
+	upper = (nlvb - nlvbi) + nlvbi;
+	upper = nlvb; //  
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //integer in an objective and in a constraint
+		vartype = 'I';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+	lower = nlvb;
+	upper = nlvb + (nlvc - (nlvb + nlvci)) ;
+	upper = nlvc - nlvci;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //continuous just in constraints
+		vartype = 'C';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+	
+	lower = nlvc - nlvci;
+	upper = nlvc - nlvci + nlvci;
+	upper = nlvc;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //integer just in constraints
+		vartype = 'I';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+	lower = nlvc;
+	upper = nlvc + ( nlvo - (nlvc + nlvoi) );
+	upper = nlvo - nlvoi;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //continuous just in objectives
+		vartype = 'C';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+	lower = nlvo - nlvoi;
+	upper = nlvo - nlvoi + nlvoi;
+	upper = nlvo ;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //integer just in objectives
+		vartype = 'I';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+	
+	//now the other variables	
+	
+	lower = CoinMax(nlvc, nlvo);
+	upper =  CoinMax(nlvc, nlvo) + nwv;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //linear arc variables
+		vartype = 'C';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
 	}	
+	
+	
+	lower = CoinMax(nlvc, nlvo) + nwv;
+	upper =  CoinMax(nlvc, nlvo) + nwv + (n_var - (CoinMax(nlvc, nlvo) + niv + nbv + nwv) );
+	upper = n_var -  niv - nbv; 
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //other linear
+		vartype = 'C';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}	
+	
+	
+	lower = n_var -  niv - nbv;
+	upper = n_var -  niv - nbv + nbv;
+	upper = n_var -  niv ; 
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //linear binary
+		vartype = 'B';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}
+	
+		
+			
+	lower = n_var -  niv;
+	upper = n_var -  niv  + niv;
+	upper =   n_var;
+	#ifdef AMPLDEBUG
+	std::cout << "LOWER = " << lower << std::endl;
+	std::cout << "UPPER = " << upper << std::endl;
+	#endif
+	for(i = lower; i < upper; i++){ //linear integer
+		vartype = 'I';
+		osinstance->addVariable(i, var_name(i), 
+		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
+		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		vartype);
+	}	
+	
+	
+	// end of variables -- thank goodness!!!
+	
+	
+	
+		
 	//
 	//
 	//(expr_v *)e;
 	//
 	//
 	// now create the objective function
+	// in the nl file, this is stored in dense form; convert to sparse.
 	//	
 	double objWeight = 1.0;
 	//	char	*objtype;	/* object type array: 0 == min, 1 == max */
 	std::string objName="";
 	SparseVector* objectiveCoefficients = NULL;
-	objectiveCoefficients = new SparseVector( n_var);
-	for(i = 0; i < n_var; i++){
-		objectiveCoefficients->indexes[i] = i;
-	} 
+
 	osinstance->setObjectiveNumber( n_obj) ;
 	for(i = 0; i < n_obj; i++){
-		for(j = 0; j < n_var; j++){
-			objectiveCoefficients->values[j] = 0;
-		}
+		int n_obj_coef = 0;
 		for(og = Ograd[i]; og; og = og->next){
-			objectiveCoefficients->values[og->varno] = og->coef;
+			if (og->coef != 0) n_obj_coef++;
+		}
+		objectiveCoefficients = new SparseVector( n_obj_coef);
+		int i_obj_coef = -1;
+		for(og = Ograd[i]; og; og = og->next){
+			if (fabs(og->coef) > OS_EPS) {
+				i_obj_coef++;
+				objectiveCoefficients->values[i_obj_coef] = og->coef;
+				objectiveCoefficients->indexes[i_obj_coef] = og->varno;
+			}
 		}
 		osinstance->addObjective(-n_obj + i, objName, 
-		(objtype[i] == 1)?"max":"min", 
-		objconst( i),  objWeight, objectiveCoefficients) ;
+			(objtype[i] == 1)?"max":"min", 
+			objconst( i),  objWeight, objectiveCoefficients) ;
+		delete objectiveCoefficients; // delete the temporary sparse vector
+		objectiveCoefficients = NULL;
 	}
-	//delete objectiveCoefficients; // delete the temporary sparse vector
-	//objectiveCoefficients = NULL;
 	//
 	// now fill in row information
 	//
@@ -441,8 +633,75 @@ bool OSnl2osil::createOSInstance(){
 		LUrhs[2*i] > -OSDBL_MAX ? LUrhs[2*i] : -OSDBL_MAX, 
 		LUrhs[2*i+1] < OSDBL_MAX ? LUrhs[2*i+1] : OSDBL_MAX, 
 		constant);
-	}	
-	int valuesBegin = 0;
+	}
+	//
+	// Now the A-matrix
+	//
+	int colStart, colEnd, nCoefSqueezed;
+	nCoefSqueezed = 0;
+
+#ifdef AMPLDEBUG
+	cout << "A-matrix elements: ";
+	for (i = 0; i < A_colstarts[ n_var]; i++)
+		cout << A_vals[i] << " ";
+	cout << endl;
+	cout << "A-matrix rowinfo: ";
+	for (i = 0; i < A_colstarts[ n_var]; i++)
+		cout << A_rownos[i] << " ";
+	cout << endl;
+	cout << "A-matrix colstart: ";
+	for (i = 0; i <= n_var; i++)
+		cout << A_colstarts[i] << " ";
+	cout << endl;
+#endif
+
+	colEnd = 0;
+	for (i = 0; i < n_var; i++)
+	{
+		colStart = colEnd;
+		colEnd   = A_colstarts[i+1];
+#ifdef AMPLDEBUG
+		cout << "col " << i << " from " << colStart << " to " << colEnd - 1 << endl;
+#endif
+		for (j = colStart; j < colEnd; j++)
+		{
+			if (fabs(A_vals[ j]) > OS_EPS)
+			{	A_vals[ j-nCoefSqueezed] = A_vals[ j];
+				A_rownos[ j-nCoefSqueezed] = A_rownos[j];
+			}
+			else {
+#ifdef AMPLDEBUG
+				cout << "squeeze out element " << j << endl; 
+#endif
+				nCoefSqueezed++;
+			}
+		}
+		A_colstarts[i+1] = A_colstarts[i+1] - nCoefSqueezed;
+	}
+
+#ifdef AMPLDEBUG
+	cout << "A-matrix elements: ";
+	for (i = 0; i < A_colstarts[ n_var]; i++)
+		cout << A_vals[i] << " ";
+	cout << endl;
+	cout << "A-matrix rowinfo: ";
+	for (i = 0; i < A_colstarts[ n_var]; i++)
+		cout << A_rownos[i] << " ";
+	cout << endl;
+	cout << "A-matrix colstart: ";
+	for (i = 0; i <= n_var; i++)
+		cout << A_colstarts[i] << " ";
+	cout << endl;
+	cout << "A-matrix nonzeroes: " << A_colstarts[ n_var] << "; nsqueezed: " << nCoefSqueezed << endl;
+#endif
+
+	if(A_colstarts[ n_var] > 0){
+		osinstance->setLinearConstraintCoefficients(A_colstarts[ n_var],  true, 
+			A_vals,   0,  A_colstarts[n_var] - 1, 
+			A_rownos, 0,  A_colstarts[n_var] - 1, 
+			A_colstarts,  0,  n_var);
+	}
+/*	int valuesBegin = 0;
 	int valuesEnd = A_colstarts[ n_var] - 1;
 	int startsBegin = 0;
 	int indexesBegin = 0;
@@ -461,7 +720,7 @@ bool OSnl2osil::createOSInstance(){
 			A_rownos,  indexesBegin,  indexesEnd,   			
 			A_colstarts,  startsBegin,  n_var);
 	}
-		
+*/		
 		
 	// Kipp: can AMPL identify QPs???
 	//osinstance->setQuadraticTerms(numberOfQPTerms, VarOneIdx, VarTwoIdx, Coeff, begin, end);
@@ -503,16 +762,21 @@ bool OSnl2osil::createOSInstance(){
 		
 
 	}
-	delete objectiveCoefficients;
-	objectiveCoefficients = NULL;
+//	delete objectiveCoefficients;
+//	objectiveCoefficients = NULL;
 	//
 	// end loop of nonlinear rows
 	//  
-	/*
+#ifdef AMPLDEBUG
 	OSiLWriter osilwriter;
 	std::cout << "WRITE THE INSTANCE" << std::endl;
+	osilwriter.m_bWhiteSpace = true;
 	std::cout << osilwriter.writeOSiL( osinstance) << std::endl;
 	std::cout << "DONE WRITE THE INSTANCE" << std::endl;
-	*/
+
+	std::cout << osinstance->printModel() << std::endl;
+
+#endif
+
 	return true;
 }

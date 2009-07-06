@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file DefaultSolver.h
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -21,6 +22,7 @@
 
 #include "OSInstance.h"
 #include "OSResult.h"
+#include "OSOption.h"
 
 #include <string>
 
@@ -59,7 +61,7 @@ public:
 
 	
 	/** osoption holds the solver options in-memory as an OSOption object */
-	//OSOption  *osoption;
+	OSOption  *osoption;
 	
 	/** osinsList holds the solution or result of the model */
 	std::string insList;
@@ -77,6 +79,13 @@ public:
 	 * been called	 
 	 */
 	bool bCallbuildSolverInstance;
+
+
+	/** 
+	 * bSetSolverOptions is set to true if setSolverOptions has
+	 * been called, false otherwise	 
+	 */
+	bool bSetSolverOptions;
 	
 
 	/** solve is a virtual function -- the actual solvers will
@@ -89,6 +98,12 @@ public:
 	 * the individual solver sees in its api
 	 */ 
 	virtual void buildSolverInstance() = 0 ;	
+	
+	/** setSolverOptions is a virtual function -- the actual solvers will
+	 * implement their own setSolverOptions method  -- the solver instance is the instance
+	 * the individual solver sees in its api
+	 */ 
+	virtual void setSolverOptions() = 0 ;
 	
 	/**
 	 * default constructor.

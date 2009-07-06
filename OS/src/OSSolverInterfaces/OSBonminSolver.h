@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file OSBonmnSolver.h
  * 
  * @author  Jun Ma, Gus Gassmann, Kipp Martin, 
@@ -23,6 +24,8 @@
 #include "OSParameters.h"
 #include "OSnLNode.h"
 #include "OSiLReader.h"
+#include "OSrLReader.h"
+#include "OSoLReader.h"
 #include "OSInstance.h"
 #include "OSExpressionTree.h"
 #include "OSnLNode.h"
@@ -32,6 +35,7 @@
 
 #include "OSResult.h"
 #include "OSInstance.h"
+#include "OSOption.h"
 
 # include <cstddef>
 # include <cstdlib>
@@ -67,11 +71,13 @@
 
 
 
-
+#include "BonCbc.hpp"
 #include "BonTMINLP.hpp"
+#include "BonBonminSetup.hpp"
+
+
 using namespace  Ipopt;
 using namespace Bonmin;
-
 
 
 
@@ -79,20 +85,23 @@ using namespace Bonmin;
 // for Stefan
 class BonminProblem : public TMINLP{  
 
+
 	
 public:
 	
 	/** the BonminProblemclass constructor */
-	BonminProblem(OSInstance *osinstance_ , OSResult *osresult_);
+	BonminProblem(OSInstance *osinstance_ , OSOption *osoption_);
 	
 	/** the BonminProblem class destructor */
 	virtual ~BonminProblem();
-	
-	OSResult *osresult;
-	
+		
 	OSInstance *osinstance;
-	
-	
+
+	OSOption *osoption;
+
+	TMINLP::SolverReturn status;
+
+
 	/** now for some pure Bonmin methods */
 	
 	  
@@ -182,7 +191,7 @@ public:
 
 	/** @name Solution Methods */
 	  /** Method called by Ipopt at the end of optimization.*/  
-	  virtual void finalize_solution(TMINLP::SolverReturn status,
+	  virtual void finalize_solution(TMINLP::SolverReturn status_,
 	                                 Index n, const Number* x, Number obj_value);
 	//@}
 
@@ -249,11 +258,13 @@ public:
 	~BonminSolver();
 	
 	
-
-	
-	//SmartPtr<BonminProblem> tminlp = new BonminProblem;
 	
 	SmartPtr<BonminProblem> tminlp;
+		
+	// this is a Bonmin BonCbc object;
+	Bab bb;
+	
+	TMINLP::SolverReturn status;
 	
 	//SmartPtr<IpoptApplication> app;
 	
@@ -268,6 +279,12 @@ public:
 	 */	
 	virtual void  buildSolverInstance() throw(ErrorClass);
 	
+	/*! \fn void setSolverOptions() 
+	 *  \brief The implementation of the virtual functions. 
+	 *  \return void.
+	 */	
+	virtual void  setSolverOptions() throw(ErrorClass);
+	
    	/**
    	 * use this for debugging, print out the instance that
    	 * the solver thinks it has and compare this with the OSiL
@@ -281,10 +298,25 @@ public:
 	 */		
 	OSiLReader *m_osilreader;
 
+	/** 
+	 * m_osolreader is an OSoLReader object used to create an osoption from an
+	 * osol string if needed	 
+	 */		
+	OSoLReader *m_osolreader;
+	
+	
+	
+   	/**
+   	 * use this to write the solution information to an 
+   	 * OSResult  object
+   	 */		
+	void writeResult();
+
 
 private:
 	OSrLWriter  *osrlwriter;
 
+	BonminSetup bonminSetup;
 
 	std::string bonminErrorMsg;
 };

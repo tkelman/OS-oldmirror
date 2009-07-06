@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory=".\$(ConfigurationName)"
+			IntermediateDirectory=".\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -42,18 +42,18 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="-DWIN_ -D_WIN32 -DMSVISUALSTUDIO -DHAVE_MATH_H -DHAVE_STRING_H -DHAVE_STDIO_H -DHAVE_TIME_H"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;..\..\..\..\OS\src\OSUtils;..\..\..\..\OS\src\OSSolverInterfaces;..\..\..\..\OS\src\OSParsers;..\..\..\..\OS\src\OSModelInterfaces;..\..\..\..\OS\src\OSCommonInterfaces;..\..\..\..\OS\src\OSAgent;..\..\..\..\OS\src;..\..\..\..;..\..\..\..\CppAD\local;..\..\..\..\CppAD;..\..\..\..\Osi\src\OsiCbc;..\..\..\..\Osi\src;..\..\..\..\Osi\src\OsiClp;..\..\..\..\CoinUtils\src;..\..\..\..\BuildTools\headers;..\..\..\..\Osi\src\OsiVol;..\..\..\..\Vol\src;..\..\..\..\Clp\src;..\..\..\..\Cbc\src;..\..\..\..\Cgl\src\CglPreProcess;..\..\..\..\Ipopt\src\Common;..\..\..\..\Ipopt\src\LinAlg;..\..\..\..\Ipopt\src\Interfaces;..\..\..\..\Cgl\src"
-				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;USE_CBCCONFIG;COIN_NO_CLP_MESSAGE;WIN_;_LINDO_DLL_;OSROOT_DIR;USE_DTOA"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;D:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;..\..\..\..;..\..\..\..\OS\src;..\..\..\..\OS\src\OSAgent;..\..\..\..\OS\src\OSCommonInterfaces;..\..\..\..\OS\src\OSModelInterfaces;..\..\..\..\OS\src\OSParsers;..\..\..\..\OS\src\OSSolverInterfaces;..\..\..\..\OS\src\OSUtils;..\..\..\..\CppAD;..\..\..\..\CppAD\local;..\..\..\..\BuildTools\headers;..\..\..\..\CoinUtils\src;..\..\..\..\Cbc\src;..\..\..\..\Clp\src;..\..\..\..\Cgl\src;..\..\..\..\Cgl\src\CglPreProcess;..\..\..\..\Cgl\src\CglFlowCover;..\..\..\..\Cgl\src\CglGomory;..\..\..\..\Cgl\src\CglKnapsackCover;..\..\..\..\Cgl\src\CglMixedIntegerRounding2;..\..\..\..\Cgl\src\CglSimpleRounding;..\..\..\..\Ipopt\src\Common;..\..\..\..\Ipopt\src\LinAlg;..\..\..\..\Ipopt\src\Interfaces;..\..\..\..\Bonmin\src\Algorithms;..\..\..\..\Bonmin\src\Algorithms\Ampl;..\..\..\..\Bonmin\src\Algorithms\Branching;..\..\..\..\Bonmin\src\Algorithms\OaGenerators;..\..\..\..\Bonmin\src\Algorithms\QuadCuts;..\..\..\..\Bonmin\src\CbcBonmin;..\..\..\..\Bonmin\src\CbcBonmin\Heuristics;..\..\..\..\Bonmin\src\Interfaces;..\..\..\..\Bonmin\src\Interfaces\Filter;..\..\..\..\Bonmin\src\Interfaces\Ampl;..\..\..\..\Bonmin\src\Interfaces\Ipopt;..\..\..\..\SYMPHONY\Include;..\..\..\..\Vol\src;..\..\..\..\Osi\src;..\..\..\..\Osi\src\OsiCbc;..\..\..\..\Osi\src\OsiClp;..\..\..\..\Osi\src\OsiSym;..\..\..\..\Osi\src\OsiVol"
+				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;USE_CBCCONFIG;COIN_NO_CLP_MESSAGE;USE_DTOA;WIN_;_LINDO_DLL_;OSROOT_DIR;COIN_HAS_SYMPHONY;COIN_HAS_ASL;COIN_HAS_IPOPT;COIN_HAS_BONMIN"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/libOS.pch"
+				PrecompiledHeaderFile=""
 				AssemblerOutput="0"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				AssemblerListingLocation=".\$(ConfigurationName)\"
+				ObjectFile=".\$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\$(ConfigurationName)\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
@@ -71,7 +71,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug\libOS.lib"
+				OutputFile=".\$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -91,8 +91,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory=".\$(ConfigurationName)"
+			IntermediateDirectory=".\$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -116,17 +116,16 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="-DWIN_ -D_WIN32 -DMSVISUALSTUDIO -DHAVE_MATH_H -DHAVE_STRING_H -DHAVE_STDIO_H -DHAVE_TIME_H"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\Ipopt\src\LinAlg;..\..\..\..\Ipopt\src\Interfaces;..\..\..\..\Ipopt\src\Common;&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;..\..\..\..\OS\src\OSUtils;..\..\..\..\OS\src\OSSolverInterfaces;..\..\..\..\OS\src\OSParsers;..\..\..\..\OS\src\OSModelInterfaces;..\..\..\..\OS\src\OSCommonInterfaces;..\..\..\..\OS\src\OSAgent;..\..\..\..\OS\src;..\..\..\..;..\..\..\..\CppAD\local;..\..\..\..\CppAD;..\..\..\..\Osi\src\OsiCbc;..\..\..\..\Osi\src;..\..\..\..\Osi\src\OsiClp;..\..\..\..\CoinUtils\src;..\..\..\..\BuildTools\headers;..\..\..\..\Osi\src\OsiVol;..\..\..\..\Vol\src;..\..\..\..\Clp\src;..\..\..\..\Cbc\src;..\..\..\..\Cgl\src\CglPreProcess;..\..\..\..\Cgl\src"
-				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;USE_CBCCONFIG;COIN_NO_CLP_MESSAGE;USE_DTOA;WIN_;_LINDO_DLL_;OSROOT_DIR"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;D:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;..\..\..\..;..\..\..\..\OS\src;..\..\..\..\OS\src\OSAgent;..\..\..\..\OS\src\OSCommonInterfaces;..\..\..\..\OS\src\OSModelInterfaces;..\..\..\..\OS\src\OSParsers;..\..\..\..\OS\src\OSSolverInterfaces;..\..\..\..\OS\src\OSUtils;..\..\..\..\CppAD;..\..\..\..\CppAD\local;..\..\..\..\BuildTools\headers;..\..\..\..\CoinUtils\src;..\..\..\..\Cbc\src;..\..\..\..\Clp\src;..\..\..\..\Cgl\src;..\..\..\..\Cgl\src\CglPreProcess;..\..\..\..\Cgl\src\CglFlowCover;..\..\..\..\Cgl\src\CglGomory;..\..\..\..\Cgl\src\CglKnapsackCover;..\..\..\..\Cgl\src\CglMixedIntegerRounding2;..\..\..\..\Cgl\src\CglSimpleRounding;..\..\..\..\Ipopt\src\Common;..\..\..\..\Ipopt\src\LinAlg;..\..\..\..\Ipopt\src\Interfaces;..\..\..\..\Bonmin\src\Algorithms;..\..\..\..\Bonmin\src\Algorithms\Ampl;..\..\..\..\Bonmin\src\Algorithms\Branching;..\..\..\..\Bonmin\src\Algorithms\OaGenerators;..\..\..\..\Bonmin\src\Algorithms\QuadCuts;..\..\..\..\Bonmin\src\CbcBonmin;..\..\..\..\Bonmin\src\CbcBonmin\Heuristics;..\..\..\..\Bonmin\src\Interfaces;..\..\..\..\Bonmin\src\Interfaces\Filter;..\..\..\..\Bonmin\src\Interfaces\Ampl;..\..\..\..\Bonmin\src\Interfaces\Ipopt;..\..\..\..\SYMPHONY\Include;..\..\..\..\Vol\src;..\..\..\..\Osi\src;..\..\..\..\Osi\src\OsiCbc;..\..\..\..\Osi\src\OsiClp;..\..\..\..\Osi\src\OsiSym;..\..\..\..\Osi\src\OsiVol"
+				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;USE_CBCCONFIG;COIN_NO_CLP_MESSAGE;USE_DTOA;WIN_;_LINDO_DLL_;OSROOT_DIR;COIN_HAS_SYMPHONY;COIN_HAS_ASL;COIN_HAS_IPOPT;COIN_HAS_BONMIN"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/libOS.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				AssemblerListingLocation=".\$(ConfigurationName)\"
+				ObjectFile=".\$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\$(ConfigurationName)\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="0"
@@ -144,7 +143,79 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release\libOS.lib"
+				OutputFile=".\$(ConfigurationName)\$(ProjectName).lib"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release-Plus|Win32"
+			OutputDirectory=".\$(ConfigurationName)"
+			IntermediateDirectory=".\$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="-DWIN_ -D_WIN32 -DMSVISUALSTUDIO -DHAVE_MATH_H -DHAVE_STRING_H -DHAVE_STDIO_H -DHAVE_TIME_H"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;&quot;D:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include&quot;;..\..\..\..;..\..\..\..\OS\src;..\..\..\..\OS\src\OSAgent;..\..\..\..\OS\src\OSCommonInterfaces;..\..\..\..\OS\src\OSModelInterfaces;..\..\..\..\OS\src\OSParsers;..\..\..\..\OS\src\OSSolverInterfaces;..\..\..\..\OS\src\OSUtils;..\..\..\..\CppAD;..\..\..\..\CppAD\local;..\..\..\..\BuildTools\headers;..\..\..\..\CoinUtils\src;..\..\..\..\Cbc\src;..\..\..\..\Clp\src;..\..\..\..\Cgl\src;..\..\..\..\Cgl\src\CglPreProcess;..\..\..\..\Cgl\src\CglFlowCover;..\..\..\..\Cgl\src\CglGomory;..\..\..\..\Cgl\src\CglKnapsackCover;..\..\..\..\Cgl\src\CglMixedIntegerRounding2;..\..\..\..\Cgl\src\CglSimpleRounding;..\..\..\..\Ipopt\src\Common;..\..\..\..\Ipopt\src\LinAlg;..\..\..\..\Ipopt\src\Interfaces;..\..\..\..\Bonmin\src\Algorithms;..\..\..\..\Bonmin\src\Algorithms\Ampl;..\..\..\..\Bonmin\src\Algorithms\Branching;..\..\..\..\Bonmin\src\Algorithms\OaGenerators;..\..\..\..\Bonmin\src\Algorithms\QuadCuts;..\..\..\..\Bonmin\src\CbcBonmin;..\..\..\..\Bonmin\src\CbcBonmin\Heuristics;..\..\..\..\Bonmin\src\Interfaces;..\..\..\..\Bonmin\src\Interfaces\Filter;..\..\..\..\Bonmin\src\Interfaces\Ampl;..\..\..\..\Bonmin\src\Interfaces\Ipopt;..\..\..\..\SYMPHONY\Include;..\..\..\..\Vol\src;..\..\..\..\Osi\src;..\..\..\..\Osi\src\OsiCbc;..\..\..\..\Osi\src\OsiClp;..\..\..\..\Osi\src\OsiSym;..\..\..\..\Osi\src\OsiVol"
+				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;USE_CBCCONFIG;COIN_NO_CLP_MESSAGE;USE_DTOA;WIN_;_LINDO_DLL_;OSROOT_DIR;COIN_HAS_SYMPHONY;COIN_HAS_ASL;COIN_HAS_IPOPT;COIN_HAS_BONMIN"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				AssemblerListingLocation=".\$(ConfigurationName)\"
+				ObjectFile=".\$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\$(ConfigurationName)\"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="0"
+				CompileAs="0"
+				DisableSpecificWarnings="4244;4267;4288;4290;4805;4930;4018;4065;4003;4101;4006"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -173,6 +244,10 @@
 			>
 			<File
 				RelativePath="..\..\..\src\OSUtils\OSBase64.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSSolverInterfaces\OSBonminSolver.cpp"
 				>
 			</File>
 			<File
@@ -244,6 +319,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\OSParsers\OSoLParserData.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSCommonInterfaces\OSoLReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSCommonInterfaces\OSoLWriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSCommonInterfaces\OSOption.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\OSParsers\OSParseosil.cpp"
 				>
 			</File>
@@ -253,6 +344,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\OSParsers\OSParseosol.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSParsers\OSParseosol.tab.cpp"
 				>
 			</File>
 			<File
@@ -390,6 +485,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\OSParsers\OSoLParserData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSCommonInterfaces\OSoLReader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSCommonInterfaces\OSoLWriter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSCommonInterfaces\OSOption.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\OSParsers\OSOptionsStruc.h"
 				>
 			</File>
@@ -399,6 +510,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\OSParsers\OSParseosil.tab.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\OSParsers\OSParseosol.tab.hpp"
 				>
 			</File>
 			<File
@@ -429,12 +544,6 @@
 				RelativePath="..\..\..\src\OSAgent\OSWSUtil.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>

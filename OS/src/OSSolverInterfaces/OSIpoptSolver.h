@@ -1,3 +1,4 @@
+/* $Id$ */
 /** @file IpoptSolver.h
  * 
  * @author  Robert Fourer,  Jun Ma, Kipp Martin, 
@@ -23,6 +24,7 @@
 #include "OSParameters.h"
 #include "OSnLNode.h"
 #include "OSiLReader.h"
+#include "OSoLReader.h"
 #include "OSInstance.h"
 #include "OSExpressionTree.h"
 #include "OSnLNode.h"
@@ -32,6 +34,7 @@
 
 #include "OSResult.h"
 #include "OSInstance.h"
+#include "OSOption.h"
 
 # include <cstddef>
 # include <cstdlib>
@@ -78,16 +81,19 @@ class IpoptProblem : public TNLP{
 public:
 	
 	/** the IpoptProblemclass constructor */
-	IpoptProblem(OSInstance *osinstance_ , OSResult *osresult_);
+	IpoptProblem(OSInstance *osinstance_ , OSOption *osoption_, OSResult *osresult_, std::string *ipoptErrorMsg_);
 	
 	/** the IpoptProblem class destructor */
 	virtual ~IpoptProblem();
 	
-	OSResult *osresult;
-	
+
 	OSInstance *osinstance;
 	
+	OSOption *osoption;
 
+	OSResult *osresult;
+	
+	std::string *ipoptErrorMsg;
 	
 	/** IPOpt specific methods for defining the nlp problem */
 	virtual bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
@@ -168,7 +174,8 @@ private:
 	IpoptProblem& operator=(const IpoptProblem&);
   //@}
 	
-	std::string ipoptErrorMsg;
+	
+
 	
 };
 
@@ -207,11 +214,17 @@ public:
 	 * data structrues and optimized */ 
 	virtual void  solve() throw (ErrorClass) ;
 	
-	/*! \fn void CoinSolver::buildSolverInstance() 
+	/*! \fn void buildSolverInstance() 
 	 *  \brief The implementation of the virtual functions. 
 	 *  \return void.
 	 */	
 	virtual void  buildSolverInstance() throw(ErrorClass);
+	
+	/*! \fn void setSolverOptions() 
+	 *  \brief The implementation of the virtual functions. 
+	 *  \return void.
+	 */	
+	virtual void  setSolverOptions() throw(ErrorClass);
 	
    	/**
    	 * use this for debugging, print out the instance that
@@ -225,6 +238,12 @@ public:
 	 * osil string if needed	 
 	 */		
 	OSiLReader *m_osilreader;
+
+	/** 
+	 * m_osolreader is an OSoLReader object used to create an osoption from an
+	 * osol string if needed	 
+	 */		
+	OSoLReader *m_osolreader;
 
 
 private:
@@ -246,7 +265,7 @@ private:
 	//IpoptSolver& operator=(const IpoptSolver&);
 	//@}
 	//std::string ipoptErrorMsg;
-	std::string ipoptErrorMsg;
+	std::string *ipoptErrorMsg;
 };
 
 
