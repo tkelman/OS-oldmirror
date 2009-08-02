@@ -92,6 +92,7 @@ using std::ostringstream;
 %x singlequoteattributetext
 %x startelement
 %x elementtext
+%x itemtext
 %x comment
 %x xmldeclaration
 
@@ -117,7 +118,7 @@ adouble (-?((([0-9]+)|([0-9]*\.[0-9]*))([eE][-+]?[0-9]+)?|INF))
 
 {quote} {YY_PRINT;  yylval->sval = yytext; return(QUOTE);}
 {twoquotes} {YY_PRINT;  yylval->sval = yytext; return(TWOQUOTES);}
-({xmlwhitespace}*{greater_than}{xmlwhitespace}*) {YY_PRINT;     return(GREATERTHAN);}
+({xmlwhitespace}*{greater_than}{xmlwhitespace}*) { YY_PRINT;     return(GREATERTHAN);}
 ({xmlwhitespace}*{aninteger}{xmlwhitespace}*)  {YY_PRINT; yylval->ival = atoi(yytext); return(INTEGER);}
 
 ({xmlwhitespace}*{adouble}{xmlwhitespace}*) {YY_PRINT; 
@@ -147,7 +148,7 @@ return(DOUBLE);}
 ({xmlwhitespace}+numberOfOtherObjectiveResults{equality}) {YY_PRINT; return(NUMBEROFOTHEROBJECTIVERESULTSATT);}
 ({xmlwhitespace}+numberOfOtherConstraintResults{equality}) {YY_PRINT; return(NUMBEROFOTHERCONSTRAINTRESULTSATT);}
 ({xmlwhitespace}+numberOfOtherSolutionResults{equality}) {  YY_PRINT; return(NUMBEROFOTHERSOLUTIONRESULTSATT);}
-({xmlwhitespace}+numberOfRecords{equality}) {  YY_PRINT;  return(NUMBEROFRECORDSATT);}
+({xmlwhitespace}+numberOfItems{equality}) {  YY_PRINT;  return(NUMBEROFITEMSATT);}
 ({xmlwhitespace}+numberOfVar{equality}) {YY_PRINT; return(NUMBEROFVARATT);}
 ({xmlwhitespace}+numberOfObj{equality}) {YY_PRINT; return(NUMBEROFOBJATT);}
 ({xmlwhitespace}+numberOfCon{equality}) {YY_PRINT; return(NUMBEROFCONATT);}
@@ -257,9 +258,10 @@ return(DOUBLE);}
 {xmlwhitespace}*\<otherSolutionResult {YY_PRINT; return(OTHERSOLUTIONRESULTSTART);}
 {xmlwhitespace}*\<\/otherSolutionResult{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT;  return(OTHERSOLUTIONRESULTEND);}
 
-{xmlwhitespace}*\<record{xmlwhitespace}*\> { YY_PRINT; return(RECORDSTART);}
-{xmlwhitespace}*\<\/record{xmlwhitespace}*\>{xmlwhitespace}* {YY_PRINT; return(RECORDEND);}
-
+{xmlwhitespace}*\<item{xmlwhitespace}*\>\<\/item{xmlwhitespace}*\>{xmlwhitespace}* {  YY_PRINT;  return(ITEMEMPTY);}
+{xmlwhitespace}*\<item{xmlwhitespace}*\> { YY_PRINT; BEGIN itemtext; return(ITEMSTART);}
+{xmlwhitespace}*\<\/item{xmlwhitespace}*\>{xmlwhitespace}* { YY_PRINT; return(ITEMEND);}
+{xmlwhitespace}*\<item{xmlwhitespace}*\/>{xmlwhitespace}* { YY_PRINT; return(ITEMSTARTANDEND);}
 (\<serviceURI{xmlwhitespace}*\/>) {YY_PRINT;  return(SERVICEURISTARTANDEND);}
 (\<serviceName{xmlwhitespace}*\/>) {YY_PRINT;  return(SERVICENAMESTARTANDEND);}
 (\<instanceName{xmlwhitespace}*\/>) {YY_PRINT;  return(INSTANCENAMESTARTANDEND);}
@@ -270,6 +272,7 @@ return(DOUBLE);}
 
 
 [a-zA-Z0-9.:_*#$@ \n]+ { YY_PRINT;  yylval->sval = strdup( yytext);   yyextra->errorText = yylval->sval;    /*yylval->sval = yytext;*/  return (ELEMENTTEXT); }
+<itemtext>[^\<]+ { YY_PRINT;  yylval->sval = strdup( yytext); BEGIN 0;  yyextra->errorText = yylval->sval;    /*yylval->sval = yytext;*/  return (ITEMTEXT); }
 
 "<!--" BEGIN comment;
  <comment>. |

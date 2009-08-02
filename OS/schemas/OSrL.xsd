@@ -109,7 +109,7 @@
 	</xs:complexType>
 	<xs:complexType name="OptimizationResult">
 		<xs:annotation>
-			<xs:documentation>numberOfVariables, numberOfObjectives and numberOfConstraints, if present, are the numbers in the original optimization instance and should match those in the corresponding OSiL.</xs:documentation>
+			<xs:documentation>numberOfVariables, numberOfObjectives and numberOfConstraints are the numbers in the original optimization instance and should match those in the corresponding OSiL. Use -1 if not applicable or necessary in appropriate scenarios.</xs:documentation>
 		</xs:annotation>
 		<xs:sequence>
 			<xs:element name="solution" type="OptimizationSolution" minOccurs="0" maxOccurs="unbounded"/>
@@ -121,20 +121,35 @@
 			</xs:element>
 		</xs:sequence>
 		<xs:attribute name="numberOfSolutions" type="xs:nonNegativeInteger" use="required"/>
-		<xs:attribute name="numberOfVariables" type="xs:positiveInteger" use="optional">
+		<xs:attribute name="numberOfVariables" use="required">
 			<xs:annotation>
 				<xs:documentation>If present, must match number of variables in the original optimization instance</xs:documentation>
 			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="-1"/>
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
-		<xs:attribute name="numberOfObjectives" type="xs:nonNegativeInteger" use="optional">
+		<xs:attribute name="numberOfObjectives" use="required">
 			<xs:annotation>
 				<xs:documentation>If present, must match number of objectives in the original optimization instance</xs:documentation>
 			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="-1"/>
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
-		<xs:attribute name="numberOfConstraints" type="xs:nonNegativeInteger" use="optional">
+		<xs:attribute name="numberOfConstraints" use="required">
 			<xs:annotation>
 				<xs:documentation>If present, must match number of constraints in the original optimization instance</xs:documentation>
 			</xs:annotation>
+			<xs:simpleType>
+				<xs:restriction base="xs:int">
+					<xs:minInclusive value="-1"/>
+				</xs:restriction>
+			</xs:simpleType>
 		</xs:attribute>
 	</xs:complexType>
 	<xs:complexType name="OtherResults">
@@ -519,34 +534,34 @@
 		<xs:attribute name="value" type="xs:string" use="optional"/>
 		<xs:attribute name="description" type="xs:string" use="optional"/>
 	</xs:complexType>
-	<xs:complexType name="SolverOutput">
-		<xs:simpleContent>
-			<xs:extension base="xs:string">
-				<xs:attribute name="name" type="xs:string" use="required"/>
-				<xs:attribute name="category" type="xs:string" use="optional"/>
-				<xs:attribute name="description" type="xs:string" use="optional"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
 	<xs:complexType name="OtherSolverOutput">
 		<xs:sequence>
-			<xs:element name="output" type="SolverOutput" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="solverOutput" type="SolverOutput" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
-		<xs:attribute name="numberOfOutputs" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="numberOfSolverOutputs" type="xs:nonNegativeInteger" use="required"/>
 	</xs:complexType>
-	<xs:complexType name="OtherSolutionResult">
+	<xs:complexType name="SolverOutput">
 		<xs:sequence>
-			<xs:element name="record" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="item" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="name" type="xs:string" use="required"/>
 		<xs:attribute name="category" type="xs:string" use="optional"/>
 		<xs:attribute name="description" type="xs:string" use="optional"/>
-		<xs:attribute name="numberOfRecords" type="xs:nonNegativeInteger" use="required"/>
+		<xs:attribute name="numberOfItems" type="xs:nonNegativeInteger" use="required"/>
 	</xs:complexType>
 	<xs:complexType name="OtherSolutionResults">
 		<xs:sequence>
 			<xs:element name="otherSolutionResult" type="OtherSolutionResult" minOccurs="0" maxOccurs="unbounded"/>
 		</xs:sequence>
 		<xs:attribute name="numberOfOtherSolutionResults" type="xs:nonNegativeInteger" use="required"/>
+	</xs:complexType>
+	<xs:complexType name="OtherSolutionResult">
+		<xs:sequence>
+			<xs:element name="item" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="category" type="xs:string" use="optional"/>
+		<xs:attribute name="description" type="xs:string" use="optional"/>
+		<xs:attribute name="numberOfItems" type="xs:nonNegativeInteger" use="required"/>
 	</xs:complexType>
 </xs:schema>
