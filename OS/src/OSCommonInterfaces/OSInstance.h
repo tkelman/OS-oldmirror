@@ -33,6 +33,7 @@
 
 #ifndef OSINSTANCE_H
 #define OSINSTANCE_H
+#include "OSConfig.h"
 #include "OSParameters.h"
 #include "OSGeneral.h"
 #include "OSnLNode.h"
@@ -810,8 +811,8 @@ public:
 	/** The OSInstance class destructor */
 	~OSInstance();
 	
-	/** A pointer to an InstanceHeader object */
-	InstanceHeader *instanceHeader;
+	/** the instanceHeader is implemented as a general file header object to allow sharing of classes between schemas */
+	GeneralFileHeader *instanceHeader;
 	
 	/** A pointer to an InstanceData object */
 	InstanceData *instanceData;
@@ -944,18 +945,6 @@ private:
 	 * m_msVariableNames holds an array of variable names. 
 	 */
 	std::string* m_msVariableNames;
-	
-	/**
-	 * m_mdVariableInitialValues holds a double array of the initial variable values.
-	 * -- now deprecated 
-	 */
-	//double* m_mdVariableInitialValues ;
-
-	/**
-	 * m_msVariableInitialStringValues holds a std::string array of the initial variable values.
-	 * -- now deprecated 
-	 */
-	//std::string* m_msVariableInitialStringValues;
 
 	/**
 	 * m_mcVariableTypes holds a char array of variable types (default = 'C').
@@ -2481,7 +2470,7 @@ bool setLinearConstraintCoefficients(int numberOfValues, bool isColumnMajor,
 	 */	 
 	void duplicateExpressionTreesMap();
 	
-#ifdef COIN_HAS_CPPAD  	 
+#ifdef OS_HAS_CPPAD  	 
 	 /**
 	  * F is a CppAD function the range space is the objective +
 	  * constraints functions, x is the domeain space

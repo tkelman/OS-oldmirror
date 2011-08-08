@@ -27,11 +27,12 @@
 #include "OSParameters.h" 
 #include "OSMathUtil.h"
 #include "CoinFinite.hpp"
+#include "CoinTime.hpp"
 #include "BonOsiTMINLPInterface.hpp"
 #include "BonTMINLP.hpp"
 
-
-#include "CoinTime.hpp"
+using namespace Bonmin;
+using namespace Ipopt;
 
 using std::cout; 
 using std::endl; 
@@ -666,7 +667,7 @@ void BonminSolver::setSolverOptions() throw (ErrorClass) {
 			char *pEnd;
 			int i;
 			std::vector<SolverOption*> optionsVector;
-			optionsVector = osoption->getSolverOptions( "bonmin");
+			optionsVector = osoption->getSolverOptions( "bonmin",true);
 			int num_bonmin_options = optionsVector.size();
 			for(i = 0; i < num_bonmin_options; i++){
 				if(optionsVector[ i]->type == "numeric" ){
@@ -843,7 +844,7 @@ void BonminSolver::writeResult(){
 		if(osinstance->getVariableNumber()  > 0) x = new double[osinstance->getVariableNumber() ];
 		z = new double[1];		
 		// resultHeader information
-		if(osresult->setServiceName( getVersionInfo()) != true)
+		if(osresult->setServiceName( OSgetVersionInfo()) != true)
 			throw ErrorClass("OSResult error: setServiceName");
 		if(osresult->setSolverInvoked( "COIN-OR Bonmin") != true)
 			throw ErrorClass("OSResult error: setSolverInvoked");

@@ -19,7 +19,15 @@
 #include <sstream>
 #include <string>
 #include "OSMatlabSolver.h"
+#include "OSConfig.h"
 
+#ifdef COIN_HAS_LINDO    
+#include "OSLindoSolver.h"
+#endif  
+
+#ifdef COIN_HAS_IPOPT    
+#include "OSIpoptSolver.h"
+#endif 
   
 
 using std::cout;
@@ -59,8 +67,9 @@ OSMatlab::~OSMatlab() {
 
 std::string OSMatlab::solve() {
 	ostringstream outStr;
-	std::string osol = "<osol> <optimization>  <other name=\"os_solver\">" + 
-	sSolverName + "</other> </optimization></osol>";
+	//std::string osol = "<osol> <optimization>  <other name=\"os_solver\">" + 
+	//sSolverName + "</other> </optimization></osol>";
+	std::string osol = "";
 	osil = "";
 //
 //

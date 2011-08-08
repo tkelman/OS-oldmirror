@@ -12,16 +12,19 @@
  * Northwestern University, Dalhousie University, and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Common Public License. 
- * Please see the accompanying LICENSE file in root directory for terms.osinstance->getVariableNumber()
+ * Please see the accompanying LICENSE file in root directory for terms.
  *
  *
  */
- 
+
+  
+#include "OSGeneral.h"
 #include "OSInstance.h"
 #include "OSMathUtil.h"
 #include "OSErrorClass.h"
 #include "OSParameters.h"
 
+#include<cstdlib>
 #include<stack>
 #include<iostream>  
 #include<sstream>
@@ -139,7 +142,7 @@ OSInstance::OSInstance():
 	#ifdef DEBUG
 	cout << "Inside OSInstance Constructor" << endl;
 	#endif
-	this->instanceHeader = new InstanceHeader();
+	this->instanceHeader = new GeneralFileHeader();
 	this->instanceData = new InstanceData();
 }  
 
@@ -408,7 +411,7 @@ InstanceHeader::~InstanceHeader(){
 Variable::Variable():
 	lb(0.0),
 	ub(OSDBL_MAX),
-	//init(OSNAN),  deprecated
+	//init(OSNaN()),  deprecated
 	type('C'), 
 	name("")
 	//initString("") deprecated
@@ -446,7 +449,8 @@ Variables::~Variables(){
 			var[i] = NULL;
 		}
 	}
-	delete[] var;
+	if (var != NULL)
+		delete[] var;
 	var = NULL; 
 }  
 
@@ -469,7 +473,7 @@ Objective::Objective():
 	name("") ,
 	maxOrMin("min"),
 	constant(0.0),
-	weight(1.0),
+	weight(OSNaN()),
 	numberOfObjCoef(0),
 	coef(NULL)
 { 
@@ -490,7 +494,8 @@ Objective::~Objective(){
 			coef[i] = NULL;
 		}
 	}
-	delete[] coef;
+	if (coef != NULL)
+		delete[] coef;
 	coef = NULL;
 }  
 
@@ -514,7 +519,8 @@ Objectives::~Objectives(){
 			obj[i] = NULL;
 		}
 	}
-	delete[] obj;
+	if (obj != NULL)
+		delete[] obj;
 	obj = NULL;
 }
 
@@ -556,7 +562,8 @@ Constraints::~Constraints(){
 			con[i] = NULL;
 		}
 	}
-	delete[] con;
+	if (con != NULL)
+		delete[] con;
 	con = NULL;
 } 
 
@@ -634,7 +641,8 @@ QuadraticCoefficients::~QuadraticCoefficients(){
 			qTerm[i] = NULL;
 		}
 	}
-	delete[] qTerm;
+	if (qTerm != NULL)
+		delete[] qTerm;
 	qTerm = NULL;  
 }//end ~QuadraticCoefficients()  
 
@@ -733,7 +741,8 @@ TimeDomainStageVariables::~TimeDomainStageVariables()
 			var[i] = NULL;
 		}
 	}
-	delete [] var;
+	if (var != NULL)
+		delete [] var;
 	var = NULL;
 } // end ~TimeDomainStageVariables
 
@@ -775,7 +784,8 @@ TimeDomainStageConstraints::~TimeDomainStageConstraints()
 			con[i] = NULL;
 		}
 	}
-	delete [] con;
+	if (con != NULL)
+		delete [] con;
 	con = NULL;
 } // end ~TimeDomainStageConstraints
 
@@ -817,7 +827,8 @@ TimeDomainStageObjectives::~TimeDomainStageObjectives()
 			obj[i] = NULL;
 		}
 	}
-	delete [] obj;
+	if (obj != NULL)
+		delete [] obj;
 	obj = NULL;
 } // end ~TimeDomainStageObjectives
 
@@ -873,7 +884,8 @@ TimeDomainStages::~TimeDomainStages(){
 			stage[i] = NULL;
 		}
 	}
-	delete[] stage;
+	if (stage != NULL)
+		delete[] stage;
 	stage = NULL;  
 }
 
@@ -935,20 +947,45 @@ InstanceData::~InstanceData(){
 	#ifdef DEBUG
 	cout << "Inside the InstanceData Destructor" << endl; 
 	#endif
-	delete variables;
-	variables = NULL;
-	delete objectives;
-	objectives = NULL;
-	delete constraints;
-	constraints = NULL;
-	delete linearConstraintCoefficients;
-	linearConstraintCoefficients = NULL;
-	delete quadraticCoefficients;
-	quadraticCoefficients = NULL;
-	delete nonlinearExpressions;
-	nonlinearExpressions = NULL;
+	if (variables != NULL)
+	{
+		delete variables;
+		variables = NULL;
+	}
+
+	if (objectives != NULL)
+	{
+		delete objectives;
+		objectives = NULL;
+	}
+
+	if (constraints != NULL)
+	{
+		delete constraints;
+		constraints = NULL;
+	}
+
+	if (linearConstraintCoefficients != NULL)
+	{
+		delete linearConstraintCoefficients;
+		linearConstraintCoefficients = NULL;
+	}
+
+	if (quadraticCoefficients != NULL)
+	{
+		delete quadraticCoefficients;
+		quadraticCoefficients = NULL;
+	}
+
+	if (nonlinearExpressions != NULL)
+	{
+		delete nonlinearExpressions;
+		nonlinearExpressions = NULL;
+	}
+
 	if (timeDomain != NULL)
-	{   delete timeDomain;
+	{
+		delete timeDomain;
 		timeDomain = NULL;
 	}
 } 
@@ -1073,18 +1110,6 @@ string* OSInstance::getVariableNames() {
 	processVariables();
 	return m_msVariableNames;
 }//getVariableNames	
-
-/*
-double* OSInstance::getVariableInitialValues() {
-	processVariables();
-	return m_mdVariableInitialValues;
-}//getVariableInitialValues
-
-string* OSInstance::getVariableInitialStringValues() {
-	processVariables();
-	return m_msVariableInitialStringValues;
-}//getVariableInitialStringValues
-*/
 
 char* OSInstance::getVariableTypes() {
 	processVariables();
@@ -2515,7 +2540,7 @@ bool OSInstance::addVariable(int index, string name, double lowerBound, double u
 	instanceData->variables->var[index]->lb = lowerBound;
 	instanceData->variables->var[index]->ub = upperBound;
 	instanceData->variables->var[index]->type = type;
-	//if(init != OSNAN) instanceData->variables->var[index]->init = init;
+	//if(init != OSNaN()) instanceData->variables->var[index]->init = init;
 	//instanceData->variables->var[index]->initString = initString;
 	return true;
 }//addVariable
@@ -4683,7 +4708,7 @@ bool OSInstance::createOSADFun(std::vector<double> vdX){
 		size_t n = vdX.size();
 #ifdef COIN_HAS_CPPAD
 		// declare a CppAD vector and fill it in
-		CppAD::vector< AD<double> > vdaX( n );
+		CppAD::vector< CppAD::AD<double> > vdaX( n );
 		for(i = 0; i < n; i++){
 			vdaX[ i] = vdX[ i];
 			//std::cout << "vdX =  " << vdX[ i] << std::endl;
@@ -4695,7 +4720,7 @@ bool OSInstance::createOSADFun(std::vector<double> vdX){
 		 *  the range vector m_vFG and it is a vector of CppAD 
 		 * objective and constraint functions.
 		 */
-		CppAD::vector< AD<double> > m_vFG;	  
+		CppAD::vector< CppAD::AD<double> > m_vFG;	  
 		int kount = 0;
 		for(posMapExpTree = m_mapExpressionTreesMod.begin(); posMapExpTree != m_mapExpressionTreesMod.end(); ++posMapExpTree){	
 			m_vFG.push_back( (posMapExpTree->second)->m_treeRoot->constructADTape(&m_mapAllNonlinearVariablesIndex, &vdaX) );

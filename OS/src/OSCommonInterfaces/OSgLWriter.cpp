@@ -2,21 +2,20 @@
 /** @file OSgLWriter.cpp
  * 
  *
- * @author  Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin, 
- * @version 1.0, 10/05/2005
- * @since   OS1.0
+ * @author  Horand Gassmann, Jun Ma, Kipp Martin, 
  *
  * \remarks
- * Copyright (C) 2005, Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Copyright (C) 2005-2011, Horand Gassmann, Jun Ma, Kipp Martin,
  * Northwestern University, Dalhousie University and the University of Chicago.
  * All Rights Reserved.
- * This software is licensed under the Common Public License. 
+ * This software is licensed under the Eclipse Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  */
 
 
 #include "OSgLWriter.h"
+#include "OSStringUtil.h"
 #include "OSGeneral.h"
 #include "OSParameters.h" 
 #include "OSBase64.h"
@@ -28,6 +27,8 @@
 using std::cout;
 using std::endl;
 using std::ostringstream; 
+
+
 
 /*! \brief Take an IntVector object and write
  * a string that validates against the OSgL schema.
@@ -51,7 +52,7 @@ std::string writeIntVectorData(IntVector *v, bool addWhiteSpace, bool writeBase6
 				getMultIncr(&(v->el[i]), &mult, &incr, (v->numberOfEl) - i, 0);
 				if (mult == 1)
 					outStr << "<el>" ;
-				else if (incr == 1)
+				else if (incr == 0)
 					outStr << "<el mult=\"" << mult << "\">";
 				else
 					outStr << "<el mult=\"" << mult << "\" incr=\"" << incr << "\">";
@@ -71,6 +72,48 @@ std::string writeIntVectorData(IntVector *v, bool addWhiteSpace, bool writeBase6
 	}
 	return outStr.str();
 }// end writeIntVectorData
+
+/*! \brief Take a GeneralFileHeader object and write
+ * a string that validates against the OSgL schema.
+ *
+ * @param v is the object to be output
+ * @param addWhiteSpace controls whether whitespace (i.e., line feed) is to be added 
+ */
+std::string writeGeneralFileHeader(GeneralFileHeader *v, bool addWhiteSpace)
+{
+	ostringstream outStr;
+
+	if (v->name != "")
+	{
+		outStr << "<name>" << v->name << "</name>" ;
+		if(addWhiteSpace == true) outStr << endl;
+	}
+
+	if (v->source != "")
+	{
+		outStr << "<source>" << v->source << "</source>" ;
+		if(addWhiteSpace == true) outStr << endl;
+	}
+
+	if (v->description != "")
+	{
+		outStr << "<description>" << v->description << "</description>" ;
+		if(addWhiteSpace == true) outStr << endl;
+	}
+
+	if (v->fileCreator != "")
+	{
+		outStr << "<fileCreator>" << v->fileCreator << "</fileCreator>" ;
+		if(addWhiteSpace == true) outStr << endl;
+	}
+
+	if (v->licence != "")
+	{
+		outStr << "<licence>" << v->licence << "</licence>" ;
+		if(addWhiteSpace == true) outStr << endl;
+	}
+	return outStr.str();
+}// end writeGeneralFileHeader
 
 
 /*! \brief Take an OtherOptionEnumeration object and write
@@ -108,7 +151,7 @@ std::string writeOtherOptionEnumeration(OtherOptionEnumeration *e, bool addWhite
 std::string writeDblVectorData(DoubleVector *v, bool addWhiteSpace, bool writeBase64)
 {
 	ostringstream outStr;
-	int mult, incr;
+	int mult;
 
 	if (v->numberOfEl > 0)
 	{
@@ -150,9 +193,8 @@ std::string writeDblVectorData(DoubleVector *v, bool addWhiteSpace, bool writeBa
 std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase64)
 {
 	ostringstream outStr;
-	outStr << "<basisStatus>" << endl;
 	
-	if (bs->basic != NULL && bs->basic->numberOfEl > 0)
+	if (bs->basic != NULL)
 	{
 		outStr << "<basic numberOfEl=\"" << bs->basic->numberOfEl << "\">";
 		if(addWhiteSpace == true) outStr << endl;
@@ -161,7 +203,7 @@ std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase
 		if(addWhiteSpace == true) outStr << endl;
 	}
 	
-	if (bs->atLower != NULL && bs->atLower->numberOfEl > 0)
+	if (bs->atLower != NULL)
 	{
 		outStr << "<atLower numberOfEl=\"" << bs->atLower->numberOfEl << "\">";
 		if(addWhiteSpace == true) outStr << endl;
@@ -170,7 +212,7 @@ std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase
 		if(addWhiteSpace == true) outStr << endl;
 	}
 	
-	if (bs->atUpper != NULL && bs->atUpper->numberOfEl > 0)
+	if (bs->atUpper != NULL)
 	{
 		outStr << "<atUpper numberOfEl=\"" << bs->atUpper->numberOfEl << "\">";
 		if(addWhiteSpace == true) outStr << endl;
@@ -179,7 +221,7 @@ std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase
 		if(addWhiteSpace == true) outStr << endl;
 	}
 	
-	if (bs->isFree != NULL && bs->isFree->numberOfEl > 0)
+	if (bs->isFree != NULL)
 	{
 		outStr << "<isFree numberOfEl=\"" << bs->isFree->numberOfEl << "\">";
 		if(addWhiteSpace == true) outStr << endl;
@@ -188,7 +230,7 @@ std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase
 		if(addWhiteSpace == true) outStr << endl;
 	}
 	
-	if (bs->superbasic != NULL && bs->superbasic->numberOfEl > 0)
+	if (bs->superbasic != NULL)
 	{
 		outStr << "<superbasic numberOfEl=\"" << bs->superbasic->numberOfEl << "\">";
 		if(addWhiteSpace == true) outStr << endl;
@@ -197,7 +239,7 @@ std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase
 		if(addWhiteSpace == true) outStr << endl;
 	}
 
-	if (bs->unknown != NULL && bs->unknown->numberOfEl > 0)
+	if (bs->unknown != NULL)
 	{
 		outStr << "<unknown numberOfEl=\"" << bs->unknown->numberOfEl << "\">";
 		if(addWhiteSpace == true) outStr << endl;
@@ -205,8 +247,6 @@ std::string writeBasisStatus(BasisStatus *bs, bool addWhiteSpace, bool writeBase
 		outStr << "</unknown>";
 		if(addWhiteSpace == true) outStr << endl;
 	}
-	
-	outStr << "</basisStatus>" << endl;
 	
 	return outStr.str();
 }// end writeDblVectorData

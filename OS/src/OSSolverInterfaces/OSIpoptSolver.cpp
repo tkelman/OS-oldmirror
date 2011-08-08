@@ -5,14 +5,12 @@
  * \detail Read an OSInstance object and convert to Ipopt data structures
  *
  * @author  Horand Gassmann,  Jun Ma, Kipp Martin, 
- * @version 1.0, 10/05/2005
- * @since   OS1.0
  *
  * \remarks
- * Copyright (C) 2005, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Copyright (C) 2005-2011, Horand Gassmann, Jun Ma, Kipp Martin,
  * Northwestern University, and the University of Chicago.
  * All Rights Reserved.
- * This software is licensed under the Common Public License. 
+ * This software is licensed under the Eclipse Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  */
@@ -29,7 +27,7 @@
 using std::cout; 
 using std::endl; 
 using std::ostringstream;
-//using namespace Ipopt;
+using namespace Ipopt;
  
 
 IpoptSolver::IpoptSolver() {
@@ -101,7 +99,12 @@ bool IpoptProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			throw;  
 		}
 		//std::cout << "Done calling sparse jacobian" << std::endl;
-		nnz_jac_g = sparseJacobian->valueSize;
+		if (sparseJacobian != NULL){
+			nnz_jac_g = sparseJacobian->valueSize;
+		}else{
+			nnz_jac_g = 0;
+		}
+		
 	#ifdef DEBUG
 		cout << "nnz_jac_g  !!!!!!!!!!!!!!!!!!!!!!!!!!!" << nnz_jac_g << endl;	
 	#endif
@@ -117,7 +120,11 @@ bool IpoptProblem::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			//std::cout << "Get Lagrangain Hessian Sparsity Pattern " << std::endl;
 			SparseHessianMatrix *sparseHessian = osinstance->getLagrangianHessianSparsityPattern();
 			//std::cout << "Done Getting Lagrangain Hessian Sparsity Pattern " << std::endl;
-			nnz_h_lag = sparseHessian->hessDimension;
+			if(sparseHessian != NULL){
+				nnz_h_lag = sparseHessian->hessDimension;
+			}else{
+				nnz_h_lag = 0;
+			}
 		}
 	#ifdef DEBUG
 		cout << "print nnz_h_lag (OSIpoptSolver.cpp)" << endl;	
@@ -539,7 +546,7 @@ void IpoptProblem::finalize_solution(SolverReturn status,
 		// resultHeader infomration
 		if(osresult->setSolverInvoked( "COIN-OR Ipopt") != true)
 			throw ErrorClass("OSResult error: setSolverInvoked");
-        if(osresult->setServiceName( getVersionInfo()) != true)
+        if(osresult->setServiceName( OSgetVersionInfo()) != true)
 			throw ErrorClass("OSResult error: setServiceName");
 		if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
 			throw ErrorClass("OSResult error: setInstanceName");
@@ -751,7 +758,7 @@ void IpoptSolver::setSolverOptions() throw (ErrorClass) {
 		if( osoption != NULL  &&  osoption->getNumberOfSolverOptions() > 0 ){
 //			std::cout << "number of solver options "  <<  osoption->getNumberOfSolverOptions() << std::endl;
 			std::vector<SolverOption*> optionsVector;
-			optionsVector = osoption->getSolverOptions( "ipopt");
+			optionsVector = osoption->getSolverOptions( "ipopt",true);
 			char *pEnd;
 			int i;
 			int num_ipopt_options = optionsVector.size();
@@ -773,9 +780,6 @@ void IpoptSolver::setSolverOptions() throw (ErrorClass) {
 		}
 	}
 	catch(const ErrorClass& eclass){
-#ifdef DEBUG
-		cout << "error in OSIpoptSolver, line 695:\n" << eclass.errormsg << endl;
-#endif
 		std::cout << "THERE IS AN ERROR" << std::endl;
 		osresult->setGeneralMessage( eclass.errormsg);
 		osresult->setGeneralStatusType( "error");
@@ -817,14 +821,14 @@ void IpoptSolver::solve() throw (ErrorClass) {
 	if( this->bCallbuildSolverInstance == false) buildSolverInstance();
 	if( this->bSetSolverOptions == false) setSolverOptions();
 	try{
-		clock_t start, finish;
-		double duration;
-		start = clock();
+		//clock_t start, finish;
+		//double duration;
+		//start = clock();
 		//OSiLWriter osilwriter;
 		//cout << osilwriter.writeOSiL( osinstance) << endl;
 		//if(osinstance->getVariableNumber() <= 0)throw ErrorClass("Ipopt requires decision variables");
-		finish = clock();
-		duration = (double) (finish - start) / CLOCKS_PER_SEC;
+		//finish = clock();
+		//duration = (double) (finish - start) / CLOCKS_PER_SEC;
 		//cout << "Parsing took (seconds): " << duration << endl; 
 		//dataEchoCheck();
 		/***************now the ipopt invokation*********************/

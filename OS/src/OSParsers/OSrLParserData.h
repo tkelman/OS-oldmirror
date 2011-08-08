@@ -1,15 +1,13 @@
 /* $Id$ */
 /** @file OSrLParserData.h
  * 
- * @author  Horand Gassmann,  Jun Ma, Kipp Martin, 
- * @version 1.0, 10/05/2005
- * @since   OS1.0
+ * @author  Horand Gassmann, Jun Ma, Kipp Martin, 
  *
  * \remarks
- * Copyright (C) 2005, Horand Gassmann, Jun Ma, Kipp Martin,
- * Northwestern University, and the University of Chicago.
+ * Copyright (C) 2005-2011, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Dalhousie University, Northwestern University, and the University of Chicago.
  * All Rights Reserved.
- * This software is licensed under the Common Public License. 
+ * This software is licensed under the Eclipse Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  */
@@ -184,6 +182,9 @@ public:
 	/** a temporary variable to hold a string */
 	std::string tempStr;
 	
+	/** a temporary variable to hold a variable, objective or constraint name */
+	std::string name;
+
 	/** a temporary variable to hold an output stream value */
 	std::ostringstream outStr;
 	
@@ -264,7 +265,7 @@ public:
 	bool generalJobIDPresent; 
 	bool generalSolverInvokedPresent; 
 	bool generalTimeStampPresent; 
-	bool generalOtherResultsPresent; 
+	bool otherGeneralResultsPresent; 
 
 	/** set system...Present to true if the corresponding 
 	 *  element (child of the <system> element) has been parsed
@@ -274,7 +275,7 @@ public:
 	bool systemAvailableMemoryPresent; 
 	bool systemAvailableCPUSpeedPresent; 
 	bool systemAvailableCPUNumberPresent; 
-	bool systemOtherResultsPresent;
+	bool otherSystemResultsPresent;
 
 	/** set service...Present to true if the corresponding 
 	 *  element (child of the <service> element) has been parsed
@@ -284,7 +285,7 @@ public:
 	bool serviceTotalJobsSoFarPresent;
 	bool timeServiceStartedPresent;
 	bool serviceUtilizationPresent;
-	bool serviceOtherResultsPresent;
+	bool otherServiceResultsPresent;
 
 	/** set job...Present to true if the corresponding 
 	 *  element (child of the <job> element) has been parsed
@@ -299,7 +300,7 @@ public:
 	bool jobUsedMemoryPresent;
 	bool jobUsedCPUSpeedPresent;
 	bool jobUsedCPUNumberPresent;
-	bool jobOtherResultsPresent;
+	bool otherJobResultsPresent;
 
 	bool numberOfItemsPresent;
 	int  numberOfItems;

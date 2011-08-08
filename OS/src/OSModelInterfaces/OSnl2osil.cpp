@@ -38,6 +38,7 @@
 # endif
 #endif
 
+#include <sstream>
 
 
 #define R_OPS  ((ASL_fg*)asl)->I.r_ops_
@@ -59,9 +60,7 @@ using std::endl;
 
 
 
-
-   
-//#define AMPLDEBUG
+#define AMPLDEBUG
 
 OSnl2osil::OSnl2osil(std::string nlfilename){	
 	//Initialize the AMPL library
@@ -441,8 +440,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //continuous in an objective and in a constraint
 		vartype = 'C';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -456,8 +455,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //integer in an objective and in a constraint
 		vartype = 'I';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -471,8 +470,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //continuous just in constraints
 		vartype = 'C';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -487,8 +486,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //integer just in constraints
 		vartype = 'I';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -502,8 +501,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //continuous just in objectives
 		vartype = 'C';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -517,8 +516,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //integer just in objectives
 		vartype = 'I';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -526,7 +525,7 @@ bool OSnl2osil::createOSInstance(){
 	//now the other variables	
 	
 	lower = CoinMax(nlvc, nlvo);
-	upper =  CoinMax(nlvc, nlvo) + nwv;
+	upper = CoinMax(nlvc, nlvo) + nwv;
 	#ifdef AMPLDEBUG
 	std::cout << "LOWER = " << lower << std::endl;
 	std::cout << "UPPER = " << upper << std::endl;
@@ -534,8 +533,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //linear arc variables
 		vartype = 'C';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}	
 	
@@ -550,8 +549,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //other linear
 		vartype = 'C';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}	
 	
@@ -566,8 +565,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //linear binary
 		vartype = 'B';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}
 	
@@ -583,8 +582,8 @@ bool OSnl2osil::createOSInstance(){
 	for(i = lower; i < upper; i++){ //linear integer
 		vartype = 'I';
 		osinstance->addVariable(i, var_name(i), 
-		LUv[2*i] > -OSDBL_MAX  ? LUv[2*i] : -OSDBL_MAX, 
-		LUv[2*i+1] < OSDBL_MAX ? LUv[2*i+1] : OSDBL_MAX, 
+		LUv[2*i]   > -OSDBL_MAX ? LUv[2*i]   : -OSDBL_MAX, 
+		LUv[2*i+1] <  OSDBL_MAX ? LUv[2*i+1] :  OSDBL_MAX, 
 		vartype);
 	}	
 	

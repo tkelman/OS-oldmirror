@@ -2,15 +2,13 @@
 /** @file OSResult.h
  * 
  *
- * @author  Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin, 
- * @version 2.0, 19/07/2009
- * @since   OS1.0
+ * @author  Horand Gassmann, Jun Ma, Kipp Martin
  *
  * \remarks
- * Copyright (C) 2005-2009, Robert Fourer, Jun Ma, Horand Gassmann, Kipp Martin,
- * Northwestern University, Dalhousie University and the University of Chicago.
+ * Copyright (C) 2005-2011, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Dalhousie University, Northwestern University, and the University of Chicago.
  * All Rights Reserved.
- * This software is licensed under the Common Public License. 
+ * This software is licensed under the Eclipse Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  */
@@ -78,6 +76,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(GeneralSubstatus *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 		
 };//GeneralSubstatus
 
@@ -125,6 +132,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(GeneralStatus *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 		
 };//GeneralStatus
 
@@ -169,6 +185,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 		
 };//OtherResult
 
@@ -210,6 +235,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherResults *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 		
 };//OtherResults
 
@@ -283,181 +317,16 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(GeneralResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//class GeneralResult
-
-
-/*! \class DiskSpace
- *  \brief The DiskSpace Class.
- * 
- * @author Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin
- * @version 1.0, 10/09/2009
- * @since OS 1.0
- * 
- * \remarks
- * A data structure class that corresponds to an xml element in 
- * the OSrL schema.  
- */
-class DiskSpace {
-
-public:
- 
-	/** the unit in which disk space is measured */
-	std::string unit;
-
-	/** a descriptive string to further describe the disk space */
-	std::string description;
-
-	/** the number of disk space units */
-	double value;
-
-	/**
-	 *
-	 * Default constructor. 
-	 */
-	DiskSpace();
-	/**
-	 *
-	 * Class destructor. 
-	 */
-	~DiskSpace();
-
-	/**
-	 *
-	 * A function to check for the equality of two objects
-	 */
-	bool IsEqual(DiskSpace *that);
-		
-};//DiskSpace
-
-
-/*! \class MemorySize
- *  \brief The MemorySize Class.
- * 
- * @author Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin
- * @version 1.0, 10/09/2009
- * @since OS 1.0
- * 
- * \remarks
- * A data structure class that corresponds to an xml element in 
- * the OSrL schema.  
- */
-class MemorySize {
-
-public:
- 
-	/** the unit in which memory size is measured */
-	std::string unit;
-
-	/** a descriptive string to further describe the memory */
-	std::string description;
-
-	/** the number of memory units */
-	double value;
-
-	/**
-	 *
-	 * Default constructor. 
-	 */
-	MemorySize();
-	/**
-	 *
-	 * Class destructor. 
-	 */
-	~MemorySize();
-
-	/**
-	 *
-	 * A function to check for the equality of two objects
-	 */
-	bool IsEqual(MemorySize *that);
-		
-};//MemorySize
-
-
-/*! \class CPUSpeed
- *  \brief The CPUSpeed Class.
- * 
- * @author Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin
- * @version 1.0, 10/09/2009
- * @since OS 1.0
- * 
- * \remarks
- * A data structure class that corresponds to an xml element in 
- * the OSrL schema.  
- */
-class CPUSpeed {
-
-public:
- 
-	/** the unit in which CPU speed is measured */
-	std::string unit;
-
-	/** a descriptive string to further describe the CPU */
-	std::string description;
-
-	/** the number of CPU speed units */
-	double value;
-
-	/**
-	 *
-	 * Default constructor. 
-	 */
-	CPUSpeed();
-	/**
-	 *
-	 * Class destructor. 
-	 */
-	~CPUSpeed();
-
-	/**
-	 *
-	 * A function to check for the equality of two objects
-	 */
-	bool IsEqual(CPUSpeed *that);
-		
-};//CPUSpeed
-
-
-
-/*! \class CPUNumber
- *  \brief The CPUNumber Class.
- * 
- * @author Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin
- * @version 1.0, 10/09/2009
- * @since OS 1.0
- * 
- * \remarks
- * A data structure class that corresponds to an xml element in 
- * the OSrL schema.  
- */
-class CPUNumber {
-
-public:
- 
-	/** a descriptive string to further describe the CPU */
-	std::string description;
-
-	/** the number of CPUs available and/or used */
-	int value;
-
-	/**
-	 *
-	 * Default constructor. 
-	 */
-	CPUNumber();
-	/**
-	 *
-	 * Class destructor. 
-	 */
-	~CPUNumber();
-
-	/**
-	 *
-	 * A function to check for the equality of two objects
-	 */
-	bool IsEqual(CPUNumber *that);
-		
-};//CPUNumber
 
 
 /*! \class SystemResult
@@ -479,11 +348,11 @@ public:
 
 	/** a pointer to the DiskSpace class
 	 */
-	DiskSpace *availableDiskSpace;
+	StorageCapacity *availableDiskSpace;
 
 	/** a pointer to the MemorySize class
 	 */
-	MemorySize *availableMemory;
+	StorageCapacity *availableMemory;
 
 	/** a pointer to the CPUSpeed class
 	 */
@@ -513,6 +382,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(SystemResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//class SystemResult
 
 
@@ -565,19 +443,29 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(ServiceResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//class ServiceResult
 
-
+#if 0
 /*! \class Time
- *  \brief The Time  Class.
+ *  \brief The Time Class.
  * 
  * @author Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin
  * @version 1.0, 03/14/2004
  * @since OS 1.0
  * 
  * \remarks
- * A class that provides an array of individual time measurements
- * that are defined in the OSrL schema.  
+ * A class that provides an individual time measurement
+ * as defined in the OSrL schema.  
+ * This class is superseded by class TimeMeasurement since version 2.3
  */
 class Time{
 public:
@@ -623,7 +511,73 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(Time *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//class Time
+#endif
+
+/*! \class TimeMeasurement
+ *  \brief The TimeMeasurement Class.
+ * 
+ * @author Horand Gassmann, Jun Ma, Kipp Martin
+ * 
+ * \remarks
+ * A class that provides an individual time measurement as defined in the OSrL schema.
+ * Extends the class TimeSpan defined in OSGeneral.h by adding three elements 
+ * type, category and description.  
+ * This class supersedes the old class Time since version 2.3.
+ */
+class TimeMeasurement : public TimeSpan{
+public:
+
+	/** 
+	 * The type of timer used (cpuTime/elapsedTime/other)
+	 */
+	std::string type;
+
+	/** 
+	 * The category of time (total/input/preprocessing/optimization/postprocessing/output/other)
+	 */
+	std::string category;
+
+	/** 
+	 * Further description on the timer used
+	 */
+	std::string description;
+
+	/**
+	 *
+	 * Default constructor. 
+	 */
+	TimeMeasurement();
+	/**
+	 *
+	 * Class destructor. 
+	 */
+	~TimeMeasurement();
+
+	/**
+	 *
+	 * A function to check for the equality of two objects
+	 */
+	bool IsEqual(TimeMeasurement *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+};//class TimeMeasurement
 
 
 /*! \class TimingInformation
@@ -650,7 +604,7 @@ public:
 	 *
 	 * An array of time measurements
 	 */
-	Time** time;
+	TimeMeasurement** time;
 
 	/**
 	 *
@@ -668,6 +622,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(TimingInformation *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//class TimingInformation
 
 
@@ -705,11 +668,11 @@ public:
 
 	/** a pointer to the DiskSpace class
 	 */
-	DiskSpace *usedDiskSpace;
+	StorageCapacity *usedDiskSpace;
 
 	/** a pointer to the MemorySize class
 	 */
-	MemorySize *usedMemory;
+	StorageCapacity *usedMemory;
 
 	/** a pointer to the CPUSpeed class
 	 */
@@ -739,6 +702,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(JobResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//class JobResult
 
 
@@ -779,6 +751,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OptimizationSolutionSubstatus *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 		
 };//OptimizationSolutionSubstatus
 
@@ -824,6 +805,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OptimizationSolutionStatus *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 		
 };//OptimizationSolutionStatus
 
@@ -845,6 +835,9 @@ public:
 	/** idx is the index on variable in the solution */
 	int idx;
 	
+	/** optional name */
+	std::string name;
+
 	/* value is the value of the variable indexed by idx
 	 * in the solution
 	 */	
@@ -867,6 +860,15 @@ public:
 	 */
 	bool IsEqual(VarValue *that);
 
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+
 };// class VarValue
 
 
@@ -878,7 +880,7 @@ public:
  * @since OS 1.0
  * 
  * \remarks
- * A class that cotnains values for all the variables
+ * A class that contains values for all the variables
  */	
 class VariableValues{
 public:
@@ -911,6 +913,15 @@ public:
 	 */
 	bool IsEqual(VariableValues *that);
 
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+
 };// class VariableValues
 
 
@@ -931,6 +942,9 @@ public:
 	/** idx is the index on variable in the solution */
 	int idx;
 	
+	/** optional name */
+	std::string name;
+
 	/* value is the value of the variable indexed by idx
 	 * in the solution
 	 */	
@@ -953,6 +967,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(VarValueString *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 
 };// class VarValueString
 
@@ -998,6 +1021,15 @@ public:
 	 */
 	bool IsEqual(VariableValuesString *that);
 
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+
 };// class VariableValuesString
 
 
@@ -1017,7 +1049,10 @@ public:
 	/** the index of a variable in the solution */
 	int idx;
 	
-	/** value holds a general value for a variable,
+	/** optional name */
+	std::string name;
+
+	/** value holds a general value associated with a variable,
 	 *  for example, rather than the value of a variable
 	 *  we may wish to store the variable name associated
 	 *  with the variable with index idx, hence we want
@@ -1041,6 +1076,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherVarResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherVarResult
 
@@ -1110,6 +1154,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherVariableResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherVariableResult
 
@@ -1165,6 +1218,15 @@ public:
 	 */
 	bool IsEqual(VariableSolution *that);
 
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+
 };// class VariableSolution
 
 
@@ -1185,6 +1247,9 @@ public:
 	/** idx is the index on an objective function */
 	int idx;
 	
+	/** optional name */
+	std::string name;
+
 	/** the value of the objective indexed by idx */
 	double value;
 	
@@ -1205,6 +1270,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(ObjValue *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 };//ObjValue
 
 /*! \class ObjectiveValues
@@ -1247,6 +1321,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(ObjectiveValues *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//ObjectiveValues
 
@@ -1268,6 +1351,8 @@ public:
 	/** idx is the index on a objective function */
 	int idx;
 	
+	/** optional name */
+	std::string name;
 	
 	/** value is a value associated with an objective function
 	 *  indexed by idx
@@ -1291,6 +1376,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherObjResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherObjResult
 
@@ -1359,6 +1453,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherObjectiveResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherObjectiveResult
 
@@ -1412,6 +1515,15 @@ public:
 	 */
 	bool IsEqual(ObjectiveSolution *that);
 
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+
 };//ObjectiveSolution
 
 
@@ -1432,19 +1544,9 @@ public:
 	/** idx is the index on a constraint */
 	int idx;
 
-	/** lbValue is the value of dual variable on
-	 * the constraint indexed by idx if the constraint
-	 * is at its lower bound
-	 */		
-	//double lbValue;
-	
-	
-	/** ubValue is the value of dual variable on
-	 * the constraint indexed by idx if the constraint
-	 * is at its upper bound
-	 */	
-	//double ubValue;
-	
+	/** optional name */
+	std::string name;
+
 	/** value of dual variable on
 	 * the constraint indexed by idx 
 	 */
@@ -1467,6 +1569,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(DualVarValue *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//DualVarValue
 
@@ -1512,6 +1623,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(DualVariableValues *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//DualVariableValues
 
@@ -1533,6 +1653,9 @@ public:
 	/** idx is the index on the constraint */
 	int idx;
 	
+	/** optional name */
+	std::string name;
+
 	/** value is a value associated with the constraint
 	 * indexed by idx, for example value might be the 
 	 * value of a dual variable or it might be the name
@@ -1557,6 +1680,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherConResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherConResult
 
@@ -1626,6 +1758,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherConstraintResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherConstraintResult
 
@@ -1678,6 +1819,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(ConstraintSolution *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//ConstraintSolution
 
@@ -1734,6 +1884,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherSolutionResult *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherSolutionResult
 
@@ -1779,6 +1938,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherSolutionResults *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherSolutionResults
 
@@ -1799,9 +1967,14 @@ class OptimizationSolution{
 public:
 
 	/** the index of the objective function for which we are 
-	 * reporting solution information 
+	 *  reporting solution information 
 	 */
 	int targetObjectiveIdx;
+
+	/** an optional name of the objective function for which we are 
+	 *  reporting solution information 
+	 */
+	std::string targetObjectiveName;
 
 	/** a marker to track whether the objectives are weighted */
 	bool weightedObjectives;
@@ -1851,6 +2024,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OptimizationSolution *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 
 };// class OptimizationSolution
 
@@ -1905,6 +2087,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(SolverOutput *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//SolverOutput
 
@@ -1949,6 +2140,15 @@ public:
 	 * A function to check for the equality of two objects
 	 */
 	bool IsEqual(OtherSolverOutput *that);
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 };//OtherSolverOutput
 
@@ -2016,6 +2216,15 @@ public:
 	 */
 	bool IsEqual(OptimizationResult *that);
 
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
+
 };// class OptimizationResult
 
 
@@ -2033,6 +2242,11 @@ public:
 class OSResult{
 
 public:
+
+	/** 
+	 * header information 
+	 */
+	GeneralFileHeader *resultHeader;
 
 	/**
 	 * general holds the first child of the OSResult specified by the OSrL Schema. 
@@ -2070,6 +2284,19 @@ public:
 	 * Class destructor. 
 	 */
 	~OSResult();
+
+
+	/**
+	 *
+	 * A function to populate an instance of the result header element
+	 * @param name: the name of this file or instance
+	 * @param source: the source (e.g., in BiBTeX format)
+	 * @param fileCreator: the creator of this file
+	 * @param description: further description about this file and/or its contents
+	 * @param licence: licence information if applicable
+	 */
+	bool setResultHeader(std::string name, std::string source, 
+		           std::string fileCreator, std::string description, std::string licence);
 
 public:	
 	
@@ -2116,6 +2343,15 @@ public:
 	 */
 	bool IsEqual(OSResult *that);
 
+
+	/**
+	 *
+	 * A function to make a random instance of this class
+	 * @param density: corresponds to the probability that a particular child element is created
+	 * @param conformant: if true enforces side constraints not enforceable in the schema
+	 *     (e.g., agreement of "numberOfXXX" atrbutes and <XXX> children)
+	 */
+	bool setRandom(double density, bool conformant);
 	
 
 
@@ -2362,6 +2598,7 @@ public:
 /* */	std::string getSolutionSubstatusType(int solIdx, int substatusIdx);
 /* */	std::string getSolutionSubstatusDescription(int solIdx, int substatusIdx);
 /* */	int getSolutionTargetObjectiveIdx(int solIdx);
+/* */	std::string getSolutionTargetObjectiveName(int solIdx);
 
 	/**
 	 * Get the [i]th optimization solution form of the objective
@@ -2382,6 +2619,7 @@ public:
 /* */	int getNumberOfPrimalVariableValues(int solIdx);
 /* */	int getNumberOfVarValues(int solIdx);
 /* */	int getVarValueIdx(int solIdx, int varIdx);
+/* */	std::string getVarValueName(int solIdx, int varIdx);
 /* */	double getVarValue(int solIdx, int varIdx);
 
 	/**
@@ -2394,10 +2632,29 @@ public:
 
 /* */	int getNumberOfVarValuesString(int solIdx);
 /* */	int getVarValueStringIdx(int solIdx, int varIdx);
+/* */	std::string getVarValueStringName(int solIdx, int varIdx);
 /* */	std::string getVarValueString(int solIdx, int varIdx);
-/* */	int getNumberOfBasisVar(int solIdx);
-/* */	int getBasisVarIdx(int solIdx, int varIdx);
-/* */	std::string getBasisVar(int solIdx, int varIdx);
+
+	/**
+	 * Get the number of indices that belong to a particular basis status
+	 *
+	 * @param solIdx holds the solution index for the current solution
+	 * @param object describes the kind of indices to be retrieved
+	 *	(legal values are described in ENUM_BASIS_STATUS --- see OSGeneral.h)
+	 * @param status gives the basis status type
+	 */
+	int getBasisStatusNumberOfEl(int solIdx, int object, int status);
+
+	/**
+	 * Get an entry in the array of indices that belong to a particular basis status
+	 *
+	 * @param solIdx holds the solution index for the current solution
+	 * @param object describes the kind of indices to be retrieved
+	 *	(legal values are described in ENUM_BASIS_STATUS --- see OSGeneral.h)
+	 * @param status gives the basis status (basic, atLower, atUpper, etc.)
+	 * @param j is the (zero-based) position of the desired entry within the index array
+	 */
+	int getBasisStatusEl(int solIdx, int object, int status, int j);
 	
 	/**
 	 * Get numberOfOtherVariableResult. 
@@ -2417,14 +2674,54 @@ public:
 /* */	std::string getOtherVariableResultValue(int solIdx, int otherIdx);
 /* */	std::string getOtherVariableResultDescription(int solIdx, int otherIdx);
 /* */	int getOtherVariableResultNumberOfVar(int solIdx, int otherIdx);
+/* */	int getOtherVariableResultNumberOfEnumerations(int solIdx, int otherIdx);
 /* */	int getOtherVariableResultVarIdx(int solIdx, int otherIdx, int varIdx);
 /* */	std::string getOtherVariableResultVar(int solIdx, int otherIdx, int varIdx);
+
+	/** Get the value of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the value 
+	 */
+	std::string getOtherVariableResultEnumerationValue(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get the description of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the description 
+	 */
+	std::string getOtherVariableResultEnumerationDescription(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get the size of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the number of indices that assume this level 
+	 */
+	int  getOtherVariableResultEnumerationNumberOfEl(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get one index of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @param enumIdx is the index of the current enumeration level
+	 * @param j jis the (zero-based) position of the index within the index array
+	 *
+	 * @return the array of indices 
+	 */
+	int getOtherVariableResultEnumerationEl(int solIdx,int otherIdx, int enumIdx, int j);
+
 /* */	int getNumberOfObjValues(int solIdx);
 /* */	int getObjValueIdx(int solIdx, int objIdx);
+/* */	std::string getObjValueName(int solIdx, int objIdx);
 /* */	double getObjValue(int solIdx, int objIdx);
 
 	/**
-	 * Get one solution of optimal objective values. 
+	 * Get one solution's optimal objective value. 
 	 * 
 	 * @param objIdx holds the objective index the optimal value corresponds to. 
 	 * @param solIdx holds the solution index the optimal value corresponds to.
@@ -2437,10 +2734,51 @@ public:
 /* */	std::string getOtherObjectiveResultValue(int solIdx, int otherIdx);
 /* */	std::string getOtherObjectiveResultDescription(int solIdx, int otherIdx);
 /* */	int getOtherObjectiveResultNumberOfObj(int solIdx, int otherIdx);
+/* */	int getOtherObjectiveResultNumberOfEnumerations(int solIdx, int otherIdx);
 /* */	int getOtherObjectiveResultObjIdx(int solIdx, int otherIdx, int objIdx);
 /* */	std::string getOtherObjectiveResultObj(int solIdx, int otherIdx, int objIdx);
+
+	/** Get the value of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the value 
+	 */
+	std::string getOtherObjectiveResultEnumerationValue(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get the description of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the description 
+	 */
+	std::string getOtherObjectiveResultEnumerationDescription(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get the size of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the number of indices that assume this level 
+	 */
+	int  getOtherObjectiveResultEnumerationNumberOfEl(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get one index of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 * @param j is the (zero-based) position of the index in the array
+	 *
+	 * @return the array of indices 
+	 */
+	int getOtherObjectiveResultEnumerationEl(int solIdx,int otherIdx, int enumIdx, int j);
+
+
 /* */	int getNumberOfDualValues(int solIdx);
 /* */	int getDualValueIdx(int solIdx, int conIdx);
+/* */	std::string getDualValueName(int solIdx, int objIdx);
 /* */	double getDualValue(int solIdx, int conIdx);
 
 	/**
@@ -2456,8 +2794,50 @@ public:
 /* */	std::string getOtherConstraintResultValue(int solIdx, int otherIdx);
 /* */	std::string getOtherConstraintResultDescription(int solIdx, int otherIdx);
 /* */	int getOtherConstraintResultNumberOfCon(int solIdx, int otherIdx);
+/* */	int getOtherConstraintResultNumberOfEnumerations(int solIdx, int otherIdx);
 /* */	int getOtherConstraintResultConIdx(int solIdx, int otherIdx, int conIdx);
 /* */	std::string getOtherConstraintResultCon(int solIdx, int otherIdx, int conIdx);
+
+
+	/** Get the value of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the value 
+	 */
+	std::string getOtherConstraintResultEnumerationValue(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get the description of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the description 
+	 */
+	std::string getOtherConstraintResultEnumerationDescription(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get the size of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 *
+	 * @return the number of indices that assume this level 
+	 */
+	int  getOtherConstraintResultEnumerationNumberOfEl(int solIdx,int otherIdx, int enumIdx);
+
+	/** Get one index of an enum associated with an <other> result for some solution
+	 * @param solIdx is the solution index
+	 * @param otherIndex is the index of the current <other> result
+	 * @enumIdx is the index of the current enumeration level
+	 * @param j is the (zeo-based) position of the entry in the array
+	 *
+	 * @return the array of indices 
+	 */
+	int getOtherConstraintResultEnumerationEl(int solIdx,int otherIdx, int enumIdx, int j);
+
+
+
 /* */	int getNumberOfOtherSolutionResults(int solIdx);
 /* */	std::string getOtherSolutionResultName(int solIdx, int otherIdx);
 /* */	std::string getOtherSolutionResultCategory(int solIdx, int otherIdx);
@@ -3157,6 +3537,19 @@ public:
 	bool setSolutionTargetObjectiveIdx(int solIdx, int objectiveIdx);
 	
 	/**
+	 * Set the [i]th optimization solution's objective name, where i equals the given solution index.   
+	 * The first objective's index should be -1, the second -2, and so on.  
+	 * Before this method is called, the setSolutionNumber(int) method has to be called first. 
+	 * 
+	 * @param solIdx holds the solution index to set the objective index.
+	 * @param objectiveName holds the objective indexname to set.  
+	 * 
+	 * @return whether the optimization objective name is set successfully or not. 
+	 * @see #setSolutionNumber(int)
+	 */
+	bool setSolutionTargetObjectiveName(int solIdx, std::string objectiveName);
+	
+	/**
 	 * Record whether the [i]th optimization solution uses weighted objectives, 
 	 * where i equals the given solution index.   
 	 * 
@@ -3231,12 +3624,13 @@ public:
 	 * @param solIdx holds the solution index to set the primal variable values. 
 	 * @param number holds the location within the sparse array var that is to be used
 	 * @param idx holds the index of the primal variable that is to be set
+	 * @param name holds the variable name (or an empty string).
 	 * @param val holds the variable value to set.
 	 * 
 	 * @return whether primal variable value was set successfully or not. 
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setVarValue(int solIdx, int number, int idx, double val);
+	bool setVarValue(int solIdx, int number, int idx, std::string name, double val);
 
 	/**
 	 * Set the number of string-valued primal variables to be given a value.
@@ -3255,28 +3649,30 @@ public:
 	 * @param solIdx holds the solution index to set the primal variable values. 
 	 * @param number holds the location within the sparse array var that is to be used
 	 * @param idx holds the index of the primal variable that is to be set
+	 * @param name holds the variable name (or an empty string).
 	 * @param str holds the variable value to set.
 	 * 
 	 * @return whether primal variable value was set successfully or not. 
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setVarValueString(int solIdx, int number, int idx, std::string str);
+	bool setVarValueString(int solIdx, int number, int idx, std::string name, std::string str);
 
 
 	/**
 	 * Set the basis status of a number of variables/constraints/objectives.
 	 * @param solIdx holds the index of the solution to which the basis values belong. 
 	 * @param object holds the type of basis object to be used 
-	 * ("variables", "objectives", "constraints" are legal values)
+	 *     (legal values are taken from the ENUMM_PROBLEM_COMPONENT enumeration --- see OSGeneral.h))
 	 * @param status holds the status which is to be used
-	 * (leagal values are "basic", "atLower", "atUpper", "isFree", "superbasic", "unknown")
+	 *     (legal values are taken from the ENUM_BASIS_STATUS enumeration --- see OSGeneral.h)
 	 * @param i holds the integer array whose values are to be transferred.
+	 *     (NOTE WELL: This method does not handle individual variables --- the entire basis must be processed at once.)
 	 * @param ni holds the number of elements of i
 	 * 
-	 * @return whether primal variable value was set successfully or not. 
+	 * @return whether basis status was set successfully or not. 
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setBasisStatus(int solIdx, char object, int status, int *i, int ni);
+	bool setBasisStatus(int solIdx, int object, int status, int *i, int ni);
 
 	/**
 	 * Set the [i]th optimization solution's other (non-standard/solver specific)variable-related results, 
@@ -3353,14 +3749,14 @@ public:
 	 * Before this method is called, the setSolutionNumber(int) method has to be called first. 
 	 * @param solIdx holds the solution index  
 	 * @param otherIdx holds the index of the OtherVariableResult object
-	 * @param numberOfVar holds the number of <var> children
+	 * @param numberOfEnumerations holds the number of <enumeration> children
 	 *
 	 * @return whether the other variable result's name was set successfully or not. 
 	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVariableResult
 	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVarResult
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setOtherVariableResultNumberOfEnumerations(int solIdx, int otherIdx, int numberOfVar);
+	bool setOtherVariableResultNumberOfEnumerations(int solIdx, int otherIdx, int numberOfEnumerations);
 
 	/**
 	 * Set the name of another (non-standard/solver specific) variable-related result, 
@@ -3416,12 +3812,28 @@ public:
 	 * @param varIdx holds the index of the location to which the information is stored
 	 * @param idx holds the index of the variable to which the information belongs
 	 *
-	 * @return whether the other variable result's value was set successfully or not. 
+	 * @return whether the other variable result's index was set successfully or not. 
 	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVariableResult
 	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVarResult
 	 * @see #setSolutionNumber(int)
 	 */
  	bool setOtherVariableResultVarIdx(int solIdx, int otherIdx, int varIdx, int idx);
+
+	/**
+	 * Set the name of another (non-standard/solver specific) variable-related result, 
+	 * for the [i]th solution, where i equals the given solution index.   
+	 * Before this method is called, the setSolutionNumber(int) method has to be called first. 
+	 * @param solIdx holds the solution index  
+	 * @param otherIdx holds the index of the OtherVariableResult object
+	 * @param varIdx holds the index of the location to which the information is stored
+	 * @param name holds the name of the variable to which the information belongs
+	 *
+	 * @return whether the other variable result's name was set successfully or not. 
+	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVariableResult
+	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVarResult
+	 * @see #setSolutionNumber(int)
+	 */
+ 	bool setOtherVariableResultVarName(int solIdx, int otherIdx, int varIdx, std::string name);
 
 	/**
 	 * Set the value of another (non-standard/solver specific) variable-related result, 
@@ -3446,7 +3858,7 @@ public:
 	 * @param solIdx holds the solution index 
 	 * @param otherIdx holds the index of the OtherVariableResult object
 	 * @param object holds the object to which this enumeration pertains 
-	 * --- variables, objectives and constraints can be handled identically
+	 *     (legal values are taken from the ENUM_PROBLEM_COMPONENT enumeration --- see OSGeneral.h))
 	 * @param enumIdx holds the index of the OtherOptionEnumeration object
 	 * @param value holds the value of this result
 	 * @param description holds a description of this result
@@ -3458,7 +3870,7 @@ public:
 	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherVarResult
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setOtherOptionEnumeration(int solIdx, int otherIdx, char object, int enumIdx, std::string value, std::string description, int *i, int ni);
+	bool setOtherOptionEnumeration(int solIdx, int otherIdx, int object, int enumIdx, std::string value, std::string description, int *i, int ni);
 
 	/**
 	 * Set the [i]th optimization solution's other (non-standard/solver specific) objective-related results, 
@@ -3540,12 +3952,13 @@ public:
 	 * @param solIdx holds the solution index to set the objective values. 
 	 * @param number holds the location within the sparse array obj that is to be used
 	 * @param idx holds the index of the objective that is to be set
+	 * @param name holds the objective name (or an empty string).
 	 * @param val holds the objective value to set.
 	 * 
 	 * @return whether primal variable value was set successfully or not. 
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setObjValue(int solIdx, int number, int idx, double val);
+	bool setObjValue(int solIdx, int number, int idx, std::string name, double val);
 
 	/**
 	 * Set the number of <obj> children of another (non-standard/solver specific) 
@@ -3637,6 +4050,22 @@ public:
 	 * @see #setSolutionNumber(int)
 	 */
  	bool setOtherObjectiveResultObjIdx(int solIdx, int otherIdx, int objIdx, int idx);
+
+	/**
+	 * Set the name of another (non-standard/solver specific) objective-related result, 
+	 * for the [i]th solution, where i equals the given solution index.   
+	 * Before this method is called, the setSolutionNumber(int) method has to be called first. 
+	 * @param solIdx holds the solution index  
+	 * @param otherIdx holds the index of the OtherObjectiveResult object
+	 * @param objIdx holds the index of the location to which the information is stored
+	 * @param name holds the name of the objective to which the information belongs
+	 *
+	 * @return whether the other variable result's value was set successfully or not. 
+	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherObjectiveResult
+	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherObjResult
+	 * @see #setSolutionNumber(int)
+	 */
+	bool setOtherObjectiveResultObjName(int solIdx, int otherIdx, int objIdx, std::string name);
 
 	/**
 	 * Set the value of another (non-standard/solver specific) objective-related result, 
@@ -3738,12 +4167,13 @@ public:
 	 * @param solIdx holds the solution index to set the constraint values. 
 	 * @param number holds the location within the sparse array con that is to be used
 	 * @param idx holds the index of the constraint that is to be set
+	 * @param name holds the constraint name (or an empty string).
 	 * @param val holds the constraint value to set.
 	 * 
 	 * @return whether dual variable value was set successfully or not. 
 	 * @see #setSolutionNumber(int)
 	 */
-	bool setDualValue(int solIdx, int number, int idx, double val);
+	bool setDualValue(int solIdx, int number, int idx, std::string name, double val);
 
 	/**
 	 * Set the number of <con> children of another (non-standard/solver specific) 
@@ -3835,6 +4265,22 @@ public:
 	 * @see #setSolutionNumber(int)
 	 */
  	bool setOtherConstraintResultConIdx(int solIdx, int otherIdx, int conIdx, int idx);
+
+	/**
+	 * Set the name of another (non-standard/solver specific) constraint-related result, 
+	 * for the [i]th solution, where i equals the given solution index.   
+	 * Before this method is called, the setSolutionNumber(int) method has to be called first. 
+	 * @param solIdx holds the solution index  
+	 * @param otherIdx holds the index of the OtherConstraintResult object
+	 * @param conIdx holds the index of the location to which the information is stored
+	 * @param name holds the name of the constraint to which the information belongs
+	 *
+	 * @return whether the other variable result's value was set successfully or not. 
+	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherConstraintResult
+	 * @see org.optimizationservices.oscommon.datastructure.osresult.OtherConResult
+	 * @see #setSolutionNumber(int)
+	 */
+	bool setOtherConstraintResultConName(int solIdx, int otherIdx, int conIdx, std::string name);
 
 	/**
 	 * Set the value of another (non-standard/solver specific) constraint-related result, 
@@ -3987,3 +4433,4 @@ public:
 
 };
 #endif
+

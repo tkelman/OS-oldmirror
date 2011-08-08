@@ -1,15 +1,13 @@
 /* $Id$ */
 /** @file MathUtil.cpp
  * 
- * @author  Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin, 
- * @version 2.2, 13/Oct/2010
- * @since   OS1.0
+ * @author  Horand Gassmann, Jun Ma, Kipp Martin 
  *
  * \remarks
- * Copyright (C) 2005-2010, Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin, and Wayne Sheng
- * Northwestern University, Dalhousie University and the University of Chicago.
+ * Copyright (C) 2005-2011, Horand Gassmann, Jun Ma, Kipp Martin, and Wayne Sheng
+ * Dalhousie University, Northwestern University, and the University of Chicago.
  * All Rights Reserved.
- * This software is licensed under the Common Public License. 
+ * This software is licensed under the Eclipse Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
  * 
  * <p>The <code>MathUtil</code> class contains methods for performing
@@ -17,13 +15,33 @@
  * Optimization Services (OS) framework. </p>
  *
  */
- 
+
+#include "OSConfig.h"
 #include "OSMathUtil.h"
 #include "OSGeneral.h" 
 
+#ifdef HAVE_CSTDLIB
+# include <cstdlib>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
+
+#ifdef HAVE_CSTRING
+# include <cstring>
+#else
+# ifdef HAVE_STRING_H
+#  include <string.h>
+# else
+#  error "don't have header file for string"
+# endif
+#endif
 
 #include <iostream>
+#include <sstream>  
 
+using std::ostringstream;
 
 
 MathUtil::MathUtil(){
@@ -63,7 +81,7 @@ SparseMatrix* MathUtil::convertLinearConstraintCoefficientMatrixToTheOtherMajor(
 		}
 	}
 	// at this point, miStart[ i] holds the number of columns with a nonzero in row i - 1
-	// we are not done with the start indicies, if we are here, and we
+	// we are not done with the start indices, if we are here, and we
 	// knew the correct starting point of row i -1, the correct starting point
 	// for row i is miStart[i] + miStart [i - 1]
 	miStart[0] = 0;
@@ -73,7 +91,7 @@ SparseMatrix* MathUtil::convertLinearConstraintCoefficientMatrixToTheOtherMajor(
 	
 	// now get the correct values
 	// again assume we are converting column major to row major
-	// loop over bariables		
+	// loop over columns		
 	for (i = 0; i < iNumSource; i++){
 		// get row indices and values of the A matrix
 		for (j = start[i]; j < start[ i + 1 ]; j++){
@@ -96,16 +114,19 @@ SparseMatrix* MathUtil::convertLinearConstraintCoefficientMatrixToTheOtherMajor(
 
 double os_strtod_wrap(const char *str,  char **strEnd){
 #ifndef USE_DTOA
-	return strtod(str,  strEnd);	
+	return    strtod(str, strEnd);	
 #else
-	return os_strtod(str,  strEnd);;
+	return os_strtod(str, strEnd);
 #endif
 }//end os_strtod_wrap
 
 
 std::string os_dtoa_format(double  x){
 	ostringstream outStr;
-#ifndef USE_DTOA
+	if (x ==  OSDBL_MAX) {outStr <<  "INF"; return outStr.str();}
+	if (x == -OSDBL_MAX) {outStr << "-INF"; return outStr.str();}
+	if ( OSIsnan(x) )    {outStr <<  "NaN"; return outStr.str();}
+#ifndef USE_DTOA 
 	outStr << x;
 	return outStr.str();
 #else
@@ -171,3 +192,31 @@ std::string os_dtoa_format(double  x){
 }// end os_dtoa_format
 
 
+/**
+ * OSRand()
+ *
+ * @return a uniformly distributed random number between 0 and 1 (inclusive)
+ * @notes The random number generator used, rand(), is not very good
+ * and should be replaced by a serious random number generator for serious work.
+ */
+double OSRand()
+{
+	int i;
+
+	i = rand();
+
+	return (double) i/RAND_MAX;
+}	
+
+
+/**
+ * OSiRand(int iMin, int iMax)
+ *
+ * @return a uniformly distributed random integer between iMin and iMax (inclusive)
+ * @notes The random number generator used, rand(), is not very good
+ * and should be replaced by a serious random number generator for serious work.
+ */
+double OSiRand(int iMin, int iMax)
+{
+	return iMin + rand()%(iMax - iMin + 1);
+}	

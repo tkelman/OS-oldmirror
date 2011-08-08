@@ -28,22 +28,21 @@
 #include "OSGeneral.h"
 
 
-#include <sstream>  
-#include<string>
-
+#include <string>
 
 #ifdef __cplusplus
-extern "C" std::string os_dtoa_format(double  x);
-extern "C" double os_strtod_wrap(const char *str,   char **strEnd);
-#else
-#ifdef __STDC__
-std::string os_dtoa_format(double  x);
-double os_strtod_wrap(const char *str,  char **strEnd);
+extern std::string os_dtoa_format(double  x);
 #endif
-#endif 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-using std::ostringstream; 
+double os_strtod_wrap(const char *str,   char **strEnd);
+
+#ifdef __cplusplus
+}
+#endif
 
 /*!  \class MathUtil
  *  \brief this class has routines for linear algebra.
@@ -285,5 +284,26 @@ inline int getMult(double* a, int size)
 	}
 	return mult;
 }	
+
+
+/**
+ * OSRand()
+ *
+ * @return a uniformly distributed random number between 0 and 1 (inclusive)
+ * @notes The random number generator used, rand(), is not very good
+ * and should be replaced by a serious random number generator for serious work.
+ */
+double OSRand();
+
+
+/**
+ * OSiRand(int iMin, int iMax)
+ *
+ * @return a uniformly distributed random integer between iMin and iMax (inclusive)
+ * @notes The random number generator used, rand(), is not very good
+ * and should be replaced by a serious random number generator for serious work.
+ */
+double OSiRand(int iMin, int iMax);
+
 
 #endif

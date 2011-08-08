@@ -32,25 +32,26 @@
 // Couenne stuff
 
 #include "CouenneTypes.hpp"
-#include "exprClone.hpp"
-#include "exprGroup.hpp"
-#include "exprAbs.hpp"
-#include "exprConst.hpp"
-#include "exprCos.hpp"
-#include "exprDiv.hpp"
-#include "exprExp.hpp"
-#include "exprInv.hpp"
-#include "exprLog.hpp"
-#include "exprMax.hpp"
-#include "exprMin.hpp"
-#include "exprMul.hpp"
-#include "exprOpp.hpp"
-#include "exprPow.hpp"
-#include "exprSin.hpp"
-#include "exprSub.hpp"
-#include "exprSum.hpp"
-#include "exprVar.hpp"
 #include "CouenneJournalist.hpp"
+#include "CouenneExprClone.hpp"
+#include "CouenneExprGroup.hpp"
+#include "CouenneExprAbs.hpp"
+#include "CouenneExprConst.hpp"
+#include "CouenneExprCos.hpp"
+#include "CouenneExprDiv.hpp"
+#include "CouenneExprExp.hpp"
+#include "CouenneExprInv.hpp"
+#include "CouenneExprLog.hpp"
+#include "CouenneExprMax.hpp"
+#include "CouenneExprMin.hpp"
+#include "CouenneExprMul.hpp"
+#include "CouenneExprOpp.hpp"
+#include "CouenneExprPow.hpp"
+#include "CouenneExprSin.hpp"
+#include "CouenneExprSub.hpp"
+#include "CouenneExprSum.hpp"
+#include "CouenneExprVar.hpp"
+using namespace Couenne;
 // end Couenne stuff
 
 
@@ -447,7 +448,7 @@ void CouenneSolver::setSolverOptions() throw (ErrorClass) {
 			
 			int i;
 			std::vector<SolverOption*> optionsVector;
-			optionsVector = osoption->getSolverOptions( "couenne");
+			optionsVector = osoption->getSolverOptions( "couenne",true);
 			int num_bonmin_options = optionsVector.size();
 			for(i = 0; i < num_bonmin_options; i++){
 				if(optionsVector[ i]->type == "numeric" ){
@@ -716,7 +717,7 @@ void CouenneSolver::writeResult(){
 		// resultHeader information
 		if(osresult->setSolverInvoked( "COIN-OR Couenne") != true)
 			throw ErrorClass("OSResult error: setSolverInvoked");
-		if(osresult->setServiceName( getVersionInfo()) != true)
+		if(osresult->setServiceName( OSgetVersionInfo()) != true)
 			throw ErrorClass("OSResult error: setServiceName");
 		if(osresult->setInstanceName(  osinstance->getInstanceName()) != true)
 			throw ErrorClass("OSResult error: setInstanceName");	

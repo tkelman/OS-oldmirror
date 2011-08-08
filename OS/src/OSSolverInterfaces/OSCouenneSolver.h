@@ -33,41 +33,16 @@
 #include "OSResult.h"
 #include "OSOption.h"
 
-
-//#include "BonIpoptSolver.hpp"
-
 //Couenne stuff
-//#include "CouenneProblem.hpp"
-class CouenneProblem;
-class expression;
+namespace Couenne {
+  class CouenneProblem;
+  class expression;
+}
 #include "BonCbc.hpp"
 #include "BonCouenneSetup.hpp"
 
-#ifdef HAVE_CTIME
-# include <ctime>
-#else
-# ifdef HAVE_TIME_H
-#  include <time.h>
-# else
-#  error "don't have header file for time"
-# endif
-#endif 
-
- 
-#ifdef HAVE_CMATH
-# include <cmath>
-#else
-# ifdef HAVE_MATH_H
-#  include <math.h>
-# else
-#  error "don't have header file for math"
-# endif
-#endif
-#include<vector>
+#include <vector>
 #include <map>  
-
-
-
 
 
 
@@ -84,7 +59,6 @@ class expression;
  * 
  */
 
-using namespace Bonmin;
 class CouenneSolver : public DefaultSolver{ 	
 public:
 
@@ -135,32 +109,29 @@ public:
 	 */		
 	OSoLReader *m_osolreader;
 		
-	CouenneProblem *couenne;
+	Couenne::CouenneProblem *couenne;
 		
-	//Ipopt::SmartPtr<TMINLP> tminlp;
-	SmartPtr<BonminProblem> tminlp;
+	Ipopt::SmartPtr<BonminProblem> tminlp;
 	
-	Ipopt::SmartPtr<TNLPSolver> app_ ;
+	Ipopt::SmartPtr<Bonmin::TNLPSolver> app_ ;
 	
 	//SmartPtr<Bonmin::IpoptSolver> app_ ;
 	
 	// this is a Bonmin BonCbc object;
-	Bab bb;
+	Bonmin::Bab bb;
 	
-	TMINLP::SolverReturn status;
+	Bonmin::TMINLP::SolverReturn status;
 	
-	expression *con_body;	
-	expression *obj_body;
-
+	Couenne::expression *con_body;	
+	Couenne::expression *obj_body;
 
 private:
 	OSrLWriter  *osrlwriter;
 	
-	CouenneSetup couenneSetup;
-
+	Couenne::CouenneSetup couenneSetup;
 	std::string couenneErrorMsg;
 
-	expression* createCouenneExpression(OSnLNode* node);
+	Couenne::expression* createCouenneExpression(OSnLNode* node);
 };
 
 
