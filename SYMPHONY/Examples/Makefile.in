@@ -1,0 +1,93 @@
+#===========================================================================#
+#                                                                           #
+# This file is part of the SYMPHONY MILP Solver Framework.                  #
+#                                                                           #
+# SYMPHONY was jointly developed by Ted Ralphs (ted@lehigh.edu) and         #
+# Laci Ladanyi (ladanyi@us.ibm.com).                                        #
+#                                                                           #
+# The author of this file is Menal Guzelsoy                                 #
+# Modified by tkr July 6, 2010                                              #
+#                                                                           #
+# (c) Copyright 2006-2010 Lehigh University. All Rights Reserved.           #
+#                                                                           #
+# This software is licensed under the Common Public License. Please see     #
+# accompanying file for terms.                                              #
+#                                                                           #
+#===========================================================================#
+
+# $Id: Makefile.in 726 2006-04-17 04:16:00Z andreasw $
+
+# The following is necessary under cygwin, if native compilers are used
+CYGPATH_W = @CYGPATH_W@
+
+EXAMPLES = milp milp2 bicriteria sensitivity \
+	warm_start1 warm_start2 warm_start3
+
+##############################################################################
+# If you wish to use SYMPHONY through the SYMPHONY OSI interface, 
+# set USE_OSI_INTERFACE to TRUE below. This will have the examples 
+# to call the OSI SYMPHONY interface routines. 
+##############################################################################
+
+USE_OSI_INTERFACE = FALSE
+
+ifeq ($(USE_OSI_INTERFACE),TRUE)
+EXAMPLES += milpOsi milpOsi2
+endif
+
+# Directory with COIN header files
+COININCDIR = @abs_include_dir@/coin
+
+# Directory with COIN libraries
+COINLIBDIR = @abs_lib_dir@/coin
+
+# Directory with Application files
+SYMEXDIR = @SYMSRCDIR@/../Examples
+
+##########################################################################
+#  Usually, you don't have to change anything below.  Note that if you   #
+#  change certain compiler options, you might have to recompile the      #
+#  COIN package.                                                         #
+##########################################################################
+USE_CGL_CUTS = @USE_CGL_CUTS_TRUE@TRUE
+CLP_LP_SOLVER = @CLP_LP_SOLVER_TRUE@TRUE
+GLPK_LP_SOLVER = @GLPK_LP_SOLVER_TRUE@TRUE
+CPLEX_LP_SOLVER = @CPLEX_LP_SOLVER_TRUE@TRUE
+OSL_LP_SOLVER = @OSL_LP_SOLVER_TRUE@TRUE
+SOPLEX_LP_SOLVER = @SOPLEX_LP_SOLVER_TRUE@TRUE
+XPRESS_LP_SOLVER = @XPRESS_LP_SOLVER_TRUE@TRUE
+
+VPATH = \
+	$(SYMEXDIR)
+
+WHATTOMAKE = $(addsuffix @EXEEXT@, $(EXAMPLES))
+
+# C++ Compiler command
+CXX = @CXX@
+
+# C++ Compiler options
+CXXFLAGS = @CXXFLAGS@ -I`$(CYGPATH_W) $(COININCDIR)`
+
+# additional C++ Compiler options for linking
+CXXLINKFLAGS = @RPATH_FLAGS@
+
+# Libraries necessary to link
+LIBS = -L`$(CYGPATH_W) $(COINLIBDIR)` \
+       -L`$(CYGPATH_W) $(COINLIBDIR)/ThirdParty` \
+       -lSym @SYMPHONYLIB_LIBS@
+
+# Additional flags
+ADDINCFLAGS =
+
+ifeq ($(USE_OSI_INTERFACE),TRUE)
+LIBS += -lOsiSym
+ADDINCFLAGS += -DUSE_OSI_INTERFACE
+endif
+
+all: $(WHATTOMAKE)
+
+%@EXEEXT@: %.c
+	$(CXX) $(CXXLINKFLAGS) $(CXXFLAGS) $(ADDINCFLAGS) $< -o $@ $(LIBS)
+
+clean:
+	rm -rf $(WHATTOMAKE)
