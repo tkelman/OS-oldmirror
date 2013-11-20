@@ -1,0 +1,80 @@
+# Copyright (C) 2009, 2010 Hans Pirnay. 
+# All Rights Reserved.
+# This code is published under the Eclipse Public License.
+#
+# Author: Hans Pirnay, 2009-12-15
+
+
+#############################################################################
+# Do not modify anything below unless you know what you're doing.
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+libdir      = @libdir@
+bindir      = @bindir@
+CYGPATH_W   = @CYGPATH_W@
+SRCDIR      = @srcdir@
+COIN_HAS_PKGCONFIG = @COIN_HAS_PKGCONFIG_TRUE@TRUE
+COIN_CXX_IS_CL = @COIN_CXX_IS_CL_TRUE@TRUE
+ipoptsrcdir  = $(SRCDIR)/../../../src
+asnmpcsrcdir = $(SRCDIR)/../src
+
+CXX         = @CXX@
+CXXFLAGS    = @CXXFLAGS@
+LDFLAGS     = $(CXXFLAGS) @RPATH_FLAGS@
+
+# Include directories (we use the CYGPATH_W variables to allow compilation with Windows compilers)
+#   we also need some Ipopt headers that are not installed, so we add $(ipoptsrcdir)/Algorithm and $(ipoptsrcdir)/LinAlg
+ifeq ($(COIN_HAS_PKGCONFIG), TRUE)
+  INCL = `PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@ @PKG_CONFIG@ --cflags ipoptamplinterface`
+else
+  INCL = -I`$(CYGPATH_W) @abs_include_dir@/coin` @IPOPTLIB_CFLAGS_INSTALLED@ @ASL_CFLAGS_INSTALLED@
+endif
+INCL += -I`$(CYGPATH_W) $(ipoptsrcdir)/Algorithm` -I`$(CYGPATH_W) $(ipoptsrcdir)/LinAlg` 
+INCL += -I`$(CYGPATH_W) $(asnmpcsrcdir)`
+INCL += $(ADDINCFLAGS)
+
+# Linker flags
+ifeq ($(COIN_HAS_PKGCONFIG), TRUE)
+  LIBS = -lasnmpc `PKG_CONFIG_PATH=@COIN_PKG_CONFIG_PATH@ @PKG_CONFIG@ --libs ipoptamplinterface`
+else
+  ifeq ($(COIN_CXX_IS_CL), TRUE)
+    LIBS = /link /libpath:`$(CYGPATH_W) @abs_lib_dir@` libasnmpc.lib libipoptamplinterface.lib libipopt.lib @IPOPTLIB_LIBS_INSTALLED@ @ASL_LIBS_INSTALLED@
+  else
+    LIBS = -L@abs_lib_dir@ -lasnmpc -lipoptamplinterface -lipopt @IPOPTLIB_LIBS_INSTALLED@ @ASL_LIBS_INSTALLED@
+  endif
+endif
+
+#LIBTOOL = @LIBTOOL@
+#CXXLD = $(CXX)
+#CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+#	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+
+ASNMPC_LIB = libasnmpc.so
+
+ASNMPC_LIBNAME =$(ASNMPC_LIB).0.0.0
+
+TARGET = ampl_asnmpc
+
+OBJS   = AsAmplNmpcTNLP.@OBJEXT@ 
+
+VPATH = $(SRCDIR):$(ipoptsrcdir)/Apps/AmplSolver
+
+all: $(OBJS)
+
+install: $(TARGET)
+	if test -d $(bindir); then : ; else mkdir $(bindir); fi
+	cp $(TARGET) $(bindir)
+
+uninstall:
+	rm -f $(bindir)/$(TARGET)
+
+$(TARGET): $(OBJS) ampl_nmpc.cpp
+	$(CXX) $(LDFLAGS) $(SRCDIR)/ampl_nmpc.cpp -o $(TARGET) $(OBJS) $(INCL) $(LIBS)
+
+%.@OBJEXT@: %.cpp 
+	$(CXX) $(CXXFLAGS) $(INCL) -o $@ -c $^
+
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+distclean: clean
