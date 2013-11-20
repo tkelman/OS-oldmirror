@@ -1,0 +1,33 @@
+# Copyright (C) 2008     GAMS Development
+# All Rights Reserved.
+# This file is distributed under the Common Public License.
+#
+## $Id$
+#
+# Author: Stefan Vigerske
+
+AUTOMAKE_OPTIONS = foreign
+
+EXTRA_DIST = 
+
+noinst_LTLIBRARIES = libLinearSolverLoader.la
+
+libLinearSolverLoader_la_SOURCES = LibraryHandler.c LibraryHandler.h
+
+AM_CPPFLAGS = -I`$(CYGPATH_W) $(srcdir)/../../Common`
+
+if BUILD_HSLLOADER
+  libLinearSolverLoader_la_SOURCES += HSLLoader.c HSLLoader.h
+  AM_CPPFLAGS += $(HSL_CFLAGS)
+endif
+
+if BUILD_PARDISOLOADER
+  libLinearSolverLoader_la_SOURCES += PardisoLoader.c PardisoLoader.h
+endif
+
+libLinearSolverLoader_la_LIBADD = 
+libLinearSolverLoader_la_DEPENDENCIES =  
+
+DEFAULT_INCLUDES = -I. -I`$(CYGPATH_W) $(srcdir)` -I$(top_builddir)/inc
+
+DISTCLEANFILES = 
